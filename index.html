@@ -370,6 +370,48 @@
       height: 100%;
       display: block;
       border-radius: 10px;
+      background: radial-gradient(circle at 50% 42%, #ffffff 0%, #f1f5f9 100%);
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .canvas-box canvas:active {
+      cursor: grabbing;
+    }
+
+    .drag-hint-pill {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .view-reset-fab {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 5px 9px;
+      border-radius: 9px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .view-reset-fab:active {
+      transform: scale(0.95);
     }
 
     .quick-replay-fab {
@@ -1286,6 +1328,8 @@
 
             <div class="canvas-box">
               <canvas id="canvasM1"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m1')" title="重置 3D 視角">⟲ 重置視角</button>
               <button class="quick-replay-fab" onclick="selectM1Step(m1State.step, true)" title="重播當前步驟">↻ 重播</button>
             </div>
 
@@ -1380,6 +1424,8 @@
 
             <div class="canvas-box">
               <canvas id="canvasM2"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m2')" title="重置 3D 視角">⟲ 重置視角</button>
               <button class="quick-replay-fab" onclick="selectM2Step(m2State.step, true)" title="重播當前步驟">↻ 重播</button>
             </div>
 
@@ -1773,66 +1819,206 @@
       }
     }
 
-    /* ==================== 2. 幾何鏡射與 3D 翻摺插值引擎 ==================== */
-    function reflectPoint(P, L1, L2) {
-      const dx = L2.x - L1.x;
-      const dy = L2.y - L1.y;
-      const lenSq = dx * dx + dy * dy;
-      const t = ((P.x - L1.x) * dx + (P.y - L1.y) * dy) / lenSq;
-      const projX = L1.x + t * dx;
-      const projY = L1.y + t * dy;
-      return { x: 2 * projX - P.x, y: 2 * projY - P.y };
+    /* ==================== 2. 3D 幾何摺紙引擎與透視相機 ==================== */
+    const m1Cam = { yaw: -0.34, pitch: 0.56 };
+    const m2Cam = { yaw: -0.34, pitch: 0.56 };
+
+    function resetCam(which) {
+      const cam = which === 'm1' ? m1Cam : m2Cam;
+      cam.yaw = -0.34;
+      cam.pitch = 0.56;
+      if (which === 'm1') renderM1();
+      else renderM2();
     }
 
-    function foldInterpolate(P, L1, L2, progress) {
-      const R = reflectPoint(P, L1, L2);
-      const midX = (P.x + R.x) / 2;
-      const midY = (P.y + R.y) / 2;
-      const angle = Math.PI * progress;
-      const cosA = Math.cos(angle);
-      const vx = P.x - midX;
-      const vy = P.y - midY;
-      const dx = L2.x - L1.x;
-      const dy = L2.y - L1.y;
-      const dLen = Math.hypot(dx, dy) || 1;
-      const lift = Math.sin(angle) * 0.08 * Math.hypot(vx, vy);
+    function p3(x, y, z = 0) {
+      return { x, y, z };
+    }
+
+    function fold3D(P, L1, L2, progress, side = 'front') {
+      const p = p3(P.x, P.y, P.z || 0);
+      const a = p3(L1.x, L1.y, L1.z || 0);
+      const b = p3(L2.x, L2.y, L2.z || 0);
+      const ux0 = b.x - a.x, uy0 = b.y - a.y, uz0 = b.z - a.z;
+      const uLen = Math.hypot(ux0, uy0, uz0) || 1;
+      const ux = ux0 / uLen, uy = uy0 / uLen, uz = uz0 / uLen;
+
+      const vx = p.x - a.x, vy = p.y - a.y, vz = p.z - a.z;
+      const cx = uy * vz - uz * vy;
+      const cy = uz * vx - ux * vz;
+      const cz = ux * vy - uy * vx;
+
+      let dir = 1;
+      if (side === 'front') dir = cz < 0 ? -1 : 1;
+      else dir = cz > 0 ? -1 : 1;
+
+      const theta = dir * Math.PI * progress;
+      const cosT = Math.cos(theta);
+      const sinT = Math.sin(theta);
+      const dotUV = ux * vx + uy * vy + uz * vz;
+      const oneMinusCos = 1 - cosT;
+
       return {
-        x: midX + vx * cosA - (dy / dLen) * lift,
-        y: midY + vy * cosA + (dx / dLen) * lift
+        x: a.x + vx * cosT + cx * sinT + ux * dotUV * oneMinusCos,
+        y: a.y + vy * cosT + cy * sinT + uy * dotUV * oneMinusCos,
+        z: a.z + vz * cosT + cz * sinT + uz * dotUV * oneMinusCos
       };
     }
 
-    function drawPoly(ctx, toPx, pts, fill, stroke, lineWidth = 1.6, shadow = false) {
+    function shadeHex(hex, factor) {
+      if (!hex || hex[0] !== '#') return hex;
+      const clean = hex.slice(1);
+      const num = parseInt(clean, 16);
+      const r = Math.min(255, Math.max(0, Math.round(((num >> 16) & 255) * factor)));
+      const g = Math.min(255, Math.max(0, Math.round(((num >> 8) & 255) * factor)));
+      const b = Math.min(255, Math.max(0, Math.round((num & 255) * factor)));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function createCamera3D(cam, size) {
+      const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
+      const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+      const dist = 5.6;
+      const fov = size * 1.56;
+
+      const toCam = (pt) => {
+        const px = pt.x - 1;
+        const py = pt.y - 1;
+        const pz = pt.z || 0;
+        const x1 = px * cy - py * sy;
+        const y1 = px * sy + py * cy;
+        return {
+          x: x1,
+          y: y1 * cp + pz * sp,
+          z: -y1 * sp + pz * cp
+        };
+      };
+
+      const project = (pt) => {
+        const c = toCam(pt);
+        const s = fov / Math.max(0.8, dist - c.z);
+        return {
+          x: size * 0.5 + c.x * s,
+          y: size * 0.53 - c.y * s,
+          z: c.z
+        };
+      };
+
+      return { toCam, project, dist };
+    }
+
+    function drawTableGrid3D(ctx, camera) {
       ctx.save();
-      if (shadow) {
-        ctx.shadowColor = 'rgba(15, 23, 42, 0.18)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 4;
-      }
-      ctx.beginPath();
-      pts.forEach((p, idx) => {
-        const px = toPx(p);
-        if (idx === 0) ctx.moveTo(px.x, px.y);
-        else ctx.lineTo(px.x, px.y);
-      });
-      ctx.closePath();
-      if (fill) {
-        ctx.fillStyle = fill;
-        ctx.fill();
-      }
-      if (stroke) {
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = lineWidth;
-        ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+      ctx.lineWidth = 1;
+      const zPlane = -0.04;
+      for (let t = -0.4; t <= 2.41; t += 0.4) {
+        const h1 = camera.project(p3(-0.4, t, zPlane));
+        const h2 = camera.project(p3(2.4, t, zPlane));
+        ctx.beginPath();
+        ctx.moveTo(h1.x, h1.y);
+        ctx.lineTo(h2.x, h2.y);
+        ctx.stroke();
+
+        const v1 = camera.project(p3(t, -0.4, zPlane));
+        const v2 = camera.project(p3(t, 2.4, zPlane));
+        ctx.beginPath();
+        ctx.moveTo(v1.x, v1.y);
+        ctx.lineTo(v2.x, v2.y);
         ctx.stroke();
       }
       ctx.restore();
     }
 
-    function drawDashed(ctx, toPx, p1, p2, color = '#475569', dash = [5, 4], width = 1.5) {
-      const a = toPx(p1);
-      const b = toPx(p2);
+    function createScene3D(camera) {
+      const faces = [];
+      const light = { x: 0.36, y: 0.52, z: 0.77 };
+
+      function addPoly(pts, frontColor, backColor, stroke, lineWidth = 1.6, zBias = 0, castShadow = false) {
+        const camPts = pts.map((pt) => camera.toCam(pt));
+        const screenPts = pts.map((pt) => camera.project(pt));
+
+        let avgZ = 0;
+        let cx = 0, cy = 0, cz = 0;
+        let maxWorldZ = -Infinity;
+        pts.forEach((pt, idx) => {
+          avgZ += camPts[idx].z;
+          cx += camPts[idx].x;
+          cy += camPts[idx].y;
+          cz += camPts[idx].z;
+          if ((pt.z || 0) > maxWorldZ) maxWorldZ = pt.z || 0;
+        });
+        avgZ /= pts.length;
+        cx /= pts.length;
+        cy /= pts.length;
+        cz /= pts.length;
+
+        const e1x = camPts[1].x - camPts[0].x, e1y = camPts[1].y - camPts[0].y, e1z = camPts[1].z - camPts[0].z;
+        const e2x = camPts[2].x - camPts[0].x, e2y = camPts[2].y - camPts[0].y, e2z = camPts[2].z - camPts[0].z;
+        let nx = e1y * e2z - e1z * e2y;
+        let ny = e1z * e2x - e1x * e2z;
+        let nz = e1x * e2y - e1y * e2x;
+        const nLen = Math.hypot(nx, ny, nz) || 1;
+        nx /= nLen; ny /= nLen; nz /= nLen;
+
+        const vx = -cx, vy = -cy, vz = camera.dist - cz;
+        const isFront = (nx * vx + ny * vy + nz * vz) >= 0;
+        const rawColor = isFront ? frontColor : (backColor || frontColor);
+
+        let fill = rawColor;
+        if (rawColor && rawColor[0] === '#') {
+          const ndotl = Math.abs(nx * light.x + ny * light.y + nz * light.z);
+          fill = shadeHex(rawColor, 0.78 + 0.25 * ndotl);
+        }
+
+        if (castShadow && maxWorldZ > 0.04) {
+          const shPts = pts.map((pt) => {
+            const lift = Math.max(0, pt.z || 0);
+            return camera.project(p3(pt.x + lift * 0.08, pt.y - lift * 0.06, -0.025));
+          });
+          faces.push({
+            screenPts: shPts,
+            avgZ: -10,
+            zBias: -100,
+            fill: 'rgba(15, 23, 42, 0.13)',
+            stroke: null,
+            lineWidth: 0
+          });
+        }
+
+        faces.push({ screenPts, avgZ, zBias, fill, stroke, lineWidth });
+      }
+
+      function flush(ctx) {
+        faces.sort((a, b) => (a.avgZ + a.zBias * 0.002) - (b.avgZ + b.zBias * 0.002));
+        faces.forEach((f) => {
+          ctx.save();
+          ctx.beginPath();
+          f.screenPts.forEach((p, idx) => {
+            if (idx === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          });
+          ctx.closePath();
+          if (f.fill) {
+            ctx.fillStyle = f.fill;
+            ctx.fill();
+          }
+          if (f.stroke) {
+            ctx.strokeStyle = f.stroke;
+            ctx.lineWidth = f.lineWidth;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+
+      return { addPoly, flush };
+    }
+
+    function drawDashed3D(ctx, camera, p1, p2, color = '#475569', dash = [5, 4], width = 1.5, zOffset = 0.006) {
+      const a = camera.project(p3(p1.x, p1.y, (p1.z || 0) + zOffset));
+      const b = camera.project(p3(p2.x, p2.y, (p2.z || 0) + zOffset));
       ctx.save();
       ctx.beginPath();
       ctx.setLineDash(dash);
@@ -1841,6 +2027,18 @@
       ctx.strokeStyle = color;
       ctx.lineWidth = width;
       ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLabel3D(ctx, camera, pt, text, color = '#0f172a', ox = 0, oy = 0) {
+      const p = camera.project(p3(pt.x, pt.y, (pt.z || 0) + 0.01));
+      ctx.save();
+      ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.strokeText(text, p.x + ox, p.y + oy);
+      ctx.fillStyle = color;
+      ctx.fillText(text, p.x + ox, p.y + oy);
       ctx.restore();
     }
 
@@ -1985,113 +2183,99 @@
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, size, size);
 
+      const camera = createCamera3D(m1Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+
       const theme = m1Themes[m1State.color];
       const showNotes = document.getElementById('m1-show-notes').checked;
-      const pad = size * 0.13;
-      const sq = size - pad * 2;
-      const toPx = (pt) => ({ x: pad + (pt.x / 2) * sq, y: size - pad - (pt.y / 2) * sq });
-
       const sqrt3 = Math.sqrt(3);
-      const A = { x: 0, y: 0 };
-      const B = { x: 2, y: 0 };
-      const TR = { x: 2, y: 2 };
-      const TL = { x: 0, y: 2 };
-      const C = { x: 1, y: 0 };
-      const T_mid = { x: 1, y: 2 };
-      const P = { x: 1, y: sqrt3 };
 
-      // 步驟 2 的摺痕線：過 B(2,0) 且平分 ∠ABP (PB 角度 120°, AB 角度 180° -> 摺痕角 150°)
-      // 與左邊 x=0 交於 L_fold = (0, 2 * tan(30°)) = (0, 2/√3)
-      const L_fold = { x: 0, y: 2 / sqrt3 };
-      // 對稱右側摺痕線：過 A(0,0) 與右邊 x=2 交於 R_fold = (2, 2/√3)
-      const R_fold = { x: 2, y: 2 / sqrt3 };
+      const A = p3(0, 0, 0);
+      const B = p3(2, 0, 0);
+      const TR = p3(2, 2, 0);
+      const TL = p3(0, 2, 0);
+      const C = p3(1, 0, 0);
+      const T_mid = p3(1, 2, 0);
+      const P = p3(1, sqrt3, 0);
+      const L_fold = p3(0, 2 / sqrt3, 0);
+      const R_fold = p3(2, 2 / sqrt3, 0);
 
       const prog = m1State.progress;
 
       if (m1State.step === 1) {
-        // 左右對摺再展開壓出垂直中線
         const foldAmt = Math.sin(prog * Math.PI) * 0.88;
-        drawPoly(ctx, toPx, [A, B, TR, TL], theme.front, theme.border, 1.8);
-        drawDashed(ctx, toPx, C, T_mid, '#334155', [5, 4], 1.6);
-        if (foldAmt > 0.02) {
-          const B_f = foldInterpolate(B, C, T_mid, foldAmt);
-          const TR_f = foldInterpolate(TR, C, T_mid, foldAmt);
-          drawPoly(ctx, toPx, [C, B_f, TR_f, T_mid], theme.back, theme.border, 1.5, true);
+        scene.addPoly([A, C, T_mid, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
+        if (foldAmt > 0.01) {
+          const B_f = fold3D(B, C, T_mid, foldAmt, 'front');
+          const TR_f = fold3D(TR, C, T_mid, foldAmt, 'front');
+          scene.addPoly([C, B_f, TR_f, T_mid], theme.front, theme.back, theme.border, 1.6, 4, true);
+        } else {
+          scene.addPoly([C, B, TR, T_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
         }
       } else if (m1State.step === 2) {
-        // 固定 B，將左下角 △(A, B, L_fold) 沿 B - L_fold 翻摺，使 A 落在 P(1, √3)
-        drawPoly(ctx, toPx, [L_fold, B, TR, TL], theme.front, theme.border, 1.8);
-        drawDashed(ctx, toPx, C, T_mid, '#64748b', [4, 4], 1.4);
-        const A_f = foldInterpolate(A, B, L_fold, prog);
-        drawPoly(ctx, toPx, [B, A_f, L_fold], prog > 0.5 ? theme.back : theme.front, theme.border, 1.6, prog > 0.05);
-        drawDashed(ctx, toPx, B, L_fold, '#334155', [4, 3], 1.5);
+        scene.addPoly([L_fold, B, TR, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
+        const A_f = fold3D(A, B, L_fold, prog, 'front');
+        scene.addPoly([B, L_fold, A_f], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
       } else if (m1State.step === 3) {
-        // 沿 PA、PB 向後收摺成正 △PAB
-        const p1 = Math.min(1, prog * 1.4);
-        const p2 = Math.max(0, (prog - 0.3) / 0.7);
-        // 背面多餘區域向後折
-        const TL_f = foldInterpolate(TL, A, P, p1);
-        const TR_f = foldInterpolate(TR, B, P, p1);
-        if (p1 < 0.96) {
-          drawPoly(ctx, toPx, [A, P, TL_f], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.4);
-          drawPoly(ctx, toPx, [B, TR_f, P], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.4);
-        }
-        // 中央正 △PAB 主體
-        drawPoly(ctx, toPx, [A, B, P], theme.front, '#e11d48', 2.4);
-        // 交疊折翼質感（呼應筆記圖櫻花粉色紙外觀）
-        if (p2 > 0.1) {
-          const flapL = foldInterpolate(L_fold, A, P, p2 * 0.98);
-          const flapR = foldInterpolate(R_fold, B, P, p2 * 0.98);
-          drawPoly(ctx, toPx, [A, P, flapL], theme.front, theme.border, 1.3, true);
-          drawPoly(ctx, toPx, [B, flapR, P], theme.front, theme.border, 1.3, true);
+        const p1 = Math.min(1, prog * 1.35);
+        const p2 = Math.max(0, (prog - 0.25) / 0.75);
+        const TL_f = fold3D(TL, A, P, p1, 'back');
+        const TR_f = fold3D(TR, B, P, p1, 'back');
+        scene.addPoly([A, P, TL_f], theme.front, theme.back, theme.border, 1.4, -3, false);
+        scene.addPoly([B, TR_f, P], theme.front, theme.back, theme.border, 1.4, -3, false);
+        scene.addPoly([A, B, P], theme.front, theme.back, '#e11d48', 2.4, 2, false);
+        if (p2 > 0.02) {
+          const flapL = fold3D(L_fold, A, P, p2 * 0.96, 'front');
+          const flapR = fold3D(R_fold, B, P, p2 * 0.96, 'front');
+          scene.addPoly([A, P, flapL], theme.front, theme.back, theme.border, 1.3, 6, true);
+          scene.addPoly([B, flapR, P], theme.front, theme.back, theme.border, 1.3, 6, true);
         }
       } else if (m1State.step === 4) {
-        // 幾何原理驗證圖：淡色正方形 + 鮮明正 △PAB + 直角 △PCB 標示
-        drawPoly(ctx, toPx, [A, B, TR, TL], '#fffbeb', '#94a3b8', 1.6);
-        drawDashed(ctx, toPx, C, T_mid, '#475569', [4, 4], 1.5);
-        drawPoly(ctx, toPx, [A, B, P], 'rgba(225, 29, 72, 0.12)', '#e11d48', 2.4);
-        // 高亮右側直角 △PCB
-        drawPoly(ctx, toPx, [C, B, P], 'rgba(79, 70, 229, 0.14)', '#4f46e5', 2);
+        scene.addPoly([A, B, TR, TL], '#fffbeb', '#f8fafc', '#94a3b8', 1.6, 0, false);
+        scene.addPoly([p3(0, 0, 0.008), p3(2, 0, 0.008), p3(1, sqrt3, 0.008)], 'rgba(225, 29, 72, 0.16)', 'rgba(225, 29, 72, 0.16)', '#e11d48', 2.4, 4, false);
+        scene.addPoly([p3(1, 0, 0.016), p3(2, 0, 0.016), p3(1, sqrt3, 0.016)], 'rgba(79, 70, 229, 0.18)', 'rgba(79, 70, 229, 0.18)', '#4f46e5', 2, 8, false);
+      }
+
+      scene.flush(ctx);
+
+      if (m1State.step === 1) {
+        drawDashed3D(ctx, camera, C, T_mid, '#334155', [5, 4], 1.6);
+      } else if (m1State.step === 2) {
+        drawDashed3D(ctx, camera, C, T_mid, '#64748b', [4, 4], 1.3);
+        drawDashed3D(ctx, camera, B, L_fold, '#334155', [4, 3], 1.5);
+      } else if (m1State.step === 4) {
+        drawDashed3D(ctx, camera, C, T_mid, '#475569', [4, 4], 1.5, 0.02);
       }
 
       if (showNotes) {
-        ctx.save();
-        ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
-        const pA = toPx(A), pB = toPx(B), pC = toPx(C), pP = toPx(P);
-        ctx.fillStyle = '#0f172a';
-        ctx.fillText('A', pA.x - 15, pA.y + 14);
-        ctx.fillText('B', pB.x + 6, pB.y + 14);
-        ctx.fillText('C', pC.x - 4, pC.y + 16);
+        drawLabel3D(ctx, camera, A, 'A', '#0f172a', -14, 14);
+        drawLabel3D(ctx, camera, B, 'B', '#0f172a', 6, 14);
+        drawLabel3D(ctx, camera, C, 'C', '#0f172a', -4, 16);
 
+        const pP = camera.project(p3(P.x, P.y, 0.02));
+        ctx.save();
         ctx.beginPath();
         ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
         ctx.fillStyle = '#e11d48';
         ctx.fill();
-        ctx.fillText('P', pP.x + 7, pP.y + 4);
+        ctx.restore();
+        drawLabel3D(ctx, camera, P, 'P', '#0f172a', 7, 4);
 
         if (m1State.step === 1) {
-          ctx.fillStyle = '#334155';
-          ctx.fillText('1', (pA.x + pC.x) / 2 - 4, pA.y + 16);
-          ctx.fillText('1', (pC.x + pB.x) / 2 - 4, pA.y + 16);
-          ctx.fillText('對摺中線', pC.x + 6, size * 0.45);
+          drawLabel3D(ctx, camera, p3(0.5, 0), '1', '#334155', -4, 15);
+          drawLabel3D(ctx, camera, p3(1.5, 0), '1', '#334155', -4, 15);
+          drawLabel3D(ctx, camera, p3(1, 1.1), '對摺中線', '#334155', 6, 0);
         } else if (m1State.step === 2) {
-          drawDashed(ctx, toPx, B, P, '#e11d48', [4, 3], 1.7);
-          ctx.fillStyle = '#e11d48';
-          ctx.fillText('PB = 2', (pB.x + pP.x) / 2 + 8, (pB.y + pP.y) / 2);
+          drawDashed3D(ctx, camera, B, P, '#e11d48', [4, 3], 1.7, 0.015);
+          drawLabel3D(ctx, camera, p3(1.55, 0.9), 'PB = 2', '#e11d48', 6, 0);
         } else if (m1State.step === 3 || m1State.step === 4) {
-          ctx.strokeStyle = '#0f172a';
-          ctx.lineWidth = 1.4;
-          ctx.strokeRect(pC.x, pC.y - 9, 9, 9);
-          ctx.fillStyle = '#0f172a';
-          ctx.fillText('1', (pC.x + pB.x) / 2 - 4, pC.y + 16);
-          ctx.fillStyle = '#e11d48';
-          ctx.fillText('2', (pB.x + pP.x) / 2 + 8, (pB.y + pP.y) / 2);
-          ctx.fillText('2', (pA.x + pP.x) / 2 - 16, (pA.y + pP.y) / 2);
-          ctx.fillStyle = '#4f46e5';
-          ctx.fillText('√3', pC.x - 22, (pC.y + pP.y) / 2 + 5);
-          ctx.fillText('60°', pB.x - 34, pB.y - 10);
+          drawLabel3D(ctx, camera, p3(1.5, 0), '1', '#0f172a', -4, 15);
+          drawLabel3D(ctx, camera, p3(1.55, 0.9), '2', '#e11d48', 6, 0);
+          drawLabel3D(ctx, camera, p3(0.45, 0.9), '2', '#e11d48', -14, 0);
+          drawLabel3D(ctx, camera, p3(1, 0.85), '√3', '#4f46e5', -22, 4);
+          drawLabel3D(ctx, camera, p3(1.72, 0.16), '60°', '#4f46e5', -10, -4);
         }
-        ctx.restore();
       }
       ctx.restore();
     }
@@ -2236,137 +2420,129 @@
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, size, size);
 
+      const camera = createCamera3D(m2Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+
       const theme = m2Themes[m2State.color];
       const showNotes = document.getElementById('m2-show-notes').checked;
-      const pad = size * 0.13;
-      const sq = size - pad * 2;
-      const toPx = (pt) => ({ x: pad + (pt.x / 2) * sq, y: size - pad - (pt.y / 2) * sq });
-
       const tan15 = Math.tan(15 * Math.PI / 180);
       const sqrt3 = Math.sqrt(3);
 
-      const A = { x: 0, y: 0 };
-      const D = { x: 2, y: 0 };
-      const E = { x: 2, y: 2 };
-      const B_orig = { x: 0, y: 2 };
-      const C_mid = { x: 1, y: 0 };
-      const T_mid = { x: 1, y: 2 };
-      const L_mid = { x: 0, y: 1 };
-      const R_mid = { x: 2, y: 1 };
-      const P_pt = { x: 1, y: sqrt3 };
-      const Q_pt = { x: sqrt3, y: 1 };
-      const C_tri = { x: 2 * tan15, y: 2 };
-      const B_tri = { x: 2, y: 2 * tan15 };
+      const A = p3(0, 0, 0);
+      const D = p3(2, 0, 0);
+      const E = p3(2, 2, 0);
+      const B_orig = p3(0, 2, 0);
+      const C_mid = p3(1, 0, 0);
+      const T_mid = p3(1, 2, 0);
+      const L_mid = p3(0, 1, 0);
+      const R_mid = p3(2, 1, 0);
+      const P_pt = p3(1, sqrt3, 0);
+      const Q_pt = p3(sqrt3, 1, 0);
+      const C_tri = p3(2 * tan15, 2, 0);
+      const B_tri = p3(2, 2 * tan15, 0);
 
       const prog = m2State.progress;
 
       if (m2State.step === 1) {
         if (prog <= 0.5) {
           const foldAmt = Math.sin(prog * 2 * Math.PI) * 0.85;
-          drawPoly(ctx, toPx, [A, D, E, B_orig], theme.front, theme.border, 1.8);
-          drawDashed(ctx, toPx, C_mid, T_mid, '#334155', [5, 4], 1.6);
-          if (foldAmt > 0.02) {
-            const Df = foldInterpolate(D, C_mid, T_mid, foldAmt);
-            const Ef = foldInterpolate(E, C_mid, T_mid, foldAmt);
-            drawPoly(ctx, toPx, [C_mid, Df, Ef, T_mid], theme.back, theme.border, 1.5, true);
+          scene.addPoly([A, C_mid, T_mid, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
+          if (foldAmt > 0.01) {
+            const Df = fold3D(D, C_mid, T_mid, foldAmt, 'front');
+            const Ef = fold3D(E, C_mid, T_mid, foldAmt, 'front');
+            scene.addPoly([C_mid, Df, Ef, T_mid], theme.front, theme.back, theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([C_mid, D, E, T_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
           }
         } else {
           const foldAmt = Math.sin((prog - 0.5) * 2 * Math.PI) * 0.85;
-          drawPoly(ctx, toPx, [A, D, E, B_orig], theme.front, theme.border, 1.8);
-          drawDashed(ctx, toPx, C_mid, T_mid, '#334155', [5, 4], 1.6);
-          drawDashed(ctx, toPx, L_mid, R_mid, '#334155', [5, 4], 1.6);
-          if (foldAmt > 0.02) {
-            const Ef = foldInterpolate(E, L_mid, R_mid, foldAmt);
-            const Bf = foldInterpolate(B_orig, L_mid, R_mid, foldAmt);
-            drawPoly(ctx, toPx, [L_mid, R_mid, Ef, Bf], theme.back, theme.border, 1.5, true);
+          scene.addPoly([A, D, R_mid, L_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
+          if (foldAmt > 0.01) {
+            const Ef = fold3D(E, L_mid, R_mid, foldAmt, 'front');
+            const Bf = fold3D(B_orig, L_mid, R_mid, foldAmt, 'front');
+            scene.addPoly([L_mid, R_mid, Ef, Bf], theme.front, theme.back, theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([L_mid, R_mid, E, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
           }
         }
       } else if (m2State.step === 2) {
-        drawPoly(ctx, toPx, [A, D, E, C_tri], theme.front, theme.border, 1.8);
-        drawDashed(ctx, toPx, C_mid, T_mid, '#64748b', [4, 4], 1.3);
-        drawDashed(ctx, toPx, L_mid, R_mid, '#94a3b8', [4, 4], 1.1);
-        const Bf = foldInterpolate(B_orig, A, C_tri, prog);
-        drawPoly(ctx, toPx, [A, C_tri, Bf], prog > 0.5 ? theme.back : theme.front, theme.border, 1.6, prog > 0.05);
-        drawDashed(ctx, toPx, A, C_tri, '#334155', [4, 3], 1.5);
+        scene.addPoly([A, D, E, C_tri], theme.front, theme.back, theme.border, 1.8, 0, false);
+        const Bf = fold3D(B_orig, A, C_tri, prog, 'front');
+        scene.addPoly([A, C_tri, Bf], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
       } else if (m2State.step === 3) {
-        drawPoly(ctx, toPx, [A, B_tri, E, B_orig], theme.front, theme.border, 1.8);
-        drawDashed(ctx, toPx, C_mid, T_mid, '#64748b', [4, 4], 1.3);
-        drawDashed(ctx, toPx, L_mid, R_mid, '#64748b', [4, 4], 1.3);
-        drawDashed(ctx, toPx, A, C_tri, '#475569', [4, 4], 1.5);
-        const Df = foldInterpolate(D, A, B_tri, prog);
-        drawPoly(ctx, toPx, [A, Df, B_tri], prog > 0.5 ? theme.back : theme.front, theme.border, 1.6, prog > 0.05);
-        drawDashed(ctx, toPx, A, B_tri, '#334155', [4, 3], 1.5);
+        scene.addPoly([A, B_tri, E, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
+        const Df = fold3D(D, A, B_tri, prog, 'front');
+        scene.addPoly([A, Df, B_tri], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
       } else if (m2State.step === 4) {
         const p1 = Math.min(1, prog * 2);
         const p2 = Math.max(0, (prog - 0.5) * 2);
-        const Ef = foldInterpolate(E, C_tri, B_tri, p2);
-        drawPoly(ctx, toPx, [A, B_tri, C_tri], theme.front, theme.border, 1.8);
-        if (p2 < 0.98) {
-          drawPoly(ctx, toPx, [C_tri, B_tri, Ef], p2 > 0.5 ? theme.back : theme.front, theme.border, 1.5);
-        }
-        const Bf = foldInterpolate(B_orig, A, C_tri, p1);
-        drawPoly(ctx, toPx, [A, C_tri, Bf], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.6, true);
-        const Df = foldInterpolate(D, A, B_tri, p1);
-        drawPoly(ctx, toPx, [A, Df, B_tri], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.6, true);
-        if (prog > 0.85) {
-          drawPoly(ctx, toPx, [A, B_tri, C_tri], null, '#e11d48', 2.6);
-        }
+        const Ef = fold3D(E, C_tri, B_tri, p2, 'back');
+        scene.addPoly([C_tri, B_tri, Ef], theme.front, theme.back, theme.border, 1.4, -3, false);
+        scene.addPoly([A, B_tri, C_tri], theme.front, theme.back, prog > 0.85 ? '#e11d48' : theme.border, prog > 0.85 ? 2.5 : 1.8, 1, false);
+        const Bf = fold3D(B_orig, A, C_tri, p1, 'front');
+        const Df = fold3D(D, A, B_tri, p1, 'front');
+        scene.addPoly([A, C_tri, Bf], theme.front, theme.back, theme.border, 1.6, 5, p1 > 0.04 && p1 < 0.96);
+        scene.addPoly([A, Df, B_tri], theme.front, theme.back, theme.border, 1.6, 6, p1 > 0.04 && p1 < 0.96);
+      }
+
+      scene.flush(ctx);
+
+      if (m2State.step === 1) {
+        drawDashed3D(ctx, camera, C_mid, T_mid, '#334155', [5, 4], 1.6);
+        if (prog > 0.5) drawDashed3D(ctx, camera, L_mid, R_mid, '#334155', [5, 4], 1.6);
+      } else if (m2State.step === 2) {
+        drawDashed3D(ctx, camera, C_mid, T_mid, '#64748b', [4, 4], 1.3);
+        drawDashed3D(ctx, camera, L_mid, R_mid, '#94a3b8', [4, 4], 1.1);
+        drawDashed3D(ctx, camera, A, C_tri, '#334155', [4, 3], 1.5);
+      } else if (m2State.step === 3) {
+        drawDashed3D(ctx, camera, C_mid, T_mid, '#64748b', [4, 4], 1.3);
+        drawDashed3D(ctx, camera, L_mid, R_mid, '#64748b', [4, 4], 1.3);
+        drawDashed3D(ctx, camera, A, C_tri, '#475569', [4, 4], 1.5);
+        drawDashed3D(ctx, camera, A, B_tri, '#334155', [4, 3], 1.5);
       }
 
       if (showNotes) {
-        ctx.save();
-        ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
-        const pA = toPx(A);
-        ctx.fillStyle = '#0f172a';
-        ctx.fillText('A', pA.x - 15, pA.y + 14);
-
+        drawLabel3D(ctx, camera, A, 'A', '#0f172a', -14, 14);
         if (m2State.step === 1) {
-          const pC = toPx(C_mid);
-          ctx.fillText('C', pC.x - 4, pC.y + 16);
-          ctx.fillText('1', (pA.x + pC.x) / 2 - 4, pA.y + 16);
-          ctx.fillText('1', (pC.x + toPx(D).x) / 2 - 4, pA.y + 16);
+          drawLabel3D(ctx, camera, C_mid, 'C', '#0f172a', -4, 16);
+          drawLabel3D(ctx, camera, p3(0.5, 0), '1', '#0f172a', -4, 15);
+          drawLabel3D(ctx, camera, p3(1.5, 0), '1', '#0f172a', -4, 15);
         } else if (m2State.step === 2) {
-          drawDashed(ctx, toPx, A, P_pt, '#e11d48', [4, 3], 1.7);
-          const pP = toPx(P_pt), pC = toPx(C_mid);
-          ctx.strokeStyle = '#0f172a';
-          ctx.lineWidth = 1.4;
-          ctx.strokeRect(pC.x - 9, pC.y - 9, 9, 9);
+          drawDashed3D(ctx, camera, A, P_pt, '#e11d48', [4, 3], 1.7, 0.015);
+          const pP = camera.project(p3(P_pt.x, P_pt.y, 0.02));
+          ctx.save();
           ctx.beginPath();
           ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
           ctx.fillStyle = '#e11d48';
           ctx.fill();
-          ctx.fillText('P', pP.x + 7, pP.y + 4);
-          ctx.fillStyle = '#0f172a';
-          ctx.fillText('1', (pA.x + pC.x) / 2 - 4, pA.y + 16);
-          ctx.fillText('√3', pP.x + 6, (pP.y + pC.y) / 2 + 6);
-          ctx.fillText('2', (pA.x + pP.x) / 2 + 6, (pA.y + pP.y) / 2 + 6);
-          ctx.fillStyle = '#4f46e5';
-          ctx.fillText('60°', pA.x + 28, pA.y - 12);
-          ctx.fillStyle = '#e11d48';
-          ctx.fillText('15°', pA.x + 16, pA.y - 38);
-          ctx.fillText('15°', pA.x + 3, pA.y - 54);
+          ctx.restore();
+          drawLabel3D(ctx, camera, P_pt, 'P', '#e11d48', 7, 4);
+          drawLabel3D(ctx, camera, p3(0.5, 0), '1', '#0f172a', -4, 15);
+          drawLabel3D(ctx, camera, p3(1, 0.85), '√3', '#0f172a', 6, 4);
+          drawLabel3D(ctx, camera, p3(0.5, 0.9), '2', '#0f172a', 6, 4);
+          drawLabel3D(ctx, camera, p3(0.32, 0.16), '60°', '#4f46e5', 0, 0);
+          drawLabel3D(ctx, camera, p3(0.18, 0.42), '15°', '#e11d48', 0, 0);
+          drawLabel3D(ctx, camera, p3(0.06, 0.56), '15°', '#e11d48', 0, 0);
         } else if (m2State.step === 3) {
-          drawDashed(ctx, toPx, A, Q_pt, '#e11d48', [4, 3], 1.7);
-          const pQ = toPx(Q_pt);
+          drawDashed3D(ctx, camera, A, Q_pt, '#e11d48', [4, 3], 1.7, 0.015);
+          const pQ = camera.project(p3(Q_pt.x, Q_pt.y, 0.02));
+          ctx.save();
           ctx.beginPath();
           ctx.arc(pQ.x, pQ.y, 4, 0, Math.PI * 2);
           ctx.fillStyle = '#e11d48';
           ctx.fill();
-          ctx.fillText('Q', pQ.x + 6, pQ.y - 6);
-          ctx.fillStyle = '#4f46e5';
-          ctx.fillText('60°', pA.x + 34, pA.y - 32);
-          ctx.fillStyle = '#e11d48';
-          ctx.fillText('α=15°', pA.x + 44, pA.y - 8);
+          ctx.restore();
+          drawLabel3D(ctx, camera, Q_pt, 'Q', '#e11d48', 6, -6);
+          drawLabel3D(ctx, camera, p3(0.36, 0.34), '60°', '#4f46e5', 0, 0);
+          drawLabel3D(ctx, camera, p3(0.48, 0.12), 'α=15°', '#e11d48', 0, 0);
         } else if (m2State.step === 4) {
-          const pB = toPx(B_tri), pC = toPx(C_tri);
-          ctx.fillStyle = '#e11d48';
-          ctx.fillText('B', pB.x + 7, pB.y + 5);
-          ctx.fillText('C', pC.x - 4, pC.y - 7);
-          ctx.fillText('60°', pA.x + 24, pA.y - 22);
-          ctx.fillText('60°', pB.x - 34, pB.y + 4);
-          ctx.fillText('60°', pC.x - 4, pC.y + 26);
+          drawLabel3D(ctx, camera, B_tri, 'B', '#e11d48', 7, 5);
+          drawLabel3D(ctx, camera, C_tri, 'C', '#e11d48', -4, -7);
+          drawLabel3D(ctx, camera, p3(0.28, 0.24), '60°', '#e11d48', 0, 0);
+          drawLabel3D(ctx, camera, p3(1.66, 0.56), '60°', '#e11d48', 0, 0);
+          drawLabel3D(ctx, camera, p3(0.56, 1.66), '60°', '#e11d48', 0, 0);
         }
-        ctx.restore();
       }
       ctx.restore();
     }
@@ -2847,11 +3023,40 @@
       updateCmpExplorer(document.getElementById('cmp-theta-slider').value);
     });
 
+    function bindOrbit3D(canvasId, cam, renderFn) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      let dragging = false;
+      let lastX = 0, lastY = 0;
+
+      canvas.addEventListener('pointerdown', (e) => {
+        dragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        canvas.setPointerCapture(e.pointerId);
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        cam.yaw += dx * 0.01;
+        cam.pitch = Math.max(-1.1, Math.min(1.4, cam.pitch + dy * 0.01));
+        renderFn();
+      });
+      const stopDrag = () => { dragging = false; };
+      canvas.addEventListener('pointerup', stopDrag);
+      canvas.addEventListener('pointercancel', stopDrag);
+    }
+
     window.onload = function () {
       updateM1UI();
       renderM1();
       updateM2UI();
       renderM2();
+      bindOrbit3D('canvasM1', m1Cam, renderM1);
+      bindOrbit3D('canvasM2', m2Cam, renderM2);
       renderCmp1();
       updateCmpExplorer(15);
       initSketchPads();
