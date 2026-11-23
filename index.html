@@ -1,0 +1,2865 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>正方形中摺出正△與最大正△｜互動幾何摺紙教學與學習單</title>
+  <style>
+    /* ==================== 1. 設計系統與全域變數 ==================== */
+    :root {
+      --bg-page: #f4f6fb;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-soft: #eef2ff;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Segoe UI", sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ==================== 2. 台灣高中數學標準符號排版 (零外部CDN) ==================== */
+    .math {
+      font-family: "Times New Roman", Georgia, "Noto Serif TC", serif;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .overline {
+      display: inline-block;
+      border-top: 1.6px solid currentColor;
+      padding-top: 1px;
+      line-height: 1.05;
+    }
+    .vec {
+      position: relative;
+      display: inline-block;
+      padding-top: 0.45em;
+      line-height: 1;
+    }
+    .vec::before {
+      content: "";
+      position: absolute;
+      top: 0.14em;
+      left: 0;
+      right: 0.12em;
+      height: 1.4px;
+      background: currentColor;
+    }
+    .vec::after {
+      content: "";
+      position: absolute;
+      top: 0.02em;
+      right: 0.04em;
+      width: 0.28em;
+      height: 0.28em;
+      border-top: 1.4px solid currentColor;
+      border-right: 1.4px solid currentColor;
+      transform: rotate(45deg);
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 3px;
+      font-size: 0.92em;
+    }
+    .frac > span:first-child {
+      border-bottom: 1.5px solid currentColor;
+      padding: 0 4px 1px;
+      line-height: 1.15;
+    }
+    .frac > span:last-child {
+      padding: 1px 4px 0;
+      line-height: 1.15;
+    }
+    .sqrt {
+      display: inline-flex;
+      align-items: center;
+    }
+    .sqrt-over {
+      border-top: 1.5px solid currentColor;
+      padding: 1px 3px 0 2px;
+      line-height: 1.1;
+    }
+
+    /* ==================== 3. 頂部導覽列與四分頁切換 ==================== */
+    header.top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .brand-title h1 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .brand-title p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: #eef2f6;
+      padding: 4px;
+      border-radius: 13px;
+      width: 100%;
+    }
+
+    @media (min-width: 860px) {
+      .tab-bar {
+        width: auto;
+        display: flex;
+      }
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: #475569;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 8px 11px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    @media (min-width: 860px) {
+      .tab-btn {
+        font-size: 0.84rem;
+        padding: 8px 14px;
+      }
+    }
+
+    .tab-btn:hover {
+      color: #0f172a;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    /* ==================== 4. 主要版面容器 ==================== */
+    main.container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    @media (min-width: 768px) {
+      main.container {
+        padding: 24px 20px;
+      }
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.24s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      color: #ffffff;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .header-m1 { background: linear-gradient(135deg, #d97706, #ea580c); }
+    .header-m2 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+    .header-cmp { background: linear-gradient(135deg, #0f766e, #0284c7); }
+
+    .badge-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      margin-bottom: 3px;
+    }
+
+    .card-header h2 {
+      font-size: 1.08rem;
+      font-weight: 800;
+    }
+
+    /* ==================== 5. 摺紙模擬器雙欄與手機首屏零距離控制列 ==================== */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 960px) {
+      .sim-grid {
+        grid-template-columns: 1.12fr 0.88fr;
+      }
+    }
+
+    .sim-stage {
+      background: var(--bg-subtle);
+      padding: 12px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    @media (min-width: 960px) {
+      .sim-stage {
+        padding: 20px;
+        border-bottom: none;
+        border-right: 1px solid var(--border-light);
+      }
+    }
+
+    .stage-topbar {
+      width: 100%;
+      max-width: 430px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .step-tag {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .step-tag.m1 {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .toggle-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #334155;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* 畫布外框：緊貼下方控制列 */
+    .canvas-box {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      padding: 6px;
+      box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    @media (min-width: 640px) {
+      .canvas-box {
+        max-width: 430px;
+        padding: 10px;
+      }
+    }
+
+    .canvas-box canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 10px;
+    }
+
+    .quick-replay-fab {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .quick-replay-fab:active {
+      transform: scale(0.95);
+    }
+
+    /* 緊貼畫布正下方的控制面板 */
+    .docked-controls {
+      width: 100%;
+      max-width: 340px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 0 0 16px 16px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    @media (min-width: 640px) {
+      .docked-controls {
+        max-width: 430px;
+        padding: 12px 14px;
+      }
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1.65fr 1fr;
+      gap: 7px;
+      margin-bottom: 9px;
+    }
+
+    .ctrl-btn {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 9px 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .ctrl-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.97);
+    }
+
+    .ctrl-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.28);
+    }
+
+    .ctrl-btn.primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .ctrl-btn.amber-primary {
+      background: #d97706;
+      border-color: #d97706;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.28);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slider-row label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+    }
+
+    .pct-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .legend-bar {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid #94a3b8;
+      display: inline-block;
+    }
+
+    /* 右側步驟說明區 */
+    .sim-sidebar {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    @media (min-width: 960px) {
+      .sim-sidebar {
+        padding: 22px;
+      }
+    }
+
+    .step-grid-btns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .step-card-btn {
+      text-align: left;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-light);
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .step-card-btn:hover {
+      border-color: #a5b4fc;
+    }
+
+    .step-card-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .step-card-btn.active-amber {
+      border-color: #d97706;
+      background: #fffbeb;
+    }
+
+    .step-card-btn .s-num {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .step-card-btn.active .s-num { color: var(--primary); }
+    .step-card-btn.active-amber .s-num { color: #b45309; }
+
+    .step-card-btn .s-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 2px;
+    }
+
+    .explain-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 15px;
+      flex: 1;
+    }
+
+    .explain-box h3 {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .explain-box p {
+      font-size: 0.86rem;
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .math-callout {
+      margin-top: 10px;
+      background: #ffffff;
+      border-left: 4px solid var(--primary);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #1e1b4b;
+      line-height: 1.6;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    .math-callout.amber {
+      border-left-color: #d97706;
+      color: #78350f;
+    }
+
+    .paper-picker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 5px 10px;
+      border-radius: 10px;
+    }
+
+    .paper-picker select {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .paper-picker select option {
+      color: #0f172a;
+    }
+
+    /* ==================== 6. 分頁 3：方法一 vs 方法二 比較探索器 ==================== */
+    .cmp-dual-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 18px;
+    }
+
+    @media (min-width: 820px) {
+      .cmp-dual-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .cmp-panel {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cmp-panel h3 {
+      font-size: 0.94rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .cmp-canvas-wrap {
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 6px;
+      margin: 8px 0;
+    }
+
+    .cmp-canvas-wrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .theta-control-card {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #c7d2fe;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: 4px;
+    }
+
+    .stats-mini-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .stat-box {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 7px 4px;
+    }
+
+    .stat-box .lbl {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .stat-box .val {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .cmp-table-wrap {
+      padding: 0 18px 20px;
+      overflow-x: auto;
+    }
+
+    table.cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 580px;
+    }
+
+    table.cmp-table th,
+    table.cmp-table td {
+      border: 1px solid var(--border-light);
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    table.cmp-table th {
+      background: #f1f5f9;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    table.cmp-table td:first-child {
+      font-weight: 700;
+      text-align: left;
+      background: #f8fafc;
+    }
+
+    .highlight-win {
+      background: #fff1f2;
+      color: #be123c;
+      font-weight: 800;
+    }
+
+    /* ==================== 7. 分頁 4：課堂學習單 (互動批改 + A4 列印) ==================== */
+    .ws-toolbar {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ws-btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ws-action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .ws-action-btn.grade {
+      background: var(--emerald);
+      color: #ffffff;
+    }
+
+    .ws-action-btn.ans {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .ws-action-btn.ans.active-toggle {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #f59e0b;
+    }
+
+    .ws-action-btn.print {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .ws-helper-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+      font-size: 0.78rem;
+      color: #475569;
+    }
+
+    .ws-sqrt-btn {
+      border: 1px solid #c7d2fe;
+      background: #eef2ff;
+      color: #3730a3;
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .ws-sqrt-btn:hover {
+      background: #e0e7ff;
+    }
+
+    .ws-sec-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ws-sec-head .ws-sec-badge {
+      margin-bottom: 0;
+    }
+
+    .ws-hint-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .ws-hint-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .ws-hint-box {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .ws-hint-box.open {
+      display: block;
+    }
+
+    .quiz-mode .diagram-hint {
+      display: none;
+    }
+
+    .worksheet-paper {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 24px 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (min-width: 768px) {
+      .worksheet-paper {
+        padding: 36px 40px;
+      }
+    }
+
+    .ws-header {
+      border-bottom: 2.5px solid #0f172a;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+
+    .ws-title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ws-title-row h2 {
+      font-size: 1.32rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .ws-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .ws-meta-item {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .ws-meta-item input {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #475569;
+      outline: none;
+      padding: 2px 4px;
+      font-size: 0.88rem;
+      text-align: center;
+      background: transparent;
+    }
+
+    .ws-section {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .ws-sec-badge {
+      display: inline-block;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ws-sec-badge.amber { background: #fef3c7; color: #92400e; }
+    .ws-sec-badge.indigo { background: #e0e7ff; color: #3730a3; }
+    .ws-sec-badge.emerald { background: #d1fae5; color: #065f46; }
+
+    .ws-two-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    @media (min-width: 720px) {
+      .ws-two-col {
+        grid-template-columns: 210px 1fr;
+      }
+    }
+
+    .ws-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ws-diagram svg {
+      width: 196px;
+      height: 196px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+
+    .ws-diagram span {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .ws-q-list {
+      font-size: 0.88rem;
+      line-height: 1.85;
+      color: #1e293b;
+    }
+
+    .ws-q-item {
+      margin-bottom: 6px;
+    }
+
+    input.blank {
+      width: 68px;
+      border: none;
+      border-bottom: 2px solid #475569;
+      background: #f8fafc;
+      text-align: center;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--primary);
+      padding: 1px 4px;
+      border-radius: 4px 4px 0 0;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    input.blank:focus {
+      border-bottom-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    input.blank.correct {
+      border-bottom-color: #059669;
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    input.blank.wrong {
+      border-bottom-color: #e11d48;
+      background: #ffe4e6;
+      color: #9f1239;
+    }
+
+    .ans-hint {
+      display: none;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 1px 6px;
+      border-radius: 5px;
+      margin-left: 3px;
+    }
+
+    .show-ans .ans-hint {
+      display: inline-block;
+    }
+
+    .sketch-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .sketch-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .sketch-box {
+      border: 1px dashed #94a3b8;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fcfcfd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sketch-box p {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .sketch-canvas {
+      width: 170px;
+      height: 170px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .sketch-tools {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .sketch-tool-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .sketch-tool-btn.active {
+      background: #eef2ff;
+      border-color: #4f46e5;
+      color: #3730a3;
+    }
+
+    .grade-banner {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    /* 慶祝彩帶畫布 */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ==================== 8. A4 列印專用樣式 ==================== */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 10pt;
+      }
+      header.top-nav,
+      .ws-toolbar,
+      .ws-helper-bar,
+      .ws-hint-btn,
+      .ws-hint-box,
+      .sketch-tools,
+      .grade-banner,
+      .ans-hint,
+      footer.site-footer,
+      #confettiCanvas {
+        display: none !important;
+      }
+      main.container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .tab-panel {
+        display: none !important;
+      }
+      #panel-4 {
+        display: block !important;
+      }
+      .worksheet-paper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .ws-header {
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+      }
+      .ws-section {
+        border: 1.2px solid #64748b !important;
+        padding: 10px 12px !important;
+        margin-bottom: 10px !important;
+        break-inside: avoid;
+      }
+      .sketch-canvas {
+        width: 140px !important;
+        height: 140px !important;
+        border: none !important;
+      }
+      input.blank {
+        background: transparent !important;
+        border-bottom: 1.4px solid #000000 !important;
+        color: #000000 !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 滿分慶祝彩帶 Canvas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- ==================== 頂部導覽列 ==================== -->
+  <header class="top-nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="2.5" stroke-opacity="0.55" />
+            <polygon points="3,21 21,16 8,3" fill="rgba(255,255,255,0.22)" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>正方形中摺出正△與最大正△</h1>
+          <p>雙摺法動態模擬 × 幾何極值探索 × 課堂互動學習單</p>
+        </div>
+      </div>
+
+      <!-- 四大功能分頁 -->
+      <nav class="tab-bar" role="tablist">
+        <button id="tab-btn-1" class="tab-btn active" onclick="switchTab(1)">① 底邊正△摺紙</button>
+        <button id="tab-btn-2" class="tab-btn" onclick="switchTab(2)">② 最大正△摺紙</button>
+        <button id="tab-btn-3" class="tab-btn" onclick="switchTab(3)">③ 雙法比較探索</button>
+        <button id="tab-btn-4" class="tab-btn" onclick="switchTab(4)">④ 課堂學習單</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ==================== 分頁 1：方法一（底邊正△ 動態摺紙） ==================== -->
+    <section id="panel-1" class="tab-panel active">
+      <div class="card">
+        <div class="card-header header-m1">
+          <div>
+            <span class="badge-pill">方法一 · 筆記「1.... 正方形中摺出正△」</span>
+            <h2>以底邊 <span class="math"><span class="overline">AB</span> = 2</span> 為邊長摺出正 <span class="math">△PAB</span></h2>
+          </div>
+          <div class="paper-picker">
+            <span>色紙：</span>
+            <select id="m1-color" onchange="setM1Color(this.value)">
+              <option value="orange">暖橘色紙（步驟1）</option>
+              <option value="yellow">鵝黃色紙（步驟2）</option>
+              <option value="pink">櫻花粉色紙（完成）</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sim-grid">
+          <!-- 左側畫布 + 緊貼底部的控制列 -->
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m1-step-badge" class="step-tag m1">步驟 1 / 4：對摺找出垂直中線</span>
+              <label class="toggle-check">
+                <input id="m1-show-notes" type="checkbox" checked onchange="renderM1()" />
+                <span>輔助線與標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM1"></canvas>
+              <button class="quick-replay-fab" onclick="selectM1Step(m1State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <!-- 手機首屏零距離控制列 -->
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM1Step()">← 上一步</button>
+                <button id="m1-play-btn" class="ctrl-btn amber-primary" onclick="toggleM1Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM1Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m1-slider">摺疊進度</label>
+                <input id="m1-slider" type="range" min="0" max="100" value="100" oninput="onM1Slider(this.value)" />
+                <span id="m1-pct" class="pct-pill" style="background:#fef3c7;color:#b45309;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span id="m1-swatch" class="swatch" style="background:#f6bd7c;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#fffdf7;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #475569;display:inline-block;"></span>摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #e11d48;display:inline-block;"></span>正 <span class="math">△PAB</span></span>
+            </div>
+          </div>
+
+          <!-- 右側步驟導覽與解析 -->
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m1-btn-1" class="step-card-btn active-amber" onclick="selectM1Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">對摺找垂直中線</div>
+                </button>
+                <button id="m1-btn-2" class="step-card-btn" onclick="selectM1Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">頂點 A 摺向中線 P</div>
+                </button>
+                <button id="m1-btn-3" class="step-card-btn" onclick="selectM1Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">對稱摺並向後收摺</div>
+                </button>
+                <button id="m1-btn-4" class="step-card-btn" onclick="selectM1Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">畢氏定理幾何驗證</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m1-title">步驟 1：對摺找出垂直中線</h3>
+              <p id="m1-desc">
+                設正方形色紙邊長為 <strong class="math">2</strong>，底邊兩頂點記為 <strong class="math">A、B</strong>。將左右兩邊對齊對摺並展開，壓出一條垂直中線，交底邊於中點 <strong class="math">C</strong>，此時 <strong class="math"><span class="overline">AC</span> = <span class="overline">CB</span> = 1</strong>。
+              </p>
+              <div id="m1-math" class="math-callout amber">
+                💡 <strong>幾何關鍵：</strong>垂直中線上的任意一點 <span class="math">P</span>，到 <span class="math">A</span> 與 <span class="math">B</span> 的距離必相等（<span class="math"><span class="overline">PA</span> = <span class="overline">PB</span></span>）。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 2：方法二（最大正△ 動態摺紙） ==================== -->
+    <section id="panel-2" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m2">
+          <div>
+            <span class="badge-pill">方法二 · 筆記「2.... 正方形中摺出最大正△」</span>
+            <h2>利用 <span class="math">15°</span> 摺紙原理摺出最大內接正 <span class="math">△ABC</span></h2>
+          </div>
+          <div class="paper-picker">
+            <span>色紙：</span>
+            <select id="m2-color" onchange="setM2Color(this.value)">
+              <option value="amber">暖橘色紙（步驟1）</option>
+              <option value="pink">櫻花粉色紙（步驟2）</option>
+              <option value="violet">薰衣草紫（完成圖）</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sim-grid">
+          <!-- 左側畫布 + 緊貼底部的控制列 -->
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m2-step-badge" class="step-tag">步驟 1 / 4：對摺垂直與水平中線</span>
+              <label class="toggle-check">
+                <input id="m2-show-notes" type="checkbox" checked onchange="renderM2()" />
+                <span>輔助線與角度</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM2"></canvas>
+              <button class="quick-replay-fab" onclick="selectM2Step(m2State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <!-- 手機首屏零距離控制列 -->
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM2Step()">← 上一步</button>
+                <button id="m2-play-btn" class="ctrl-btn primary" onclick="toggleM2Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM2Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m2-slider">摺疊進度</label>
+                <input id="m2-slider" type="range" min="0" max="100" value="100" oninput="onM2Slider(this.value)" />
+                <span id="m2-pct" class="pct-pill">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span id="m2-swatch" class="swatch" style="background:#f6bd7c;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#fffdf9;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #475569;display:inline-block;"></span>摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #e11d48;display:inline-block;"></span>最大正 <span class="math">△ABC</span></span>
+            </div>
+          </div>
+
+          <!-- 右側步驟導覽與解析 -->
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m2-btn-1" class="step-card-btn active" onclick="selectM2Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">對摺垂直與水平中線</div>
+                </button>
+                <button id="m2-btn-2" class="step-card-btn" onclick="selectM2Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">構造 60° 與 15° 角</div>
+                </button>
+                <button id="m2-btn-3" class="step-card-btn" onclick="selectM2Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">對稱摺出下側 15°</div>
+                </button>
+                <button id="m2-btn-4" class="step-card-btn" onclick="selectM2Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">收摺完成最大正△</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m2-title">步驟 1：對摺找出垂直與水平中線</h3>
+              <p id="m2-desc">
+                設正方形邊長為 <strong class="math">2</strong>。先左右對摺並展開壓出垂直中線（距左邊界距離為 <strong class="math">1</strong>），再上下對摺壓出水平中線作為對稱參考。
+              </p>
+              <div id="m2-math" class="math-callout">
+                💡 <strong>摺紙原理預告：</strong>垂直中線提供長度 <span class="math">1</span> 的股，配合正方形邊長 <span class="math">2</span>，即可不靠量角器構造出 <span class="math">1 : <span class="sqrt">√<span class="sqrt-over">3</span></span> : 2</span> 的 <span class="math">60°</span> 角！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 3：方法一 vs 方法二 比較探索器 ==================== -->
+    <section id="panel-3" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-cmp">
+          <div>
+            <span class="badge-pill">PART 3 · 幾何極值與面積對照實驗室</span>
+            <h2>方法一（底邊正△） vs 方法二（斜擺 <span class="math">15°</span> 最大正△）</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            固定正方形邊長 = 2（原面積 = 4）
+          </span>
+        </div>
+
+        <!-- 雙畫布並排（手機自動垂直堆疊） -->
+        <div class="cmp-dual-grid">
+          <!-- 左側：方法一固定對照 -->
+          <div class="cmp-panel">
+            <h3 style="color:#b45309;">方法一：一邊貼齊底邊（<span class="math">θ = 0°</span>）</h3>
+            <p style="font-size:0.78rem;color:#64748b;">正三角形底邊完全貼齊正方形底邊 <span class="math"><span class="overline">AB</span></span></p>
+            <div class="cmp-canvas-wrap">
+              <canvas id="canvasCmp1"></canvas>
+            </div>
+            <div class="stats-mini-grid">
+              <div class="stat-box">
+                <div class="lbl">正△邊長</div>
+                <div class="val">2.000</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">正△面積</div>
+                <div class="val" style="color:#d97706;">1.732</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">佔正方形比</div>
+                <div class="val">43.30%</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:0.78rem;color:#475569;text-align:center;">
+              頂點 <span class="math">P</span> 距上邊界尚有 <span class="math">2 - <span class="sqrt">√<span class="sqrt-over">3</span></span> ≈ 0.268</span> 的剩餘空間未被利用。
+            </div>
+          </div>
+
+          <!-- 右側：方法二動態偏轉角探索器 -->
+          <div class="cmp-panel" style="border-color:#c7d2fe;background:#f5f7ff;">
+            <h3 style="color:#3730a3;">方法二：動態偏轉角 <span class="math">θ</span> 探索器（<span class="math">0° ~ 18°</span>）</h3>
+            <p style="font-size:0.78rem;color:#4f46e5;">拖動滑桿觀察偏轉角 <span class="math">θ</span> 如何撐大內接正三角形！</p>
+            <div class="cmp-canvas-wrap">
+              <canvas id="canvasCmp2"></canvas>
+            </div>
+
+            <div class="theta-control-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <span style="font-size:0.78rem;font-weight:800;">底邊偏轉角 <span class="math">θ</span>：</span>
+                <span id="cmp-theta-badge" style="font-size:0.84rem;font-weight:900;color:#4f46e5;font-family:monospace;">15.0°（★ 最大極值）</span>
+              </div>
+              <input id="cmp-theta-slider" type="range" min="0" max="18" step="0.5" value="15" oninput="updateCmpExplorer(this.value)" />
+              <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#64748b;margin-top:3px;">
+                <span>0° (同方法一)</span>
+                <span style="color:#059669;font-weight:800;">15° (對稱極值)</span>
+                <span style="color:#e11d48;">&gt;15° (超出邊界!)</span>
+              </div>
+            </div>
+
+            <div class="stats-mini-grid">
+              <div class="stat-box">
+                <div class="lbl">邊長 <span class="math">x = 2/cosθ</span></div>
+                <div id="cmp-side-val" class="val" style="color:#4f46e5;">2.071</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">面積 <span class="math"><span class="sqrt">√<span class="sqrt-over">3</span></span>/cos²θ</span></div>
+                <div id="cmp-area-val" class="val" style="color:#e11d48;">1.856</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">佔正方形比</div>
+                <div id="cmp-ratio-val" class="val" style="color:#059669;">46.41%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 完整數據與數學證明對比表 -->
+        <div class="cmp-table-wrap">
+          <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:10px;color:#0f172a;">📊 兩種摺法完整數學規格對照表（正方形邊長 = 2）</h3>
+          <table class="cmp-table">
+            <thead>
+              <tr>
+                <th>比較項目</th>
+                <th>方法一：底邊正 <span class="math">△PAB</span></th>
+                <th>方法二：斜擺 <span class="math">15°</span> 最大正 <span class="math">△ABC</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>底邊偏轉角 <span class="math">θ</span></td>
+                <td><span class="math">0°</span>（底邊完全貼齊正方形邊界）</td>
+                <td class="highlight-win"><span class="math">15°</span>（受對稱性 <span class="math">θ + α = 30°</span> 限制之最大值）</td>
+              </tr>
+              <tr>
+                <td>正三角形邊長</td>
+                <td><span class="math">2</span></td>
+                <td class="highlight-win"><span class="math"><span class="frac"><span>2</span><span>cos 15°</span></span> = <span class="sqrt">√<span class="sqrt-over">6</span></span> + <span class="sqrt">√<span class="sqrt-over">2</span></span> ≈ 2.0706</span></td>
+              </tr>
+              <tr>
+                <td>正三角形面積</td>
+                <td><span class="math"><span class="frac"><span><span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>4</span></span> × 2² = <span class="sqrt">√<span class="sqrt-over">3</span></span> ≈ 1.7321</span></td>
+                <td class="highlight-win"><span class="math"><span class="frac"><span><span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>cos²15°</span></span> = 8 - 4<span class="sqrt">√<span class="sqrt-over">3</span></span> ≈ 1.8564</span></td>
+              </tr>
+              <tr>
+                <td>佔原正方形面積比例</td>
+                <td><span class="math">43.30%</span></td>
+                <td class="highlight-win"><span class="math">46.41%</span>（面積提升 <span class="math">+7.18%</span>）</td>
+              </tr>
+              <tr>
+                <td>核心構造技巧</td>
+                <td>利用垂直中線與摺疊保長構造 <span class="math">1 : <span class="sqrt">√<span class="sqrt-over">3</span></span> : 2</span></td>
+                <td>先構造 <span class="math">60°</span>，再將剩餘 <span class="math">30°</span> 對摺平分得 <span class="math">15°</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 4：課堂學習單（線上批改 ＋ A4 列印） ==================== -->
+    <section id="panel-4" class="tab-panel">
+      <!-- 操作工具列（列印時自動隱藏） -->
+      <div class="ws-toolbar">
+        <div>
+          <h2 style="font-size:0.98rem;font-weight:800;color:#1e1b4b;">📝 課堂探究學習單（線上互動批改 / A4 紙本列印）</h2>
+          <p style="font-size:0.78rem;color:#4338ca;">學生可直接在空格填答並按「核對互動答案」；教師點擊「列印學習單 (A4)」即可輸出整齊紙本。</p>
+        </div>
+        <div class="ws-btn-group">
+          <button class="ws-action-btn grade" onclick="gradeWorksheet()">✓ 核對互動答案</button>
+          <button class="ws-action-btn ans" onclick="toggleAnswerKey()">👁 顯示/隱藏解答</button>
+          <button id="ws-quiz-btn" class="ws-action-btn ans" onclick="toggleQuizMode()">📝 測驗模式</button>
+          <button class="ws-action-btn ans" onclick="resetWorksheet()">↺ 清除重填</button>
+          <button class="ws-action-btn print" onclick="window.print()">🖨️ 列印學習單 (A4)</button>
+        </div>
+      </div>
+
+      <!-- 正式 A4 學習單 -->
+      <article id="worksheet-root" class="worksheet-paper">
+        <div class="ws-helper-bar">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>⌨️ 輸入小幫手：</span>
+            <button type="button" class="ws-sqrt-btn" onmousedown="event.preventDefault()" onclick="insertSqrtSymbol()">＋ 插入 √ 符號</button>
+            <span style="color:#64748b;">（亦支援輸入 <code>sqrt3</code> 或 <code>根號3</code>，系統自動容錯與暫存填答）</span>
+          </div>
+        </div>
+
+        <div class="ws-header">
+          <div class="ws-title-row">
+            <h2>【數學探究學習單】正方形中摺出正△與最大正△</h2>
+            <span style="font-size:0.76rem;font-weight:700;padding:3px 9px;border:1px solid #94a3b8;border-radius:6px;">
+              幾何摺紙 × 畢氏定理 × 三角函數極值
+            </span>
+          </div>
+          <div class="ws-meta-grid">
+            <div class="ws-meta-item"><span>班級：</span><input id="ws-meta-class" type="text" placeholder="請填寫" /></div>
+            <div class="ws-meta-item"><span>座號：</span><input id="ws-meta-seat" type="text" placeholder="請填寫" /></div>
+            <div class="ws-meta-item"><span>姓名：</span><input id="ws-meta-name" type="text" placeholder="請填寫" /></div>
+          </div>
+        </div>
+
+        <!-- 任務一：方法一（底邊正△） -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge amber">探究一：方法一 —— 以底邊 <span class="math"><span class="overline">AB</span> = 2</span> 摺出正 <span class="math">△PAB</span></span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-1')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="25" y="20" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="2" />
+                <line x1="110" y1="20" x2="110" y2="190" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 4" />
+                <polyline points="110,180 120,180 120,190" fill="none" stroke="#0f172a" stroke-width="1.4" />
+                <polygon points="25,190 195,190 110,42.8" fill="rgba(217,119,6,0.1)" stroke="#e11d48" stroke-width="2" />
+                <circle cx="110" cy="42.8" r="3.5" fill="#e11d48" />
+                <text x="12" y="202" font-size="14" font-weight="bold">A</text>
+                <text x="105" y="207" font-size="14" font-weight="bold">C</text>
+                <text x="198" y="202" font-size="14" font-weight="bold">B</text>
+                <text x="116" y="45" font-size="14" font-weight="bold" fill="#e11d48">P</text>
+                <text class="diagram-hint" x="148" y="206" font-size="13" font-weight="bold">1</text>
+                <text class="diagram-hint" x="160" y="115" font-size="13" font-weight="bold" fill="#e11d48">2</text>
+                <text class="diagram-hint" x="90" y="122" font-size="13" font-weight="bold" fill="#0f172a">√3</text>
+              </svg>
+              <span>圖(一)：底邊正 <span class="math">△PAB</span> 示意圖</span>
+            </div>
+
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 設正方形邊長為 <span class="math">2</span>，對摺出垂直中線交底邊於中點 <span class="math">C</span>，則 <span class="math"><span class="overline">CB</span> =</span>
+                <input class="blank" data-ans="1" type="text" /><span class="ans-hint">1</span>。
+              </div>
+              <div class="ws-q-item">
+                (2) 固定頂點 <span class="math">B</span>，將 <span class="math">A</span> 摺向垂直中線上的 <span class="math">P</span> 點，因摺疊保持長度不變，故 <span class="math"><span class="overline">PB</span> = <span class="overline">AB</span> =</span>
+                <input class="blank" data-ans="2" type="text" /><span class="ans-hint">2</span>。
+              </div>
+              <div class="ws-q-item">
+                (3) 在直角 <span class="math">△PCB</span> 中，由畢氏定理可得高 <span class="math"><span class="overline">PC</span> = <span class="sqrt">√<span class="sqrt-over">2² - 1²</span></span> =</span>
+                <input class="blank" data-ans="√3" data-alt="根號3" placeholder="例:√3" type="text" /><span class="ans-hint">√3</span>，且 <span class="math">∠PBC =</span>
+                <input class="blank" data-ans="60" type="text" /><span class="ans-hint">60</span> °。
+              </div>
+              <div class="ws-q-item">
+                (4) 由對稱性同理可得 <span class="math"><span class="overline">PA</span> = 2</span>，故正 <span class="math">△PAB</span> 的面積為
+                <input class="blank" data-ans="√3" data-alt="根號3" placeholder="例:√3" type="text" /><span class="ans-hint">√3</span>（約 <span class="math">1.732</span>）。
+              </div>
+            </div>
+          </div>
+          <div id="hint-1" class="ws-hint-box">
+            💡 <strong>提示：</strong>對摺代表平分底邊；直角三角形三邊比例為 <span class="math">1 : √3 : 2</span> 時，對應角度為 <span class="math">30° - 60° - 90°</span>；三角形面積 = <span class="math">½ × 底 × 高</span>。
+          </div>
+        </div>
+
+        <!-- 任務二：方法二（15° 角與最大正△） -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge indigo">探究二：方法二 —— 利用 <span class="math">15°</span> 摺紙原理摺出最大正 <span class="math">△ABC</span></span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-2')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="25" y="20" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="2" />
+                <line x1="110" y1="20" x2="110" y2="190" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4 4" />
+                <polygon points="25,190 195,144.4 70.6,20" fill="rgba(79,70,229,0.09)" stroke="#e11d48" stroke-width="2" />
+                <line x1="25" y1="190" x2="110" y2="42.8" stroke="#334155" stroke-width="1.3" stroke-dasharray="3 3" />
+                <circle cx="110" cy="42.8" r="3" fill="#4f46e5" />
+                <text x="12" y="202" font-size="14" font-weight="bold">A</text>
+                <text x="199" y="149" font-size="14" font-weight="bold">B</text>
+                <text x="66" y="15" font-size="14" font-weight="bold">C</text>
+                <text x="115" y="47" font-size="13" font-weight="bold" fill="#4f46e5">P</text>
+                <text x="105" y="206" font-size="13" font-weight="bold">2</text>
+                <text x="72" y="185" font-size="12" font-weight="bold" fill="#e11d48">θ</text>
+                <text x="31" y="138" font-size="12" font-weight="bold" fill="#e11d48">α</text>
+                <text class="diagram-hint" x="43" y="164" font-size="11" font-weight="bold" fill="#4f46e5">60°</text>
+              </svg>
+              <span>圖(二)：最大內接正 <span class="math">△ABC</span> 示意圖</span>
+            </div>
+
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 將左上頂點摺向垂直中線上的 <span class="math">P</span> 點，構造出斜邊為 <span class="math">2</span>、底股為 <span class="math">1</span> 的直角三角形，得出夾角 <span class="math">60°</span>；因 <span class="math">∠A = 90°</span>，摺線將剩餘 <span class="math">30°</span> 平分，故偏轉角 <span class="math">θ =</span>
+                <input class="blank" data-ans="15" type="text" /><span class="ans-hint">15</span> °。
+              </div>
+              <div class="ws-q-item">
+                (2) 在右下直角三角形中，鄰邊為 <span class="math">2</span>、斜邊為正三角形邊長 <span class="math">x</span>，由 <span class="math">cos θ = <span class="frac"><span>2</span><span>x</span></span></span> 可得 <span class="math">x = <span class="frac"><span>2</span><span>cos θ</span></span></span>，代回面積公式得正 <span class="math">△ABC</span> 面積為 <span class="math"><span class="frac"><span><span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>cos²θ</span></span></span>。
+              </div>
+              <div class="ws-q-item">
+                (3) 因為 <span class="math">θ + α + 60° = 90°</span>，所以 <span class="math">θ + α =</span>
+                <input class="blank" data-ans="30" type="text" /><span class="ans-hint">30</span> °；受正方形對稱性限制，當 <span class="math">θ = 15°</span> 時分母 <span class="math">cos²θ</span> 最
+                <input class="blank" data-ans="小" placeholder="大/小" type="text" /><span class="ans-hint">小</span>，正 <span class="math">△ABC</span> 面積達到最
+                <input class="blank" data-ans="大" placeholder="大/小" type="text" /><span class="ans-hint">大</span>值（約 <span class="math">1.856</span>）。
+              </div>
+            </div>
+          </div>
+          <div id="hint-2" class="ws-hint-box">
+            💡 <strong>提示：</strong>分子 <span class="math">√3</span> 為定值時，分母 <span class="math">cos²θ</span> 越「小」，整個分數的值就越「大」！且在 <span class="math">0° ~ 15°</span> 之間，<span class="math">θ</span> 越大，<span class="math">cos θ</span> 越小。
+          </div>
+        </div>
+
+        <!-- 任務三：手繪摺痕練習框與綜合比較 -->
+        <div class="ws-section" style="margin-bottom:0;">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge emerald">探究三：雙法比較與動手繪製關鍵摺痕</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-3')">💡 小提示</button>
+          </div>
+          <div class="ws-q-list" style="margin-bottom:8px;">
+            比較邊長為 <span class="math">2</span> 的正方形中，方法二摺出的最大正三角形面積比方法一多了約
+            <input class="blank" data-ans="7.18" data-alt="7.2" placeholder="例:7.18" type="text" /><span class="ans-hint">7.18</span> %。請在下方兩個正方形框中，分別畫出兩種摺法的<strong>關鍵摺痕虛線</strong>與<strong>目標正三角形</strong>：
+          </div>
+          <div id="hint-3" class="ws-hint-box" style="margin-bottom:10px;">
+            💡 <strong>提示：</strong>面積增加百分比 = <span class="math">(1.8564 - 1.7321) ÷ 1.7321 × 100% ≈ 7.18%</span>。下方畫板可直接用滑鼠或觸控筆繪製！
+          </div>
+          <div class="sketch-grid">
+            <div class="sketch-box">
+              <p>【練習框 A】方法一：底邊正 <span class="math">△PAB</span></p>
+              <canvas id="sketchCanvasA" class="sketch-canvas" width="170" height="170"></canvas>
+              <div class="sketch-tools">
+                <button type="button" class="sketch-tool-btn active" data-pad="A" data-mode="dash" onclick="setSketchMode('A','dash',this)">摺痕虛線</button>
+                <button type="button" class="sketch-tool-btn" data-pad="A" data-mode="solid" onclick="setSketchMode('A','solid',this)">正△紅線</button>
+                <button type="button" class="sketch-tool-btn" onclick="clearSketch('A')">清除</button>
+                <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('A')">參考圖</button>
+              </div>
+            </div>
+            <div class="sketch-box">
+              <p>【練習框 B】方法二：斜擺 <span class="math">15°</span> 最大正 <span class="math">△ABC</span></p>
+              <canvas id="sketchCanvasB" class="sketch-canvas" width="170" height="170"></canvas>
+              <div class="sketch-tools">
+                <button type="button" class="sketch-tool-btn active" data-pad="B" data-mode="dash" onclick="setSketchMode('B','dash',this)">摺痕虛線</button>
+                <button type="button" class="sketch-tool-btn" data-pad="B" data-mode="solid" onclick="setSketchMode('B','solid',this)">正△紅線</button>
+                <button type="button" class="sketch-tool-btn" onclick="clearSketch('B')">清除</button>
+                <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('B')">參考圖</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="grade-banner" class="grade-banner"></div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" style="text-align:center;padding:18px;font-size:0.76rem;color:#94a3b8;">
+    正方形中摺出正△與最大正△｜互動幾何摺紙教學與課堂學習單
+  </footer>
+
+  <!-- ==================== JavaScript 互動模擬與動畫引擎 ==================== -->
+  <script>
+    /* ==================== 1. 分頁切換邏輯 ==================== */
+    function switchTab(idx) {
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`tab-btn-${i}`);
+        const panel = document.getElementById(`panel-${i}`);
+        if (i === idx) {
+          btn.classList.add('active');
+          panel.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+          panel.classList.remove('active');
+        }
+      }
+      if (idx === 1) renderM1();
+      if (idx === 2) renderM2();
+      if (idx === 3) {
+        renderCmp1();
+        updateCmpExplorer(document.getElementById('cmp-theta-slider').value);
+      }
+    }
+
+    /* ==================== 2. 幾何鏡射與 3D 翻摺插值引擎 ==================== */
+    function reflectPoint(P, L1, L2) {
+      const dx = L2.x - L1.x;
+      const dy = L2.y - L1.y;
+      const lenSq = dx * dx + dy * dy;
+      const t = ((P.x - L1.x) * dx + (P.y - L1.y) * dy) / lenSq;
+      const projX = L1.x + t * dx;
+      const projY = L1.y + t * dy;
+      return { x: 2 * projX - P.x, y: 2 * projY - P.y };
+    }
+
+    function foldInterpolate(P, L1, L2, progress) {
+      const R = reflectPoint(P, L1, L2);
+      const midX = (P.x + R.x) / 2;
+      const midY = (P.y + R.y) / 2;
+      const angle = Math.PI * progress;
+      const cosA = Math.cos(angle);
+      const vx = P.x - midX;
+      const vy = P.y - midY;
+      const dx = L2.x - L1.x;
+      const dy = L2.y - L1.y;
+      const dLen = Math.hypot(dx, dy) || 1;
+      const lift = Math.sin(angle) * 0.08 * Math.hypot(vx, vy);
+      return {
+        x: midX + vx * cosA - (dy / dLen) * lift,
+        y: midY + vy * cosA + (dx / dLen) * lift
+      };
+    }
+
+    function drawPoly(ctx, toPx, pts, fill, stroke, lineWidth = 1.6, shadow = false) {
+      ctx.save();
+      if (shadow) {
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.18)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 4;
+      }
+      ctx.beginPath();
+      pts.forEach((p, idx) => {
+        const px = toPx(p);
+        if (idx === 0) ctx.moveTo(px.x, px.y);
+        else ctx.lineTo(px.x, px.y);
+      });
+      ctx.closePath();
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = lineWidth;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawDashed(ctx, toPx, p1, p2, color = '#475569', dash = [5, 4], width = 1.5) {
+      const a = toPx(p1);
+      const b = toPx(p2);
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash(dash);
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* ==================== 3. 分頁 1：方法一（底邊正△）模擬器 ==================== */
+    const m1Themes = {
+      orange: { front: '#f6bd7c', back: '#fffdf7', border: '#b45309' },
+      yellow: { front: '#fde073', back: '#fffef5', border: '#a16207' },
+      pink:   { front: '#f7a8ce', back: '#fff9fc', border: '#be185d' }
+    };
+
+    const m1StepsData = {
+      1: {
+        badge: '步驟 1 / 4：對摺找出垂直中線',
+        title: '步驟 1：對摺找出垂直中線',
+        desc: '設正方形色紙邊長為 2，底邊兩頂點記為 A、B。將左右兩邊對齊對摺並展開，壓出一條垂直中線，交底邊於中點 C，此時 AC = CB = 1。',
+        math: '💡 幾何關鍵：垂直中線上的任意一點 P，到 A 與 B 的距離必相等（PA = PB）。'
+      },
+      2: {
+        badge: '步驟 2 / 4：頂點 A 摺向垂直中線 P 點',
+        title: '步驟 2：固定頂點 B，將頂點 A 摺向垂直中線上的 P 點',
+        desc: '固定右下頂點 B 不動，將左下頂點 A 向內翻摺，使 A 精準落在垂直中線上的 P 點。因摺疊不改變線段長度，故 PB = AB = 2！',
+        math: '💡 摺疊保長：頂點 A 移至 P 點後，線段 PB 的長度即原本的底邊長 AB = 2。'
+      },
+      3: {
+        badge: '步驟 3 / 4：對稱摺並向後收摺成正△',
+        title: '步驟 3：展開並對稱摺出 PA，再將兩側與上方多餘紙翼向後收摺',
+        desc: '展開左翼並以同樣方式固定 A 將 B 摺向 P 點，壓出摺痕 PA；最後沿 PA、PB 將左右兩側與上方多餘色紙向後收摺，即完成正 △PAB！',
+        math: '★ 完工驗證：三邊長 PA = PB = AB = 2，三內角皆為 60°，為完全對稱之正三角形。'
+      },
+      4: {
+        badge: '步驟 4 / 4：畢氏定理與 1 : √3 : 2 幾何驗證',
+        title: '步驟 4：幾何原理驗證（直角 △PCB）',
+        desc: '觀察右半部的直角 △PCB：底股 CB = 1、斜邊 PB = 2，由畢氏定理求得高 PC = √(2² - 1²) = √3，因此 △PCB 為 1 : √3 : 2 特殊直角三角形，∠PBC = 60°！',
+        math: '📐 面積計算：底邊 AB = 2，高 PC = √3，故正 △PAB 面積 = ½ × 2 × √3 = √3 ≈ 1.732。'
+      }
+    };
+
+    const m1State = { step: 1, progress: 1, playing: false, raf: null, color: 'orange' };
+
+    function setM1Color(val) {
+      m1State.color = val;
+      document.getElementById('m1-swatch').style.background = m1Themes[val].front;
+      renderM1();
+    }
+
+    function updateM1UI() {
+      const info = m1StepsData[m1State.step];
+      document.getElementById('m1-step-badge').textContent = info.badge;
+      document.getElementById('m1-title').textContent = info.title;
+      document.getElementById('m1-desc').textContent = info.desc;
+      document.getElementById('m1-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        const b = document.getElementById(`m1-btn-${i}`);
+        b.className = i === m1State.step ? 'step-card-btn active-amber' : 'step-card-btn';
+      }
+    }
+
+    function selectM1Step(step, autoPlay = true) {
+      stopM1Play();
+      m1State.step = step;
+      // 自動切換對應色紙顏色以呼應手寫筆記（可隨時手動覆蓋）
+      if (step === 1) setM1Color('orange');
+      else if (step === 2) setM1Color('yellow');
+      else if (step === 3) setM1Color('pink');
+      document.getElementById('m1-color').value = m1State.color;
+      updateM1UI();
+
+      if (autoPlay) {
+        m1State.progress = 0;
+        document.getElementById('m1-slider').value = 0;
+        document.getElementById('m1-pct').textContent = '0%';
+        startM1Play();
+      } else {
+        m1State.progress = 1;
+        document.getElementById('m1-slider').value = 100;
+        document.getElementById('m1-pct').textContent = '100%';
+        renderM1();
+      }
+    }
+
+    function prevM1Step() { selectM1Step(m1State.step > 1 ? m1State.step - 1 : 4, true); }
+    function nextM1Step() { selectM1Step(m1State.step < 4 ? m1State.step + 1 : 1, true); }
+
+    function onM1Slider(val) {
+      stopM1Play();
+      m1State.progress = Number(val) / 100;
+      document.getElementById('m1-pct').textContent = `${val}%`;
+      renderM1();
+    }
+
+    function startM1Play() {
+      m1State.playing = true;
+      document.getElementById('m1-play-btn').textContent = '⏸ 暫停動畫';
+      if (m1State.progress >= 0.99) m1State.progress = 0;
+
+      const tick = () => {
+        if (!m1State.playing) return;
+        m1State.progress += 0.016;
+        if (m1State.progress >= 1) {
+          m1State.progress = 1;
+          document.getElementById('m1-slider').value = 100;
+          document.getElementById('m1-pct').textContent = '100%';
+          renderM1();
+          stopM1Play();
+          return;
+        }
+        const pct = Math.round(m1State.progress * 100);
+        document.getElementById('m1-slider').value = pct;
+        document.getElementById('m1-pct').textContent = `${pct}%`;
+        renderM1();
+        m1State.raf = requestAnimationFrame(tick);
+      };
+      m1State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM1Play() {
+      m1State.playing = false;
+      if (m1State.raf) cancelAnimationFrame(m1State.raf);
+      document.getElementById('m1-play-btn').textContent = '▶ 重播動畫';
+    }
+
+    function toggleM1Play() {
+      if (m1State.playing) stopM1Play();
+      else {
+        if (m1State.progress >= 0.99) m1State.progress = 0;
+        startM1Play();
+      }
+    }
+
+    function renderM1() {
+      const canvas = document.getElementById('canvasM1');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const theme = m1Themes[m1State.color];
+      const showNotes = document.getElementById('m1-show-notes').checked;
+      const pad = size * 0.13;
+      const sq = size - pad * 2;
+      const toPx = (pt) => ({ x: pad + (pt.x / 2) * sq, y: size - pad - (pt.y / 2) * sq });
+
+      const sqrt3 = Math.sqrt(3);
+      const A = { x: 0, y: 0 };
+      const B = { x: 2, y: 0 };
+      const TR = { x: 2, y: 2 };
+      const TL = { x: 0, y: 2 };
+      const C = { x: 1, y: 0 };
+      const T_mid = { x: 1, y: 2 };
+      const P = { x: 1, y: sqrt3 };
+
+      // 步驟 2 的摺痕線：過 B(2,0) 且平分 ∠ABP (PB 角度 120°, AB 角度 180° -> 摺痕角 150°)
+      // 與左邊 x=0 交於 L_fold = (0, 2 * tan(30°)) = (0, 2/√3)
+      const L_fold = { x: 0, y: 2 / sqrt3 };
+      // 對稱右側摺痕線：過 A(0,0) 與右邊 x=2 交於 R_fold = (2, 2/√3)
+      const R_fold = { x: 2, y: 2 / sqrt3 };
+
+      const prog = m1State.progress;
+
+      if (m1State.step === 1) {
+        // 左右對摺再展開壓出垂直中線
+        const foldAmt = Math.sin(prog * Math.PI) * 0.88;
+        drawPoly(ctx, toPx, [A, B, TR, TL], theme.front, theme.border, 1.8);
+        drawDashed(ctx, toPx, C, T_mid, '#334155', [5, 4], 1.6);
+        if (foldAmt > 0.02) {
+          const B_f = foldInterpolate(B, C, T_mid, foldAmt);
+          const TR_f = foldInterpolate(TR, C, T_mid, foldAmt);
+          drawPoly(ctx, toPx, [C, B_f, TR_f, T_mid], theme.back, theme.border, 1.5, true);
+        }
+      } else if (m1State.step === 2) {
+        // 固定 B，將左下角 △(A, B, L_fold) 沿 B - L_fold 翻摺，使 A 落在 P(1, √3)
+        drawPoly(ctx, toPx, [L_fold, B, TR, TL], theme.front, theme.border, 1.8);
+        drawDashed(ctx, toPx, C, T_mid, '#64748b', [4, 4], 1.4);
+        const A_f = foldInterpolate(A, B, L_fold, prog);
+        drawPoly(ctx, toPx, [B, A_f, L_fold], prog > 0.5 ? theme.back : theme.front, theme.border, 1.6, prog > 0.05);
+        drawDashed(ctx, toPx, B, L_fold, '#334155', [4, 3], 1.5);
+      } else if (m1State.step === 3) {
+        // 沿 PA、PB 向後收摺成正 △PAB
+        const p1 = Math.min(1, prog * 1.4);
+        const p2 = Math.max(0, (prog - 0.3) / 0.7);
+        // 背面多餘區域向後折
+        const TL_f = foldInterpolate(TL, A, P, p1);
+        const TR_f = foldInterpolate(TR, B, P, p1);
+        if (p1 < 0.96) {
+          drawPoly(ctx, toPx, [A, P, TL_f], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.4);
+          drawPoly(ctx, toPx, [B, TR_f, P], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.4);
+        }
+        // 中央正 △PAB 主體
+        drawPoly(ctx, toPx, [A, B, P], theme.front, '#e11d48', 2.4);
+        // 交疊折翼質感（呼應筆記圖櫻花粉色紙外觀）
+        if (p2 > 0.1) {
+          const flapL = foldInterpolate(L_fold, A, P, p2 * 0.98);
+          const flapR = foldInterpolate(R_fold, B, P, p2 * 0.98);
+          drawPoly(ctx, toPx, [A, P, flapL], theme.front, theme.border, 1.3, true);
+          drawPoly(ctx, toPx, [B, flapR, P], theme.front, theme.border, 1.3, true);
+        }
+      } else if (m1State.step === 4) {
+        // 幾何原理驗證圖：淡色正方形 + 鮮明正 △PAB + 直角 △PCB 標示
+        drawPoly(ctx, toPx, [A, B, TR, TL], '#fffbeb', '#94a3b8', 1.6);
+        drawDashed(ctx, toPx, C, T_mid, '#475569', [4, 4], 1.5);
+        drawPoly(ctx, toPx, [A, B, P], 'rgba(225, 29, 72, 0.12)', '#e11d48', 2.4);
+        // 高亮右側直角 △PCB
+        drawPoly(ctx, toPx, [C, B, P], 'rgba(79, 70, 229, 0.14)', '#4f46e5', 2);
+      }
+
+      if (showNotes) {
+        ctx.save();
+        ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
+        const pA = toPx(A), pB = toPx(B), pC = toPx(C), pP = toPx(P);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText('A', pA.x - 15, pA.y + 14);
+        ctx.fillText('B', pB.x + 6, pB.y + 14);
+        ctx.fillText('C', pC.x - 4, pC.y + 16);
+
+        ctx.beginPath();
+        ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#e11d48';
+        ctx.fill();
+        ctx.fillText('P', pP.x + 7, pP.y + 4);
+
+        if (m1State.step === 1) {
+          ctx.fillStyle = '#334155';
+          ctx.fillText('1', (pA.x + pC.x) / 2 - 4, pA.y + 16);
+          ctx.fillText('1', (pC.x + pB.x) / 2 - 4, pA.y + 16);
+          ctx.fillText('對摺中線', pC.x + 6, size * 0.45);
+        } else if (m1State.step === 2) {
+          drawDashed(ctx, toPx, B, P, '#e11d48', [4, 3], 1.7);
+          ctx.fillStyle = '#e11d48';
+          ctx.fillText('PB = 2', (pB.x + pP.x) / 2 + 8, (pB.y + pP.y) / 2);
+        } else if (m1State.step === 3 || m1State.step === 4) {
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(pC.x, pC.y - 9, 9, 9);
+          ctx.fillStyle = '#0f172a';
+          ctx.fillText('1', (pC.x + pB.x) / 2 - 4, pC.y + 16);
+          ctx.fillStyle = '#e11d48';
+          ctx.fillText('2', (pB.x + pP.x) / 2 + 8, (pB.y + pP.y) / 2);
+          ctx.fillText('2', (pA.x + pP.x) / 2 - 16, (pA.y + pP.y) / 2);
+          ctx.fillStyle = '#4f46e5';
+          ctx.fillText('√3', pC.x - 22, (pC.y + pP.y) / 2 + 5);
+          ctx.fillText('60°', pB.x - 34, pB.y - 10);
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 4. 分頁 2：方法二（最大正△）模擬器 ==================== */
+    const m2Themes = {
+      amber:  { front: '#f6bd7c', back: '#fffdf9', border: '#c27d38' },
+      pink:   { front: '#f7a8ce', back: '#fffafc', border: '#be5b8b' },
+      violet: { front: '#d8ccf2', back: '#fcfaff', border: '#7c3aed' }
+    };
+
+    const m2StepsData = {
+      1: {
+        badge: '步驟 1 / 4：對摺垂直與水平中線',
+        title: '步驟 1：對摺找出垂直與水平中線',
+        desc: '設正方形邊長為 2。先左右對摺並展開壓出垂直中線（距左邊界距離為 1），再上下對摺壓出水平中線作為對稱參考。',
+        math: '💡 摺紙原理預告：垂直中線提供長度 1 的股，配合正方形邊長 2，即可構造出 1 : √3 : 2 的 60° 角！'
+      },
+      2: {
+        badge: '步驟 2 / 4：構造 60° 與 θ = 15° 角',
+        title: '步驟 2：固定左下頂點 A，將左上頂點 B 摺向垂直中線上的 P 點',
+        desc: '在直角 △APC 中，斜邊 AP = AB = 2、底股 AC = 1，得出高 PC = √3 與 ∠PAC = 60°。因 ∠A = 90°，摺線平分剩餘 30°，壓出 θ = 15° 摺痕！',
+        math: '💡 角度推導：θ + θ + 60° = 90° ⇒ 2θ = 30° ⇒ θ = 15°。'
+      },
+      3: {
+        badge: '步驟 3 / 4：對稱摺出下側 α = 15°',
+        title: '步驟 3：以相同 15° 角對稱向內摺出下側邊 AB',
+        desc: '展開左翼（保留剛壓出的 15° 摺痕），固定左下頂點 A，將底邊向上翻摺使右下頂點落在水平中線 Q 點，壓出另一條夾角 α = 15° 的摺痕！',
+        math: '💡 核心夾角：兩條 15° 摺痕之間的夾角為 90° - 15° - 15° = 60°，正是最大正三角形的第一個內角！'
+      },
+      4: {
+        badge: '步驟 4 / 4：收摺完成最大內接正 △ABC',
+        title: '步驟 4：沿兩條 15° 摺痕向內收摺，並收齊右上多餘紙翼',
+        desc: '同時沿左右兩側 15° 摺痕向內收摺，並將右上方多餘三角形沿 BC 邊向後折齊，即完成正方形中面積最大的正 △ABC！',
+        math: '★ 完工規格：邊長 x = 2 / cos(15°) ≈ 2.071，面積 = √3 / cos²(15°) ≈ 1.856（佔原正方形 46.41%）。'
+      }
+    };
+
+    const m2State = { step: 1, progress: 1, playing: false, raf: null, color: 'amber' };
+
+    function setM2Color(val) {
+      m2State.color = val;
+      document.getElementById('m2-swatch').style.background = m2Themes[val].front;
+      renderM2();
+    }
+
+    function updateM2UI() {
+      const info = m2StepsData[m2State.step];
+      document.getElementById('m2-step-badge').textContent = info.badge;
+      document.getElementById('m2-title').textContent = info.title;
+      document.getElementById('m2-desc').textContent = info.desc;
+      document.getElementById('m2-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        const b = document.getElementById(`m2-btn-${i}`);
+        b.className = i === m2State.step ? 'step-card-btn active' : 'step-card-btn';
+      }
+    }
+
+    function selectM2Step(step, autoPlay = true) {
+      stopM2Play();
+      m2State.step = step;
+      if (step === 1) setM2Color('amber');
+      else if (step === 2 || step === 3) setM2Color('pink');
+      else if (step === 4) setM2Color('violet');
+      document.getElementById('m2-color').value = m2State.color;
+      updateM2UI();
+
+      if (autoPlay) {
+        m2State.progress = 0;
+        document.getElementById('m2-slider').value = 0;
+        document.getElementById('m2-pct').textContent = '0%';
+        startM2Play();
+      } else {
+        m2State.progress = 1;
+        document.getElementById('m2-slider').value = 100;
+        document.getElementById('m2-pct').textContent = '100%';
+        renderM2();
+      }
+    }
+
+    function prevM2Step() { selectM2Step(m2State.step > 1 ? m2State.step - 1 : 4, true); }
+    function nextM2Step() { selectM2Step(m2State.step < 4 ? m2State.step + 1 : 1, true); }
+
+    function onM2Slider(val) {
+      stopM2Play();
+      m2State.progress = Number(val) / 100;
+      document.getElementById('m2-pct').textContent = `${val}%`;
+      renderM2();
+    }
+
+    function startM2Play() {
+      m2State.playing = true;
+      document.getElementById('m2-play-btn').textContent = '⏸ 暫停動畫';
+      if (m2State.progress >= 0.99) m2State.progress = 0;
+
+      const tick = () => {
+        if (!m2State.playing) return;
+        m2State.progress += 0.016;
+        if (m2State.progress >= 1) {
+          m2State.progress = 1;
+          document.getElementById('m2-slider').value = 100;
+          document.getElementById('m2-pct').textContent = '100%';
+          renderM2();
+          stopM2Play();
+          return;
+        }
+        const pct = Math.round(m2State.progress * 100);
+        document.getElementById('m2-slider').value = pct;
+        document.getElementById('m2-pct').textContent = `${pct}%`;
+        renderM2();
+        m2State.raf = requestAnimationFrame(tick);
+      };
+      m2State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM2Play() {
+      m2State.playing = false;
+      if (m2State.raf) cancelAnimationFrame(m2State.raf);
+      document.getElementById('m2-play-btn').textContent = '▶ 重播動畫';
+    }
+
+    function toggleM2Play() {
+      if (m2State.playing) stopM2Play();
+      else {
+        if (m2State.progress >= 0.99) m2State.progress = 0;
+        startM2Play();
+      }
+    }
+
+    function renderM2() {
+      const canvas = document.getElementById('canvasM2');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const theme = m2Themes[m2State.color];
+      const showNotes = document.getElementById('m2-show-notes').checked;
+      const pad = size * 0.13;
+      const sq = size - pad * 2;
+      const toPx = (pt) => ({ x: pad + (pt.x / 2) * sq, y: size - pad - (pt.y / 2) * sq });
+
+      const tan15 = Math.tan(15 * Math.PI / 180);
+      const sqrt3 = Math.sqrt(3);
+
+      const A = { x: 0, y: 0 };
+      const D = { x: 2, y: 0 };
+      const E = { x: 2, y: 2 };
+      const B_orig = { x: 0, y: 2 };
+      const C_mid = { x: 1, y: 0 };
+      const T_mid = { x: 1, y: 2 };
+      const L_mid = { x: 0, y: 1 };
+      const R_mid = { x: 2, y: 1 };
+      const P_pt = { x: 1, y: sqrt3 };
+      const Q_pt = { x: sqrt3, y: 1 };
+      const C_tri = { x: 2 * tan15, y: 2 };
+      const B_tri = { x: 2, y: 2 * tan15 };
+
+      const prog = m2State.progress;
+
+      if (m2State.step === 1) {
+        if (prog <= 0.5) {
+          const foldAmt = Math.sin(prog * 2 * Math.PI) * 0.85;
+          drawPoly(ctx, toPx, [A, D, E, B_orig], theme.front, theme.border, 1.8);
+          drawDashed(ctx, toPx, C_mid, T_mid, '#334155', [5, 4], 1.6);
+          if (foldAmt > 0.02) {
+            const Df = foldInterpolate(D, C_mid, T_mid, foldAmt);
+            const Ef = foldInterpolate(E, C_mid, T_mid, foldAmt);
+            drawPoly(ctx, toPx, [C_mid, Df, Ef, T_mid], theme.back, theme.border, 1.5, true);
+          }
+        } else {
+          const foldAmt = Math.sin((prog - 0.5) * 2 * Math.PI) * 0.85;
+          drawPoly(ctx, toPx, [A, D, E, B_orig], theme.front, theme.border, 1.8);
+          drawDashed(ctx, toPx, C_mid, T_mid, '#334155', [5, 4], 1.6);
+          drawDashed(ctx, toPx, L_mid, R_mid, '#334155', [5, 4], 1.6);
+          if (foldAmt > 0.02) {
+            const Ef = foldInterpolate(E, L_mid, R_mid, foldAmt);
+            const Bf = foldInterpolate(B_orig, L_mid, R_mid, foldAmt);
+            drawPoly(ctx, toPx, [L_mid, R_mid, Ef, Bf], theme.back, theme.border, 1.5, true);
+          }
+        }
+      } else if (m2State.step === 2) {
+        drawPoly(ctx, toPx, [A, D, E, C_tri], theme.front, theme.border, 1.8);
+        drawDashed(ctx, toPx, C_mid, T_mid, '#64748b', [4, 4], 1.3);
+        drawDashed(ctx, toPx, L_mid, R_mid, '#94a3b8', [4, 4], 1.1);
+        const Bf = foldInterpolate(B_orig, A, C_tri, prog);
+        drawPoly(ctx, toPx, [A, C_tri, Bf], prog > 0.5 ? theme.back : theme.front, theme.border, 1.6, prog > 0.05);
+        drawDashed(ctx, toPx, A, C_tri, '#334155', [4, 3], 1.5);
+      } else if (m2State.step === 3) {
+        drawPoly(ctx, toPx, [A, B_tri, E, B_orig], theme.front, theme.border, 1.8);
+        drawDashed(ctx, toPx, C_mid, T_mid, '#64748b', [4, 4], 1.3);
+        drawDashed(ctx, toPx, L_mid, R_mid, '#64748b', [4, 4], 1.3);
+        drawDashed(ctx, toPx, A, C_tri, '#475569', [4, 4], 1.5);
+        const Df = foldInterpolate(D, A, B_tri, prog);
+        drawPoly(ctx, toPx, [A, Df, B_tri], prog > 0.5 ? theme.back : theme.front, theme.border, 1.6, prog > 0.05);
+        drawDashed(ctx, toPx, A, B_tri, '#334155', [4, 3], 1.5);
+      } else if (m2State.step === 4) {
+        const p1 = Math.min(1, prog * 2);
+        const p2 = Math.max(0, (prog - 0.5) * 2);
+        const Ef = foldInterpolate(E, C_tri, B_tri, p2);
+        drawPoly(ctx, toPx, [A, B_tri, C_tri], theme.front, theme.border, 1.8);
+        if (p2 < 0.98) {
+          drawPoly(ctx, toPx, [C_tri, B_tri, Ef], p2 > 0.5 ? theme.back : theme.front, theme.border, 1.5);
+        }
+        const Bf = foldInterpolate(B_orig, A, C_tri, p1);
+        drawPoly(ctx, toPx, [A, C_tri, Bf], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.6, true);
+        const Df = foldInterpolate(D, A, B_tri, p1);
+        drawPoly(ctx, toPx, [A, Df, B_tri], p1 > 0.5 ? theme.back : theme.front, theme.border, 1.6, true);
+        if (prog > 0.85) {
+          drawPoly(ctx, toPx, [A, B_tri, C_tri], null, '#e11d48', 2.6);
+        }
+      }
+
+      if (showNotes) {
+        ctx.save();
+        ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
+        const pA = toPx(A);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText('A', pA.x - 15, pA.y + 14);
+
+        if (m2State.step === 1) {
+          const pC = toPx(C_mid);
+          ctx.fillText('C', pC.x - 4, pC.y + 16);
+          ctx.fillText('1', (pA.x + pC.x) / 2 - 4, pA.y + 16);
+          ctx.fillText('1', (pC.x + toPx(D).x) / 2 - 4, pA.y + 16);
+        } else if (m2State.step === 2) {
+          drawDashed(ctx, toPx, A, P_pt, '#e11d48', [4, 3], 1.7);
+          const pP = toPx(P_pt), pC = toPx(C_mid);
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(pC.x - 9, pC.y - 9, 9, 9);
+          ctx.beginPath();
+          ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#e11d48';
+          ctx.fill();
+          ctx.fillText('P', pP.x + 7, pP.y + 4);
+          ctx.fillStyle = '#0f172a';
+          ctx.fillText('1', (pA.x + pC.x) / 2 - 4, pA.y + 16);
+          ctx.fillText('√3', pP.x + 6, (pP.y + pC.y) / 2 + 6);
+          ctx.fillText('2', (pA.x + pP.x) / 2 + 6, (pA.y + pP.y) / 2 + 6);
+          ctx.fillStyle = '#4f46e5';
+          ctx.fillText('60°', pA.x + 28, pA.y - 12);
+          ctx.fillStyle = '#e11d48';
+          ctx.fillText('15°', pA.x + 16, pA.y - 38);
+          ctx.fillText('15°', pA.x + 3, pA.y - 54);
+        } else if (m2State.step === 3) {
+          drawDashed(ctx, toPx, A, Q_pt, '#e11d48', [4, 3], 1.7);
+          const pQ = toPx(Q_pt);
+          ctx.beginPath();
+          ctx.arc(pQ.x, pQ.y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#e11d48';
+          ctx.fill();
+          ctx.fillText('Q', pQ.x + 6, pQ.y - 6);
+          ctx.fillStyle = '#4f46e5';
+          ctx.fillText('60°', pA.x + 34, pA.y - 32);
+          ctx.fillStyle = '#e11d48';
+          ctx.fillText('α=15°', pA.x + 44, pA.y - 8);
+        } else if (m2State.step === 4) {
+          const pB = toPx(B_tri), pC = toPx(C_tri);
+          ctx.fillStyle = '#e11d48';
+          ctx.fillText('B', pB.x + 7, pB.y + 5);
+          ctx.fillText('C', pC.x - 4, pC.y - 7);
+          ctx.fillText('60°', pA.x + 24, pA.y - 22);
+          ctx.fillText('60°', pB.x - 34, pB.y + 4);
+          ctx.fillText('60°', pC.x - 4, pC.y + 26);
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 5. 分頁 3：方法一 vs 方法二 比較探索器 ==================== */
+    function renderCmp1() {
+      const canvas = document.getElementById('canvasCmp1');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(200, Math.floor(rect.width - 12));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const pad = size * 0.14;
+      const sq = size - pad * 2;
+      const toPx = (x, y) => ({ x: pad + (x / 2) * sq, y: size - pad - (y / 2) * sq });
+
+      const p00 = toPx(0, 0), p20 = toPx(2, 0), p22 = toPx(2, 2), p02 = toPx(0, 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(p02.x, p02.y, sq, sq);
+
+      // 垂直中線
+      const p10 = toPx(1, 0), p12 = toPx(1, 2);
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.moveTo(p10.x, p10.y);
+      ctx.lineTo(p12.x, p12.y);
+      ctx.stroke();
+      ctx.restore();
+
+      // 正 △PAB
+      const pP = toPx(1, Math.sqrt(3));
+      ctx.beginPath();
+      ctx.moveTo(p00.x, p00.y);
+      ctx.lineTo(p20.x, p20.y);
+      ctx.lineTo(pP.x, pP.y);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(217, 119, 6, 0.18)';
+      ctx.fill();
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.3;
+      ctx.stroke();
+
+      ctx.font = 'bold 12px -apple-system, sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('A', p00.x - 14, p00.y + 12);
+      ctx.fillText('B', p20.x + 5, p20.y + 12);
+      ctx.fillStyle = '#d97706';
+      ctx.fillText('P', pP.x + 6, pP.y + 4);
+      ctx.fillText('邊長 = 2', (p00.x + p20.x) / 2 - 22, p00.y + 15);
+      ctx.restore();
+    }
+
+    function updateCmpExplorer(val) {
+      const theta = parseFloat(val);
+      const rad = theta * Math.PI / 180;
+      const alpha = 30 - theta;
+      const alphaRad = alpha * Math.PI / 180;
+      const cosT = Math.cos(rad);
+      const sideX = 2 / cosT;
+      const area = Math.sqrt(3) / (cosT * cosT);
+      const ratio = (area / 4) * 100;
+
+      const badge = document.getElementById('cmp-theta-badge');
+      if (theta === 15) {
+        badge.textContent = '15.0°（★ 最大極值）';
+        badge.style.color = '#059669';
+      } else if (theta > 15) {
+        badge.textContent = `${theta.toFixed(1)}°（⚠ α=${alpha.toFixed(1)}°<15° 超出上邊界）`;
+        badge.style.color = '#e11d48';
+      } else {
+        badge.textContent = `${theta.toFixed(1)}°（α = ${alpha.toFixed(1)}°）`;
+        badge.style.color = '#4f46e5';
+      }
+
+      document.getElementById('cmp-side-val').textContent = sideX.toFixed(3);
+      document.getElementById('cmp-area-val').textContent = area.toFixed(3);
+      document.getElementById('cmp-ratio-val').textContent = `${ratio.toFixed(2)}%`;
+
+      // 繪製右側動態畫布
+      const canvas = document.getElementById('canvasCmp2');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(200, Math.floor(rect.width - 12));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const pad = size * 0.14;
+      const sq = size - pad * 2;
+      const toPx = (x, y) => ({ x: pad + (x / 2) * sq, y: size - pad - (y / 2) * sq });
+
+      const p00 = toPx(0, 0), p02 = toPx(0, 2);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(p02.x, p02.y, sq, sq);
+
+      // 頂點 B(2, 2*tan(theta))，頂點 C 由 A(0,0) 逆時針旋轉 60° 得到：
+      // C_x = x * sin(alpha), C_y = x * cos(alpha)
+      const Bx = 2;
+      const By = 2 * Math.tan(rad);
+      const Cx = sideX * Math.sin(alphaRad);
+      const Cy = sideX * Math.cos(alphaRad);
+
+      const pA = toPx(0, 0);
+      const pB = toPx(Bx, By);
+      const pC = toPx(Cx, Cy);
+
+      ctx.beginPath();
+      ctx.moveTo(pA.x, pA.y);
+      ctx.lineTo(pB.x, pB.y);
+      ctx.lineTo(pC.x, pC.y);
+      ctx.closePath();
+
+      if (theta > 15) {
+        ctx.fillStyle = 'rgba(225, 29, 72, 0.16)';
+        ctx.strokeStyle = '#e11d48';
+      } else if (theta === 15) {
+        ctx.fillStyle = 'rgba(5, 150, 105, 0.18)';
+        ctx.strokeStyle = '#059669';
+      } else {
+        ctx.fillStyle = 'rgba(79, 70, 229, 0.15)';
+        ctx.strokeStyle = '#4f46e5';
+      }
+      ctx.lineWidth = 2.3;
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = 'bold 12px -apple-system, sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('A', pA.x - 14, pA.y + 12);
+      ctx.fillText('B', pB.x + 5, pB.y + 4);
+      ctx.fillText('C', pC.x - 4, pC.y - 6);
+      ctx.fillStyle = '#e11d48';
+      ctx.fillText(`θ=${theta}°`, pA.x + 36, pA.y - 4);
+      ctx.fillText(`α=${alpha}°`, pA.x + 3, pA.y - 38);
+      ctx.restore();
+    }
+
+    /* ==================== 6. 分頁 4：學習單批改、Web Audio 音效與慶祝彩帶 ==================== */
+    function playTone(type) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        if (type === 'win') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);       // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          osc.frequency.setValueAtTime(1046.5, now + 0.3); // C6
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+          osc.start(now);
+          osc.stop(now + 0.55);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        }
+      } catch (e) {}
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#4f46e5', '#e11d48', '#059669', '#d97706', '#0284c7'];
+      const particles = Array.from({ length: 85 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.4,
+        w: 7 + Math.random() * 6,
+        h: 4 + Math.random() * 5,
+        vy: 3 + Math.random() * 4,
+        vx: -2 + Math.random() * 4,
+        rot: Math.random() * 360,
+        vRot: -6 + Math.random() * 12,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      }));
+
+      let frames = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vRot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 115) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      requestAnimationFrame(draw);
+    }
+
+    let lastFocusedBlank = null;
+
+    function normalizeWsAnswer(raw) {
+      if (!raw) return '';
+      // 全形轉半形並移除空白與常見單位符號
+      let s = raw.replace(/[\uff01-\uff5e]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
+      s = s.trim().replace(/\s+/g, '').replace(/[°度%]/g, '').toLowerCase();
+      if (s === 'sqrt(3)' || s === 'sqrt3' || s === '根號3') return '√3';
+      return s;
+    }
+
+    function insertSqrtSymbol() {
+      let target = lastFocusedBlank;
+      if (!target) {
+        const blanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
+        target = blanks.find((b) => (b.getAttribute('data-ans') || '').includes('√') && !b.value.trim()) || blanks[0];
+      }
+      if (!target) return;
+      const start = target.selectionStart ?? target.value.length;
+      const end = target.selectionEnd ?? target.value.length;
+      target.value = target.value.slice(0, start) + '√' + target.value.slice(end);
+      target.focus();
+      target.setSelectionRange(start + 1, start + 1);
+      saveWorksheetProgress();
+    }
+
+    function gradeWorksheet() {
+      const blanks = document.querySelectorAll('#worksheet-root input.blank');
+      let correct = 0;
+      blanks.forEach((inp) => {
+        const val = normalizeWsAnswer(inp.value);
+        const ans = normalizeWsAnswer(inp.getAttribute('data-ans'));
+        const alt = normalizeWsAnswer(inp.getAttribute('data-alt'));
+        inp.classList.remove('correct', 'wrong');
+        if (val === ans || (alt && val === alt)) {
+          correct++;
+          inp.classList.add('correct');
+        } else {
+          inp.classList.add('wrong');
+        }
+      });
+
+      const banner = document.getElementById('grade-banner');
+      banner.style.display = 'block';
+      if (correct === blanks.length) {
+        banner.style.background = '#ecfdf5';
+        banner.style.color = '#065f46';
+        banner.style.border = '1.5px solid #6ee7b7';
+        banner.textContent = `🎉 恭喜全對！全部 ${blanks.length} 格完全正確，你已徹底精通兩種正方形摺正三角形的原理！`;
+        playTone('win');
+        launchConfetti();
+      } else {
+        banner.style.background = '#fff1f2';
+        banner.style.color = '#9f1239';
+        banner.style.border = '1.5px solid #fda4af';
+        banner.textContent = `📝 目前答對 ${correct} / ${blanks.length} 格（紅底空格請再思考看看，或點擊「💡 小提示」與「顯示/隱藏解答」對照）。`;
+        playTone('check');
+      }
+    }
+
+    function toggleAnswerKey() {
+      document.getElementById('worksheet-root').classList.toggle('show-ans');
+    }
+
+    function toggleQuizMode() {
+      const root = document.getElementById('worksheet-root');
+      const btn = document.getElementById('ws-quiz-btn');
+      const isQuiz = root.classList.toggle('quiz-mode');
+      btn.classList.toggle('active-toggle', isQuiz);
+      btn.textContent = isQuiz ? '📝 測驗模式（已隱藏圖示提示）' : '📝 測驗模式';
+    }
+
+    function toggleHint(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('open');
+    }
+
+    function saveWorksheetProgress() {
+      try {
+        const blanks = Array.from(document.querySelectorAll('#worksheet-root input.blank')).map((b) => b.value);
+        const data = {
+          cls: document.getElementById('ws-meta-class')?.value || '',
+          seat: document.getElementById('ws-meta-seat')?.value || '',
+          name: document.getElementById('ws-meta-name')?.value || '',
+          blanks
+        };
+        localStorage.setItem('origami_ws_v1', JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function loadWorksheetProgress() {
+      try {
+        const raw = localStorage.getItem('origami_ws_v1');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (document.getElementById('ws-meta-class')) document.getElementById('ws-meta-class').value = data.cls || '';
+        if (document.getElementById('ws-meta-seat')) document.getElementById('ws-meta-seat').value = data.seat || '';
+        if (document.getElementById('ws-meta-name')) document.getElementById('ws-meta-name').value = data.name || '';
+        const blanks = document.querySelectorAll('#worksheet-root input.blank');
+        if (Array.isArray(data.blanks)) {
+          blanks.forEach((inp, i) => {
+            if (typeof data.blanks[i] === 'string') inp.value = data.blanks[i];
+          });
+        }
+      } catch (e) {}
+    }
+
+    function resetWorksheet() {
+      const blanks = document.querySelectorAll('#worksheet-root input.blank');
+      blanks.forEach((inp) => {
+        inp.value = '';
+        inp.classList.remove('correct', 'wrong');
+      });
+      document.getElementById('worksheet-root').classList.remove('show-ans');
+      document.getElementById('grade-banner').style.display = 'none';
+      saveWorksheetProgress();
+    }
+
+    /* ==================== 6.5 探究三：互動手繪摺痕畫板 ==================== */
+    const sketchPads = {
+      A: { mode: 'dash', drawing: false },
+      B: { mode: 'dash', drawing: false }
+    };
+
+    function drawSketchBase(key) {
+      const canvas = document.getElementById(`sketchCanvas${key}`);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 20, 130, 130);
+      ctx.font = 'bold 13px -apple-system, sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('A', 7, 158);
+      if (key === 'A') ctx.fillText('B', 154, 158);
+    }
+
+    function setSketchMode(key, mode, btn) {
+      sketchPads[key].mode = mode;
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.sketch-tool-btn[data-mode]').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function clearSketch(key) {
+      drawSketchBase(key);
+    }
+
+    function drawSketchAnswer(key) {
+      drawSketchBase(key);
+      const canvas = document.getElementById(`sketchCanvas${key}`);
+      const ctx = canvas.getContext('2d');
+      const x0 = 20, y0 = 20, s = 130;
+      ctx.save();
+      if (key === 'A') {
+        const cx = x0 + s / 2, py = y0 + s - (s * Math.sqrt(3)) / 2;
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(cx, y0);
+        ctx.lineTo(cx, y0 + s);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#e11d48';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 + s);
+        ctx.lineTo(x0 + s, y0 + s);
+        ctx.lineTo(cx, py);
+        ctx.closePath();
+        ctx.stroke();
+      } else {
+        const tan15 = Math.tan((15 * Math.PI) / 180);
+        const bx = x0 + s, by = y0 + s * (1 - tan15);
+        const cx = x0 + s * tan15, cy = y0;
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(x0 + s / 2, y0);
+        ctx.lineTo(x0 + s / 2, y0 + s);
+        ctx.moveTo(x0, y0 + s / 2);
+        ctx.lineTo(x0 + s, y0 + s / 2);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#e11d48';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 + s);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(cx, cy);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function initSketchPads() {
+      ['A', 'B'].forEach((key) => {
+        drawSketchBase(key);
+        const canvas = document.getElementById(`sketchCanvas${key}`);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const getPos = (e) => {
+          const rect = canvas.getBoundingClientRect();
+          return {
+            x: ((e.clientX - rect.left) / rect.width) * canvas.width,
+            y: ((e.clientY - rect.top) / rect.height) * canvas.height
+          };
+        };
+        canvas.addEventListener('pointerdown', (e) => {
+          sketchPads[key].drawing = true;
+          canvas.setPointerCapture(e.pointerId);
+          const p = getPos(e);
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          if (sketchPads[key].mode === 'dash') {
+            ctx.setLineDash([5, 4]);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.8;
+          } else {
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#e11d48';
+            ctx.lineWidth = 2.4;
+          }
+        });
+        canvas.addEventListener('pointermove', (e) => {
+          if (!sketchPads[key].drawing) return;
+          const p = getPos(e);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        });
+        const stopDraw = () => { sketchPads[key].drawing = false; };
+        canvas.addEventListener('pointerup', stopDraw);
+        canvas.addEventListener('pointercancel', stopDraw);
+      });
+    }
+
+    /* ==================== 7. 視窗縮放與頁面初始化 ==================== */
+    window.addEventListener('resize', () => {
+      renderM1();
+      renderM2();
+      renderCmp1();
+      updateCmpExplorer(document.getElementById('cmp-theta-slider').value);
+    });
+
+    window.onload = function () {
+      updateM1UI();
+      renderM1();
+      updateM2UI();
+      renderM2();
+      renderCmp1();
+      updateCmpExplorer(15);
+      initSketchPads();
+      loadWorksheetProgress();
+      document.querySelectorAll('#worksheet-root input').forEach((inp) => {
+        if (inp.classList.contains('blank')) {
+          inp.addEventListener('focus', () => { lastFocusedBlank = inp; });
+        }
+        inp.addEventListener('input', saveWorksheetProgress);
+      });
+    };
+  </script>
+</body>
+</html>
