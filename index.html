@@ -899,6 +899,21 @@
       background: #e0e7ff;
     }
 
+    .ws-progress-pill {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .ws-progress-pill.complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
     .ws-sec-head {
       display: flex;
       flex-wrap: wrap;
@@ -1149,8 +1164,8 @@
     }
 
     .sketch-canvas {
-      width: 170px;
-      height: 170px;
+      width: 196px;
+      height: 196px;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
       background: #ffffff;
@@ -1539,11 +1554,14 @@
             </div>
 
             <div class="theta-control-card">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px;flex-wrap:wrap;">
                 <span style="font-size:0.78rem;font-weight:800;">底邊偏轉角 <span class="math">θ</span>：</span>
-                <span id="cmp-theta-badge" style="font-size:0.84rem;font-weight:900;color:#4f46e5;font-family:monospace;">15.0°（★ 最大極值）</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span id="cmp-theta-badge" style="font-size:0.84rem;font-weight:900;color:#4f46e5;font-family:monospace;">15.0°（★ 最大極值）</span>
+                  <button id="cmp-play-btn" type="button" class="sketch-tool-btn" onclick="toggleCmpPlay()" style="padding:3px 8px;">▶ 自動播放</button>
+                </div>
               </div>
-              <input id="cmp-theta-slider" type="range" min="0" max="18" step="0.5" value="15" oninput="updateCmpExplorer(this.value)" />
+              <input id="cmp-theta-slider" type="range" min="0" max="18" step="0.1" value="15" oninput="onCmpSliderInput(this.value)" />
               <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#64748b;margin-top:3px;">
                 <span>0° (同方法一)</span>
                 <span style="color:#059669;font-weight:800;">15° (對稱極值)</span>
@@ -1634,8 +1652,9 @@
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span>⌨️ 輸入小幫手：</span>
             <button type="button" class="ws-sqrt-btn" onmousedown="event.preventDefault()" onclick="insertSqrtSymbol()">＋ 插入 √ 符號</button>
-            <span style="color:#64748b;">（亦支援輸入 <code>sqrt3</code> 或 <code>根號3</code>，系統自動容錯與暫存填答）</span>
+            <span style="color:#64748b;">（支援 <code>sqrt3</code> / <code>根號3</code>，按 <code>Enter</code> 跳下一格）</span>
           </div>
+          <span id="ws-progress-pill" class="ws-progress-pill">填答進度：0 / 10 格</span>
         </div>
 
         <div class="ws-header">
@@ -1765,20 +1784,24 @@
           <div class="sketch-grid">
             <div class="sketch-box">
               <p>【練習框 A】方法一：底邊正 <span class="math">△PAB</span></p>
-              <canvas id="sketchCanvasA" class="sketch-canvas" width="170" height="170"></canvas>
+              <canvas id="sketchCanvasA" class="sketch-canvas" width="196" height="196"></canvas>
               <div class="sketch-tools">
                 <button type="button" class="sketch-tool-btn active" data-pad="A" data-mode="dash" onclick="setSketchMode('A','dash',this)">摺痕虛線</button>
                 <button type="button" class="sketch-tool-btn" data-pad="A" data-mode="solid" onclick="setSketchMode('A','solid',this)">正△紅線</button>
+                <button type="button" class="sketch-tool-btn active" data-pad="A" data-tool="line" onclick="toggleSketchTool('A',this)">📏 直線</button>
+                <button type="button" class="sketch-tool-btn" onclick="undoSketch('A')">↩ 復原</button>
                 <button type="button" class="sketch-tool-btn" onclick="clearSketch('A')">清除</button>
                 <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('A')">參考圖</button>
               </div>
             </div>
             <div class="sketch-box">
               <p>【練習框 B】方法二：斜擺 <span class="math">15°</span> 最大正 <span class="math">△ABC</span></p>
-              <canvas id="sketchCanvasB" class="sketch-canvas" width="170" height="170"></canvas>
+              <canvas id="sketchCanvasB" class="sketch-canvas" width="196" height="196"></canvas>
               <div class="sketch-tools">
                 <button type="button" class="sketch-tool-btn active" data-pad="B" data-mode="dash" onclick="setSketchMode('B','dash',this)">摺痕虛線</button>
                 <button type="button" class="sketch-tool-btn" data-pad="B" data-mode="solid" onclick="setSketchMode('B','solid',this)">正△紅線</button>
+                <button type="button" class="sketch-tool-btn active" data-pad="B" data-tool="line" onclick="toggleSketchTool('B',this)">📏 直線</button>
+                <button type="button" class="sketch-tool-btn" onclick="undoSketch('B')">↩ 復原</button>
                 <button type="button" class="sketch-tool-btn" onclick="clearSketch('B')">清除</button>
                 <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('B')">參考圖</button>
               </div>
@@ -1811,21 +1834,33 @@
           panel.classList.remove('active');
         }
       }
-      if (idx === 1) renderM1();
-      if (idx === 2) renderM2();
-      if (idx === 3) {
+      if (idx === 1) {
+        stopM2Play();
+        stopCmpPlay();
+        selectM1Step(1, true, true);
+      } else if (idx === 2) {
+        stopM1Play();
+        stopCmpPlay();
+        selectM2Step(1, true, true);
+      } else if (idx === 3) {
+        stopM1Play();
+        stopM2Play();
         renderCmp1();
-        updateCmpExplorer(document.getElementById('cmp-theta-slider').value);
+        startCmpPlay(true);
+      } else {
+        stopM1Play();
+        stopM2Play();
+        stopCmpPlay();
       }
     }
 
     /* ==================== 2. 3D 幾何摺紙引擎與透視相機 ==================== */
-    const m1Cam = { yaw: -0.34, pitch: 0.56 };
-    const m2Cam = { yaw: -0.34, pitch: 0.56 };
+    const m1Cam = { yaw: 0, pitch: 0.56 };
+    const m2Cam = { yaw: 0, pitch: 0.56 };
 
     function resetCam(which) {
       const cam = which === 'm1' ? m1Cam : m2Cam;
-      cam.yaw = -0.34;
+      cam.yaw = 0;
       cam.pitch = 0.56;
       if (which === 'm1') renderM1();
       else renderM2();
@@ -1934,7 +1969,7 @@
       const faces = [];
       const light = { x: 0.36, y: 0.52, z: 0.77 };
 
-      function addPoly(pts, frontColor, backColor, stroke, lineWidth = 1.6, zBias = 0, castShadow = false) {
+      function addPoly(pts, frontColor, backColor, stroke, lineWidth = 1.6, zBias = 0, castShadow = false, lineDash = null) {
         const camPts = pts.map((pt) => camera.toCam(pt));
         const screenPts = pts.map((pt) => camera.project(pt));
 
@@ -1982,11 +2017,12 @@
             zBias: -100,
             fill: 'rgba(15, 23, 42, 0.13)',
             stroke: null,
-            lineWidth: 0
+            lineWidth: 0,
+            lineDash: null
           });
         }
 
-        faces.push({ screenPts, avgZ, zBias, fill, stroke, lineWidth });
+        faces.push({ screenPts, avgZ, zBias, fill, stroke, lineWidth, lineDash });
       }
 
       function flush(ctx) {
@@ -2004,6 +2040,7 @@
             ctx.fill();
           }
           if (f.stroke) {
+            if (f.lineDash) ctx.setLineDash(f.lineDash);
             ctx.strokeStyle = f.stroke;
             ctx.lineWidth = f.lineWidth;
             ctx.lineJoin = 'round';
@@ -2076,7 +2113,7 @@
       }
     };
 
-    const m1State = { step: 1, progress: 1, playing: false, raf: null, color: 'orange' };
+    const m1State = { step: 1, progress: 1, playing: false, raf: null, color: 'orange', autoChain: false, chainTimer: null };
 
     function setM1Color(val) {
       m1State.color = val;
@@ -2096,9 +2133,10 @@
       }
     }
 
-    function selectM1Step(step, autoPlay = true) {
+    function selectM1Step(step, autoPlay = true, autoChain = false) {
       stopM1Play();
       m1State.step = step;
+      m1State.autoChain = autoChain;
       // 自動切換對應色紙顏色以呼應手寫筆記（可隨時手動覆蓋）
       if (step === 1) setM1Color('orange');
       else if (step === 2) setM1Color('yellow');
@@ -2136,13 +2174,18 @@
 
       const tick = () => {
         if (!m1State.playing) return;
-        m1State.progress += 0.016;
+        m1State.progress += 0.0055;
         if (m1State.progress >= 1) {
           m1State.progress = 1;
           document.getElementById('m1-slider').value = 100;
           document.getElementById('m1-pct').textContent = '100%';
           renderM1();
+          const shouldChain = m1State.autoChain && m1State.step < 4;
+          const nextStep = m1State.step + 1;
           stopM1Play();
+          if (shouldChain) {
+            m1State.chainTimer = setTimeout(() => selectM1Step(nextStep, true, true), 650);
+          }
           return;
         }
         const pct = Math.round(m1State.progress * 100);
@@ -2156,6 +2199,11 @@
 
     function stopM1Play() {
       m1State.playing = false;
+      m1State.autoChain = false;
+      if (m1State.chainTimer) {
+        clearTimeout(m1State.chainTimer);
+        m1State.chainTimer = null;
+      }
       if (m1State.raf) cancelAnimationFrame(m1State.raf);
       document.getElementById('m1-play-btn').textContent = '▶ 重播動畫';
     }
@@ -2218,18 +2266,36 @@
         const A_f = fold3D(A, B, L_fold, prog, 'front');
         scene.addPoly([B, L_fold, A_f], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
       } else if (m1State.step === 3) {
-        const p1 = Math.min(1, prog * 1.35);
-        const p2 = Math.max(0, (prog - 0.25) / 0.75);
-        const TL_f = fold3D(TL, A, P, p1, 'back');
-        const TR_f = fold3D(TR, B, P, p1, 'back');
-        scene.addPoly([A, P, TL_f], theme.front, theme.back, theme.border, 1.4, -3, false);
-        scene.addPoly([B, TR_f, P], theme.front, theme.back, theme.border, 1.4, -3, false);
-        scene.addPoly([A, B, P], theme.front, theme.back, '#e11d48', 2.4, 2, false);
-        if (p2 > 0.02) {
-          const flapL = fold3D(L_fold, A, P, p2 * 0.96, 'front');
-          const flapR = fold3D(R_fold, B, P, p2 * 0.96, 'front');
-          scene.addPoly([A, P, flapL], theme.front, theme.back, theme.border, 1.3, 6, true);
-          scene.addPoly([B, flapR, P], theme.front, theme.back, theme.border, 1.3, 6, true);
+        if (prog <= 0.45) {
+          // 階段 1 (0% ~ 45%)：對稱鏡像示範 —— 固定 A，將右下角 B 沿 A-R_fold 摺向 P 再展開，壓出對稱摺痕 PA
+          const pSym = Math.sin((prog / 0.45) * Math.PI);
+          scene.addPoly([A, R_fold, TR, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
+          if (pSym > 0.01) {
+            const B_f = fold3D(B, A, R_fold, pSym, 'front');
+            scene.addPoly([A, B_f, R_fold], theme.front, theme.back, theme.border, 1.6, 5, true);
+          } else {
+            scene.addPoly([A, B, R_fold], theme.front, theme.back, theme.border, 1.8, 0, false);
+          }
+        } else {
+          // 階段 2 (45% ~ 100%)：沿 PA、PB 將左右與上方多餘紙翼對稱向後折，向後折部分全改為透明虛線
+          const pTuck = Math.min(1, (prog - 0.45) / 0.55);
+          const backAmt = pTuck * 0.38;
+          const TL_f = fold3D(TL, A, P, backAmt, 'back');
+          const T_mid_L = fold3D(T_mid, A, P, backAmt, 'back');
+          const TR_f = fold3D(TR, B, P, backAmt, 'back');
+          const T_mid_R = fold3D(T_mid, B, P, backAmt, 'back');
+          const isBack = pTuck > 0.04;
+          const backFillF = isBack ? null : theme.front;
+          const backFillB = isBack ? null : theme.back;
+          const backStroke = isBack ? 'rgba(100, 116, 139, 0.8)' : theme.border;
+          const backDash = isBack ? [5, 4] : null;
+
+          // 左側與右側多餘紙翼（單一平面四邊形，無多餘對角線，向後折時為完全透明虛線）
+          scene.addPoly([A, P, T_mid_L, TL_f], backFillF, backFillB, backStroke, 1.4, -4, false, backDash);
+          scene.addPoly([B, TR_f, T_mid_R, P], backFillF, backFillB, backStroke, 1.4, -4, false, backDash);
+
+          // 中央正 △PAB 主體（固定於最前方，外框隨收摺完成高亮）
+          scene.addPoly([A, B, P], theme.front, theme.back, pTuck > 0.85 ? '#e11d48' : theme.border, pTuck > 0.85 ? 2.4 : 1.8, 3, false);
         }
       } else if (m1State.step === 4) {
         scene.addPoly([A, B, TR, TL], '#fffbeb', '#f8fafc', '#94a3b8', 1.6, 0, false);
@@ -2244,6 +2310,14 @@
       } else if (m1State.step === 2) {
         drawDashed3D(ctx, camera, C, T_mid, '#64748b', [4, 4], 1.3);
         drawDashed3D(ctx, camera, B, L_fold, '#334155', [4, 3], 1.5);
+      } else if (m1State.step === 3) {
+        if (prog <= 0.45) {
+          drawDashed3D(ctx, camera, C, T_mid, '#64748b', [4, 4], 1.2);
+          drawDashed3D(ctx, camera, A, R_fold, '#334155', [4, 3], 1.5);
+        } else if (prog < 0.96) {
+          drawDashed3D(ctx, camera, A, P, '#e11d48', [4, 3], 1.5);
+          drawDashed3D(ctx, camera, B, P, '#e11d48', [4, 3], 1.5);
+        }
       } else if (m1State.step === 4) {
         drawDashed3D(ctx, camera, C, T_mid, '#475569', [4, 4], 1.5, 0.02);
       }
@@ -2314,7 +2388,7 @@
       }
     };
 
-    const m2State = { step: 1, progress: 1, playing: false, raf: null, color: 'amber' };
+    const m2State = { step: 1, progress: 1, playing: false, raf: null, color: 'amber', autoChain: false, chainTimer: null };
 
     function setM2Color(val) {
       m2State.color = val;
@@ -2334,9 +2408,10 @@
       }
     }
 
-    function selectM2Step(step, autoPlay = true) {
+    function selectM2Step(step, autoPlay = true, autoChain = false) {
       stopM2Play();
       m2State.step = step;
+      m2State.autoChain = autoChain;
       if (step === 1) setM2Color('amber');
       else if (step === 2 || step === 3) setM2Color('pink');
       else if (step === 4) setM2Color('violet');
@@ -2373,13 +2448,18 @@
 
       const tick = () => {
         if (!m2State.playing) return;
-        m2State.progress += 0.016;
+        m2State.progress += 0.0055;
         if (m2State.progress >= 1) {
           m2State.progress = 1;
           document.getElementById('m2-slider').value = 100;
           document.getElementById('m2-pct').textContent = '100%';
           renderM2();
+          const shouldChain = m2State.autoChain && m2State.step < 4;
+          const nextStep = m2State.step + 1;
           stopM2Play();
+          if (shouldChain) {
+            m2State.chainTimer = setTimeout(() => selectM2Step(nextStep, true, true), 650);
+          }
           return;
         }
         const pct = Math.round(m2State.progress * 100);
@@ -2393,6 +2473,11 @@
 
     function stopM2Play() {
       m2State.playing = false;
+      m2State.autoChain = false;
+      if (m2State.chainTimer) {
+        clearTimeout(m2State.chainTimer);
+        m2State.chainTimer = null;
+      }
       if (m2State.raf) cancelAnimationFrame(m2State.raf);
       document.getElementById('m2-play-btn').textContent = '▶ 重播動畫';
     }
@@ -2477,13 +2562,27 @@
       } else if (m2State.step === 4) {
         const p1 = Math.min(1, prog * 2);
         const p2 = Math.max(0, (prog - 0.5) * 2);
-        const Ef = fold3D(E, C_tri, B_tri, p2, 'back');
-        scene.addPoly([C_tri, B_tri, Ef], theme.front, theme.back, theme.border, 1.4, -3, false);
-        scene.addPoly([A, B_tri, C_tri], theme.front, theme.back, prog > 0.85 ? '#e11d48' : theme.border, prog > 0.85 ? 2.5 : 1.8, 1, false);
-        const Bf = fold3D(B_orig, A, C_tri, p1, 'front');
-        const Df = fold3D(D, A, B_tri, p1, 'front');
-        scene.addPoly([A, C_tri, Bf], theme.front, theme.back, theme.border, 1.6, 5, p1 > 0.04 && p1 < 0.96);
-        scene.addPoly([A, Df, B_tri], theme.front, theme.back, theme.border, 1.6, 6, p1 > 0.04 && p1 < 0.96);
+        const isACBack = p1 > 0.04;
+        const isBCBack = p2 > 0.04;
+        const backStroke = 'rgba(100, 116, 139, 0.8)';
+
+        // AC 邊、AB 邊兩側 15° 紙翼同步「向後折」180° 收進 △ABC 背面（過程中以透明虛線呈現，收齊後完全隱藏於背面）
+        if (p1 < 0.98) {
+          const Bf = fold3D(B_orig, A, C_tri, p1, 'back');
+          const Df = fold3D(D, A, B_tri, p1, 'back');
+          scene.addPoly([A, C_tri, Bf], isACBack ? null : theme.front, isACBack ? null : theme.back, isACBack ? backStroke : theme.border, 1.4, -3, false, isACBack ? [5, 4] : null);
+          scene.addPoly([A, Df, B_tri], isACBack ? null : theme.front, isACBack ? null : theme.back, isACBack ? backStroke : theme.border, 1.4, -3, false, isACBack ? [5, 4] : null);
+        }
+
+        // 右上方 BC 邊多餘紙翼「向後折」180° 收進 △ABC 背面
+        if (p2 < 0.98) {
+          const Ef = fold3D(E, C_tri, B_tri, p2, 'back');
+          scene.addPoly([C_tri, B_tri, Ef], isBCBack ? null : theme.front, isBCBack ? null : theme.back, isBCBack ? backStroke : theme.border, 1.4, -4, false, isBCBack ? [5, 4] : null);
+        }
+
+        // 中央完整最大正 △ABC 主體（保持在最前方）
+        const doneTri = prog > 0.85;
+        scene.addPoly([A, B_tri, C_tri], theme.front, theme.back, doneTri ? '#e11d48' : theme.border, doneTri ? 2.6 : 1.8, 10, false);
       }
 
       scene.flush(ctx);
@@ -2605,6 +2704,63 @@
       ctx.fillText('P', pP.x + 6, pP.y + 4);
       ctx.fillText('邊長 = 2', (p00.x + p20.x) / 2 - 22, p00.y + 15);
       ctx.restore();
+    }
+
+    const cmpState = { playing: false, raf: null, theta: 0, phase: 'up' };
+
+    function stopCmpPlay() {
+      cmpState.playing = false;
+      if (cmpState.raf) cancelAnimationFrame(cmpState.raf);
+      const btn = document.getElementById('cmp-play-btn');
+      if (btn) btn.textContent = '▶ 自動播放';
+    }
+
+    function startCmpPlay(fromZero = true) {
+      stopCmpPlay();
+      cmpState.playing = true;
+      if (fromZero) {
+        cmpState.theta = 0;
+        cmpState.phase = 'up';
+      }
+      const btn = document.getElementById('cmp-play-btn');
+      if (btn) btn.textContent = '⏸ 暫停';
+
+      const slider = document.getElementById('cmp-theta-slider');
+      const tick = () => {
+        if (!cmpState.playing) return;
+        if (cmpState.phase === 'up') {
+          cmpState.theta += 0.06;
+          if (cmpState.theta >= 18) {
+            cmpState.theta = 18;
+            cmpState.phase = 'settle';
+          }
+        } else {
+          cmpState.theta -= 0.05;
+          if (cmpState.theta <= 15) {
+            cmpState.theta = 15;
+            if (slider) slider.value = '15';
+            updateCmpExplorer(15);
+            stopCmpPlay();
+            return;
+          }
+        }
+        const rounded = Math.round(cmpState.theta * 10) / 10;
+        if (slider) slider.value = rounded;
+        updateCmpExplorer(rounded);
+        cmpState.raf = requestAnimationFrame(tick);
+      };
+      cmpState.raf = requestAnimationFrame(tick);
+    }
+
+    function toggleCmpPlay() {
+      if (cmpState.playing) stopCmpPlay();
+      else startCmpPlay(true);
+    }
+
+    function onCmpSliderInput(val) {
+      stopCmpPlay();
+      cmpState.theta = parseFloat(val);
+      updateCmpExplorer(val);
     }
 
     function updateCmpExplorer(val) {
@@ -2859,23 +3015,37 @@
         };
         localStorage.setItem('origami_ws_v1', JSON.stringify(data));
       } catch (e) {}
+      updateWsProgress();
+    }
+
+    function updateWsProgress() {
+      const blanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
+      const filled = blanks.filter((b) => b.value.trim().length > 0).length;
+      const pill = document.getElementById('ws-progress-pill');
+      if (!pill) return;
+      pill.textContent = filled === blanks.length
+        ? `填答進度：${filled} / ${blanks.length} 格（已完成）`
+        : `填答進度：${filled} / ${blanks.length} 格`;
+      pill.classList.toggle('complete', filled === blanks.length && blanks.length > 0);
     }
 
     function loadWorksheetProgress() {
       try {
         const raw = localStorage.getItem('origami_ws_v1');
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        if (document.getElementById('ws-meta-class')) document.getElementById('ws-meta-class').value = data.cls || '';
-        if (document.getElementById('ws-meta-seat')) document.getElementById('ws-meta-seat').value = data.seat || '';
-        if (document.getElementById('ws-meta-name')) document.getElementById('ws-meta-name').value = data.name || '';
-        const blanks = document.querySelectorAll('#worksheet-root input.blank');
-        if (Array.isArray(data.blanks)) {
-          blanks.forEach((inp, i) => {
-            if (typeof data.blanks[i] === 'string') inp.value = data.blanks[i];
-          });
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (document.getElementById('ws-meta-class')) document.getElementById('ws-meta-class').value = data.cls || '';
+          if (document.getElementById('ws-meta-seat')) document.getElementById('ws-meta-seat').value = data.seat || '';
+          if (document.getElementById('ws-meta-name')) document.getElementById('ws-meta-name').value = data.name || '';
+          const blanks = document.querySelectorAll('#worksheet-root input.blank');
+          if (Array.isArray(data.blanks)) {
+            blanks.forEach((inp, i) => {
+              if (typeof data.blanks[i] === 'string') inp.value = data.blanks[i];
+            });
+          }
         }
       } catch (e) {}
+      updateWsProgress();
     }
 
     function resetWorksheet() {
@@ -2891,9 +3061,26 @@
 
     /* ==================== 6.5 探究三：互動手繪摺痕畫板 ==================== */
     const sketchPads = {
-      A: { mode: 'dash', drawing: false },
-      B: { mode: 'dash', drawing: false }
+      A: { mode: 'dash', tool: 'line', drawing: false, start: null, snapshot: null, history: [] },
+      B: { mode: 'dash', tool: 'line', drawing: false, start: null, snapshot: null, history: [] }
     };
+
+    function saveSketchState(key) {
+      try {
+        const canvas = document.getElementById(`sketchCanvas${key}`);
+        if (canvas) localStorage.setItem(`origami_ws_sketch_${key}`, canvas.toDataURL('image/png'));
+      } catch (e) {}
+    }
+
+    function pushSketchHistory(key) {
+      const canvas = document.getElementById(`sketchCanvas${key}`);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const snap = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const hist = sketchPads[key].history;
+      hist.push(snap);
+      if (hist.length > 20) hist.shift();
+    }
 
     function drawSketchBase(key) {
       const canvas = document.getElementById(`sketchCanvas${key}`);
@@ -2904,11 +3091,11 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 2;
-      ctx.strokeRect(20, 20, 130, 130);
+      ctx.strokeRect(22, 22, 152, 152);
       ctx.font = 'bold 13px -apple-system, sans-serif';
       ctx.fillStyle = '#0f172a';
-      ctx.fillText('A', 7, 158);
-      if (key === 'A') ctx.fillText('B', 154, 158);
+      ctx.fillText('A', 8, 182);
+      if (key === 'A') ctx.fillText('B', 178, 182);
     }
 
     function setSketchMode(key, mode, btn) {
@@ -2918,15 +3105,40 @@
       btn.classList.add('active');
     }
 
+    function toggleSketchTool(key, btn) {
+      const pad = sketchPads[key];
+      pad.tool = pad.tool === 'line' ? 'free' : 'line';
+      if (pad.tool === 'line') {
+        btn.classList.add('active');
+        btn.textContent = '📏 直線';
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '✏️ 手繪';
+      }
+    }
+
+    function undoSketch(key) {
+      const hist = sketchPads[key].history;
+      if (!hist.length) return;
+      const canvas = document.getElementById(`sketchCanvas${key}`);
+      if (!canvas) return;
+      const prev = hist.pop();
+      canvas.getContext('2d').putImageData(prev, 0, 0);
+      saveSketchState(key);
+    }
+
     function clearSketch(key) {
+      pushSketchHistory(key);
       drawSketchBase(key);
+      saveSketchState(key);
     }
 
     function drawSketchAnswer(key) {
+      pushSketchHistory(key);
       drawSketchBase(key);
       const canvas = document.getElementById(`sketchCanvas${key}`);
       const ctx = canvas.getContext('2d');
-      const x0 = 20, y0 = 20, s = 130;
+      const x0 = 22, y0 = 22, s = 152;
       ctx.save();
       if (key === 'A') {
         const cx = x0 + s / 2, py = y0 + s - (s * Math.sqrt(3)) / 2;
@@ -2940,7 +3152,7 @@
 
         ctx.setLineDash([]);
         ctx.strokeStyle = '#e11d48';
-        ctx.lineWidth = 2.2;
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
         ctx.moveTo(x0, y0 + s);
         ctx.lineTo(x0 + s, y0 + s);
@@ -2963,7 +3175,7 @@
 
         ctx.setLineDash([]);
         ctx.strokeStyle = '#e11d48';
-        ctx.lineWidth = 2.2;
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
         ctx.moveTo(x0, y0 + s);
         ctx.lineTo(bx, by);
@@ -2972,6 +3184,19 @@
         ctx.stroke();
       }
       ctx.restore();
+      saveSketchState(key);
+    }
+
+    function applySketchStrokeStyle(ctx, mode) {
+      if (mode === 'dash') {
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.8;
+      } else {
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#e11d48';
+        ctx.lineWidth = 2.4;
+      }
     }
 
     function initSketchPads() {
@@ -2980,6 +3205,16 @@
         const canvas = document.getElementById(`sketchCanvas${key}`);
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
+
+        try {
+          const saved = localStorage.getItem(`origami_ws_sketch_${key}`);
+          if (saved) {
+            const img = new Image();
+            img.onload = () => ctx.drawImage(img, 0, 0);
+            img.src = saved;
+          }
+        } catch (e) {}
+
         const getPos = (e) => {
           const rect = canvas.getBoundingClientRect();
           return {
@@ -2988,28 +3223,43 @@
           };
         };
         canvas.addEventListener('pointerdown', (e) => {
-          sketchPads[key].drawing = true;
+          const pad = sketchPads[key];
+          pad.drawing = true;
           canvas.setPointerCapture(e.pointerId);
+          pushSketchHistory(key);
           const p = getPos(e);
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          if (sketchPads[key].mode === 'dash') {
-            ctx.setLineDash([5, 4]);
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 1.8;
-          } else {
-            ctx.setLineDash([]);
-            ctx.strokeStyle = '#e11d48';
-            ctx.lineWidth = 2.4;
+          pad.start = p;
+          pad.snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          if (pad.tool === 'free') {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            applySketchStrokeStyle(ctx, pad.mode);
           }
         });
         canvas.addEventListener('pointermove', (e) => {
-          if (!sketchPads[key].drawing) return;
+          const pad = sketchPads[key];
+          if (!pad.drawing) return;
           const p = getPos(e);
-          ctx.lineTo(p.x, p.y);
-          ctx.stroke();
+          if (pad.tool === 'line') {
+            ctx.putImageData(pad.snapshot, 0, 0);
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(pad.start.x, pad.start.y);
+            ctx.lineTo(p.x, p.y);
+            applySketchStrokeStyle(ctx, pad.mode);
+            ctx.stroke();
+            ctx.restore();
+          } else {
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+          }
         });
-        const stopDraw = () => { sketchPads[key].drawing = false; };
+        const stopDraw = () => {
+          if (!sketchPads[key].drawing) return;
+          sketchPads[key].drawing = false;
+          sketchPads[key].snapshot = null;
+          saveSketchState(key);
+        };
         canvas.addEventListener('pointerup', stopDraw);
         canvas.addEventListener('pointercancel', stopDraw);
       });
@@ -3051,8 +3301,7 @@
     }
 
     window.onload = function () {
-      updateM1UI();
-      renderM1();
+      selectM1Step(1, true, true);
       updateM2UI();
       renderM2();
       bindOrbit3D('canvasM1', m1Cam, renderM1);
@@ -3061,11 +3310,26 @@
       updateCmpExplorer(15);
       initSketchPads();
       loadWorksheetProgress();
+      const allBlanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
       document.querySelectorAll('#worksheet-root input').forEach((inp) => {
         if (inp.classList.contains('blank')) {
           inp.addEventListener('focus', () => { lastFocusedBlank = inp; });
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const idx = allBlanks.indexOf(inp);
+              if (idx >= 0 && idx < allBlanks.length - 1) {
+                allBlanks[idx + 1].focus();
+              } else {
+                gradeWorksheet();
+              }
+            }
+          });
         }
-        inp.addEventListener('input', saveWorksheetProgress);
+        inp.addEventListener('input', () => {
+          inp.classList.remove('correct', 'wrong');
+          saveWorksheetProgress();
+        });
       });
     };
   </script>
