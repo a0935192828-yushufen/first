@@ -258,6 +258,7 @@
 
     .header-m1 { background: linear-gradient(135deg, #d97706, #ea580c); }
     .header-m2 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+    .header-m3 { background: linear-gradient(135deg, #059669, #0d9488); }
     .header-cmp { background: linear-gradient(135deg, #0f766e, #0284c7); }
 
     .badge-pill {
@@ -370,7 +371,7 @@
       height: 100%;
       display: block;
       border-radius: 10px;
-      background: radial-gradient(circle at 50% 42%, #ffffff 0%, #f1f5f9 100%);
+      background: radial-gradient(circle at 50% 42%, #f7f8f3 0%, #eaeee6 100%);
       cursor: grab;
       touch-action: none;
     }
@@ -501,6 +502,13 @@
       box-shadow: 0 2px 8px rgba(217, 119, 6, 0.28);
     }
 
+    .ctrl-btn.emerald-primary {
+      background: #059669;
+      border-color: #059669;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+    }
+
     .slider-row {
       display: flex;
       align-items: center;
@@ -617,6 +625,11 @@
       background: #fffbeb;
     }
 
+    .step-card-btn.active-emerald {
+      border-color: #059669;
+      background: #ecfdf5;
+    }
+
     .step-card-btn .s-num {
       font-size: 0.68rem;
       font-weight: 800;
@@ -626,6 +639,7 @@
 
     .step-card-btn.active .s-num { color: var(--primary); }
     .step-card-btn.active-amber .s-num { color: #b45309; }
+    .step-card-btn.active-emerald .s-num { color: #059669; }
 
     .step-card-btn .s-name {
       font-size: 0.82rem;
@@ -670,6 +684,11 @@
     .math-callout.amber {
       border-left-color: #d97706;
       color: #78350f;
+    }
+
+    .math-callout.emerald {
+      border-left-color: #059669;
+      color: #064e3b;
     }
 
     .paper-picker {
@@ -1300,12 +1319,14 @@
         </div>
       </div>
 
-      <!-- 四大功能分頁 -->
+      <!-- 五大功能分頁 -->
       <nav class="tab-bar" role="tablist">
         <button id="tab-btn-1" class="tab-btn active" onclick="switchTab(1)">① 底邊正△摺紙</button>
         <button id="tab-btn-2" class="tab-btn" onclick="switchTab(2)">② 最大正△摺紙</button>
         <button id="tab-btn-3" class="tab-btn" onclick="switchTab(3)">③ 雙法比較探索</button>
-        <button id="tab-btn-4" class="tab-btn" onclick="switchTab(4)">④ 課堂學習單</button>
+        <button id="tab-btn-5" class="tab-btn" onclick="switchTab(5)">④ 延伸：最大正六邊形</button>
+        <button id="tab-btn-4" class="tab-btn" onclick="switchTab(4)">⑤ 課堂學習單</button>
+        <button id="sfx-toggle-btn" type="button" class="tab-btn" onclick="toggleSfx()" title="開啟或關閉摺紙音效" style="background:#f1f5f9;color:#0f172a;border-color:#cbd5e1;">🔊 音效：開</button>
       </nav>
     </div>
   </header>
@@ -1323,9 +1344,7 @@
           <div class="paper-picker">
             <span>色紙：</span>
             <select id="m1-color" onchange="setM1Color(this.value)">
-              <option value="orange">暖橘色紙（步驟1）</option>
-              <option value="yellow">鵝黃色紙（步驟2）</option>
-              <option value="pink">櫻花粉色紙（完成）</option>
+              <option value="orange">暖橘色紙</option>
             </select>
           </div>
         </div>
@@ -1363,10 +1382,10 @@
             </div>
 
             <div class="legend-bar">
-              <span class="legend-item"><span id="m1-swatch" class="swatch" style="background:#f6bd7c;"></span>色紙正面</span>
-              <span class="legend-item"><span class="swatch" style="background:#fffdf7;"></span>紙背翻折面</span>
-              <span class="legend-item"><span style="width:14px;border-top:2px dashed #475569;display:inline-block;"></span>摺痕</span>
-              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #e11d48;display:inline-block;"></span>正 <span class="math">△PAB</span></span>
+              <span class="legend-item"><span id="m1-swatch" class="swatch" style="background:#ecc8a1;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#faf7f0;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #c84b61;display:inline-block;"></span>正 <span class="math">△PAB</span></span>
             </div>
           </div>
 
@@ -1419,9 +1438,7 @@
           <div class="paper-picker">
             <span>色紙：</span>
             <select id="m2-color" onchange="setM2Color(this.value)">
-              <option value="amber">暖橘色紙（步驟1）</option>
-              <option value="pink">櫻花粉色紙（步驟2）</option>
-              <option value="violet">薰衣草紫（完成圖）</option>
+              <option value="amber">暖橘色紙</option>
             </select>
           </div>
         </div>
@@ -1430,7 +1447,7 @@
           <!-- 左側畫布 + 緊貼底部的控制列 -->
           <div class="sim-stage">
             <div class="stage-topbar">
-              <span id="m2-step-badge" class="step-tag">步驟 1 / 4：對摺垂直與水平中線</span>
+              <span id="m2-step-badge" class="step-tag">步驟 1 / 4：對摺水平與垂直中線</span>
               <label class="toggle-check">
                 <input id="m2-show-notes" type="checkbox" checked onchange="renderM2()" />
                 <span>輔助線與角度</span>
@@ -1459,10 +1476,10 @@
             </div>
 
             <div class="legend-bar">
-              <span class="legend-item"><span id="m2-swatch" class="swatch" style="background:#f6bd7c;"></span>色紙正面</span>
-              <span class="legend-item"><span class="swatch" style="background:#fffdf9;"></span>紙背翻折面</span>
-              <span class="legend-item"><span style="width:14px;border-top:2px dashed #475569;display:inline-block;"></span>摺痕</span>
-              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #e11d48;display:inline-block;"></span>最大正 <span class="math">△ABC</span></span>
+              <span class="legend-item"><span id="m2-swatch" class="swatch" style="background:#ecc8a1;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#faf7f0;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #c84b61;display:inline-block;"></span>最大正 <span class="math">△ABC</span></span>
             </div>
           </div>
 
@@ -1473,7 +1490,7 @@
               <div class="step-grid-btns">
                 <button id="m2-btn-1" class="step-card-btn active" onclick="selectM2Step(1, true)">
                   <div class="s-num">STEP 1</div>
-                  <div class="s-name">對摺垂直與水平中線</div>
+                  <div class="s-name">對摺水平與垂直中線</div>
                 </button>
                 <button id="m2-btn-2" class="step-card-btn" onclick="selectM2Step(2, true)">
                   <div class="s-num">STEP 2</div>
@@ -1491,9 +1508,9 @@
             </div>
 
             <div class="explain-box">
-              <h3 id="m2-title">步驟 1：對摺找出垂直與水平中線</h3>
+              <h3 id="m2-title">步驟 1：對摺找出水平與垂直中線</h3>
               <p id="m2-desc">
-                設正方形邊長為 <strong class="math">2</strong>。先左右對摺並展開壓出垂直中線（距左邊界距離為 <strong class="math">1</strong>），再上下對摺壓出水平中線作為對稱參考。
+                設正方形邊長為 <strong class="math">2</strong>。先上下對摺並展開壓出水平中線作為對稱參考，再左右對摺壓出垂直中線（距左邊界距離為 <strong class="math">1</strong>）。
               </p>
               <div id="m2-math" class="math-callout">
                 💡 <strong>摺紙原理預告：</strong>垂直中線提供長度 <span class="math">1</span> 的股，配合正方形邊長 <span class="math">2</span>，即可不靠量角器構造出 <span class="math">1 : <span class="sqrt">√<span class="sqrt-over">3</span></span> : 2</span> 的 <span class="math">60°</span> 角！
@@ -1629,6 +1646,160 @@
       </div>
     </section>
 
+    <!-- ==================== 分頁 4（第 4 分頁）：延伸課程——最大正六邊形 ==================== -->
+    <section id="panel-5" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m3">
+          <div>
+            <span class="badge-pill">延伸課程 · 筆記「3.... 正方形中摺出最大正六邊形」</span>
+            <h2>以「<span class="math">1/4</span> 正方形最大正 <span class="math">△</span>」為先備知識摺出最大正六邊形</h2>
+          </div>
+          <div class="paper-picker">
+            <span>色紙：</span>
+            <select id="m3-color" onchange="setM3Color(this.value)">
+              <option value="green">嫩綠色紙</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m3-step-badge" class="step-tag" style="background:#d1fae5;color:#065f46;">步驟 1 / 4：先將正方形分成四個小正方形</span>
+              <label class="toggle-check">
+                <input id="m3-show-notes" type="checkbox" checked onchange="renderM3()" />
+                <span>輔助線與角度</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM3"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m3')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM3Step(m3State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM3Step()">← 上一步</button>
+                <button id="m3-play-btn" class="ctrl-btn emerald-primary" onclick="toggleM3Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM3Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m3-slider">摺疊進度</label>
+                <input id="m3-slider" type="range" min="0" max="100" value="100" oninput="onM3Slider(this.value)" />
+                <span id="m3-pct" class="pct-pill" style="background:#d1fae5;color:#065f46;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span id="m3-swatch" class="swatch" style="background:#aed6b8;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#f4f9f5;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.2px solid #2d8a68;display:inline-block;"></span>最大正六邊形</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m3-btn-1" class="step-card-btn active-emerald" onclick="selectM3Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">分成四個小正方形</div>
+                </button>
+                <button id="m3-btn-2" class="step-card-btn" onclick="selectM3Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">沿對角線對摺成 △</div>
+                </button>
+                <button id="m3-btn-3" class="step-card-btn" onclick="selectM3Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">1/4 正方形摺最大正△</div>
+                </button>
+                <button id="m3-btn-4" class="step-card-btn" onclick="selectM3Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">摺出其餘 5 個正△並展開</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m3-title">步驟 1：先將正方形分成四個小正方形</h3>
+              <p id="m3-desc">
+                設大正方形邊長為 <strong class="math">2</strong>，先左右、上下各對摺一次並展開，壓出十字中線，找出中心點 <strong class="math">O</strong>，同時將大正方形分成 4 個邊長為 <strong class="math">1</strong> 的 <strong class="math">1/4</strong> 小正方形。
+              </p>
+              <div id="m3-math" class="math-callout emerald">
+                💡 <strong>先備知識連結：</strong>正六邊形由 6 個全等正三角形組成；而邊長為 <span class="math">1</span> 的 <span class="math">1/4</span> 小正方形內接最大正△邊長為 <span class="math">1 / cos 15° = √6 - √2</span>，剛好等於邊長 <span class="math">2</span> 大正方形內接最大正六邊形的邊長！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 幾何極值證明卡（對應教材圖 a、圖 b） -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header header-m3">
+          <div>
+            <span class="badge-pill">延伸證明 · 三角函數極值法（對照教材「在正方形紙中摺正三角形」）</span>
+            <h2>為什麼偏轉角 <span class="math">θ = 15°</span> 時正六邊形面積最大？</h2>
+          </div>
+        </div>
+        <div style="padding:20px;">
+          <div class="cmp-dual-grid" style="margin-bottom:16px;">
+            <div class="cmp-panel" style="text-align:center;">
+              <h3 style="color:#065f46;margin-bottom:6px;">圖 (a)：正六邊形面積公式</h3>
+              <svg viewBox="0 0 220 200" style="width:100%;max-width:220px;height:auto;margin:0 auto;display:block;">
+                <rect x="25" y="15" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="1.8" />
+                <polygon points="195,88 140,19 52,32 25,112 80,185 168,172" fill="rgba(5,150,105,0.10)" stroke="#059669" stroke-width="2" />
+                <line x1="110" y1="100" x2="195" y2="88" stroke="#475569" stroke-width="1.2" />
+                <line x1="110" y1="100" x2="140" y2="19" stroke="#475569" stroke-width="1.2" />
+                <line x1="110" y1="100" x2="52" y2="32" stroke="#475569" stroke-width="1.2" />
+                <line x1="110" y1="100" x2="25" y2="112" stroke="#475569" stroke-width="1.2" />
+                <line x1="110" y1="100" x2="80" y2="185" stroke="#475569" stroke-width="1.2" />
+                <line x1="110" y1="100" x2="168" y2="172" stroke="#475569" stroke-width="1.2" />
+                <text x="65" y="96" font-size="13" font-style="italic" font-weight="bold">x</text>
+                <text x="150" y="92" font-size="13" font-style="italic" font-weight="bold">x</text>
+                <text x="120" y="170" font-size="13" font-style="italic" font-weight="bold">x</text>
+                <text x="148" y="182" font-size="12" font-weight="bold" fill="#e11d48">θ</text>
+                <text x="202" y="105" font-size="13" font-weight="bold">1</text>
+              </svg>
+              <p style="font-size:0.82rem;color:#334155;margin-top:6px;">
+                分成 6 個正△：<span class="math">A = 6 × <span class="frac"><span>x</span><span>2</span></span> · <span class="frac"><span><span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>2</span></span>x = <span class="frac"><span>3<span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>2</span></span>x²</span>
+              </p>
+            </div>
+
+            <div class="cmp-panel" style="text-align:center;border-color:#a7f3d0;background:#f0fdf4;">
+              <h3 style="color:#065f46;margin-bottom:6px;">圖 (b)：主對角線 <span class="math">2x</span> 與直角三角形</h3>
+              <svg viewBox="0 0 220 200" style="width:100%;max-width:220px;height:auto;margin:0 auto;display:block;">
+                <rect x="25" y="15" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="1.8" />
+                <polygon points="195,88 140,19 52,32 25,112 80,185 168,172" fill="rgba(5,150,105,0.12)" stroke="#059669" stroke-width="2" />
+                <line x1="25" y1="112" x2="195" y2="88" stroke="#0f172a" stroke-width="1.8" />
+                <line x1="25" y1="112" x2="195" y2="112" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="4 3" />
+                <polyline points="185,112 185,102 195,102" fill="none" stroke="#e11d48" stroke-width="1.3" />
+                <text x="102" y="92" font-size="13" font-weight="bold">2x</text>
+                <text x="148" y="108" font-size="12" font-weight="bold" fill="#e11d48">θ</text>
+                <text x="120" y="170" font-size="13" font-style="italic" font-weight="bold">x</text>
+                <text x="148" y="182" font-size="12" font-weight="bold" fill="#e11d48">θ</text>
+                <text x="202" y="105" font-size="13" font-weight="bold">1</text>
+              </svg>
+              <p style="font-size:0.82rem;color:#065f46;margin-top:6px;">
+                水平寬度 <span class="math">1</span>、斜邊 <span class="math">2x</span> <span class="math">⇒ cos θ = <span class="frac"><span>1</span><span>2x</span></span></span>
+              </p>
+            </div>
+          </div>
+
+          <div class="explain-box" style="background:#f8fafc;">
+            <div style="display:grid;gap:8px;font-size:0.86rem;color:#1e293b;">
+              <div><strong>① 邊長與面積函數：</strong>假設正六邊形左右一對對頂點觸及正方形左右邊，主對角線（直徑）長 <span class="math">2x</span> 且平行於底邊，因此直角三角形底角為 <span class="math">θ</span>。由 <span class="math">cos θ = <span class="frac"><span>1</span><span>2x</span></span></span> 得 <span class="math">x = <span class="frac"><span>1</span><span>2 cos θ</span></span></span>，代回面積公式得：<span class="math" style="color:#059669;">A(θ) = <span class="frac"><span>3<span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>8 cos²θ</span></span></span>。</div>
+              <div><strong>② 對稱性決定範圍：</strong>正六邊形每轉 <span class="math">60°</span> 重合、正方形每轉 <span class="math">90°</span> 重合（最大公因數 <span class="math">30°</span>），再加上左右鏡射對稱，只需考慮 <span class="math">0° ≤ θ ≤ 15°</span> 即可。</div>
+              <div><strong>③ 極大值與對角線重疊：</strong>在 <span class="math">0° ≤ θ ≤ 15°</span> 內，<span class="math">cos θ</span> 嚴格遞減，分母 <span class="math">8 cos²θ</span> 隨 <span class="math">θ</span> 增大而變小，故端點 <strong><span class="math">θ = 15°</span></strong> 時面積最大！此時六邊形的六條半徑位於 <span class="math">15°, 75°, 135°, 195°, 255°, 315°</span>，其中 <span class="math">135° / 315°</span> 對角線剛好與正方形對角線重疊。</div>
+              <div><strong>④ 最大規格（正方形邊長 = 1）：</strong>最大邊長 <span class="math">x = <span class="frac"><span><span class="sqrt">√<span class="sqrt-over">6</span></span> - <span class="sqrt">√<span class="sqrt-over">2</span></span></span><span>2</span></span> ≈ 0.5176</span>；最大面積 <span class="math">A = 3<span class="sqrt">√<span class="sqrt-over">3</span></span> - <span class="frac"><span>9</span><span>2</span></span> ≈ 0.6962</span>（佔原正方形面積 <strong>69.62%</strong>）。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ==================== 分頁 4：課堂學習單（線上批改 ＋ A4 列印） ==================== -->
     <section id="panel-4" class="tab-panel">
       <!-- 操作工具列（列印時自動隱藏） -->
@@ -1654,12 +1825,12 @@
             <button type="button" class="ws-sqrt-btn" onmousedown="event.preventDefault()" onclick="insertSqrtSymbol()">＋ 插入 √ 符號</button>
             <span style="color:#64748b;">（支援 <code>sqrt3</code> / <code>根號3</code>，按 <code>Enter</code> 跳下一格）</span>
           </div>
-          <span id="ws-progress-pill" class="ws-progress-pill">填答進度：0 / 10 格</span>
+          <span id="ws-progress-pill" class="ws-progress-pill">填答進度：0 / 16 格</span>
         </div>
 
         <div class="ws-header">
           <div class="ws-title-row">
-            <h2>【數學探究學習單】正方形中摺出正△與最大正△</h2>
+            <h2>【數學探究學習單】正方形中摺出正△、最大正△與最大正六邊形</h2>
             <span style="font-size:0.76rem;font-weight:700;padding:3px 9px;border:1px solid #94a3b8;border-radius:6px;">
               幾何摺紙 × 畢氏定理 × 三角函數極值
             </span>
@@ -1769,7 +1940,7 @@
         </div>
 
         <!-- 任務三：手繪摺痕練習框與綜合比較 -->
-        <div class="ws-section" style="margin-bottom:0;">
+        <div class="ws-section">
           <div class="ws-sec-head">
             <span class="ws-sec-badge emerald">探究三：雙法比較與動手繪製關鍵摺痕</span>
             <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-3')">💡 小提示</button>
@@ -1809,6 +1980,64 @@
           </div>
         </div>
 
+        <!-- 任務四：延伸探究（正方形中摺出最大正六邊形） -->
+        <div class="ws-section" style="margin-bottom:0;">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge emerald">探究四（延伸）：以 <span class="math">1/4</span> 正方形最大正 <span class="math">△</span> 摺出最大正六邊形</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-4')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="25" y="20" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="2" />
+                <line x1="110" y1="20" x2="110" y2="190" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 4" />
+                <line x1="25" y1="105" x2="195" y2="105" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 4" />
+                <!-- 1/4 小正方形底色 -->
+                <rect x="110" y="20" width="85" height="85" fill="rgba(5,150,105,0.06)" stroke="none" />
+                <!-- 正六邊形：中心 (110,105)，R = 88 -->
+                <polygon points="195,82.2 132.8,20 47.8,42.8 25,127.8 87.2,190 172.2,167.2" fill="rgba(5,150,105,0.12)" stroke="#059669" stroke-width="2.2" />
+                <!-- 6 條放射摺痕 -->
+                <line x1="110" y1="105" x2="195" y2="82.2" stroke="#475569" stroke-width="1.3" stroke-dasharray="3 3" />
+                <line x1="110" y1="105" x2="132.8" y2="20" stroke="#475569" stroke-width="1.3" stroke-dasharray="3 3" />
+                <line x1="110" y1="105" x2="47.8" y2="42.8" stroke="#475569" stroke-width="1.3" stroke-dasharray="3 3" />
+                <line x1="110" y1="105" x2="25" y2="127.8" stroke="#475569" stroke-width="1.3" stroke-dasharray="3 3" />
+                <line x1="110" y1="105" x2="87.2" y2="190" stroke="#475569" stroke-width="1.3" stroke-dasharray="3 3" />
+                <line x1="110" y1="105" x2="172.2" y2="167.2" stroke="#475569" stroke-width="1.3" stroke-dasharray="3 3" />
+                <circle cx="110" cy="105" r="3" fill="#059669" />
+                <text x="98" y="100" font-size="13" font-weight="bold" fill="#059669">O</text>
+                <text class="diagram-hint" x="128" y="82" font-size="11" font-weight="bold" fill="#059669">60°</text>
+                <text class="diagram-hint" x="150" y="99" font-size="10.5" font-weight="bold" fill="#e11d48">15°</text>
+                <text class="diagram-hint" x="112" y="55" font-size="10.5" font-weight="bold" fill="#e11d48">15°</text>
+              </svg>
+              <span>圖(三)：大正方形內接最大正六邊形</span>
+            </div>
+
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 先將邊長為 <span class="math">2</span> 的正方形分成 4 個邊長為 <span class="math">1</span> 的 <span class="math">1/4</span> 小正方形，並沿對角線對摺；正六邊形可拆成 6 個以中心 <span class="math">O</span> 為頂點、頂角為
+                <input class="blank" data-ans="60" type="text" /><span class="ans-hint">60</span> ° 的全等正三角形。
+              </div>
+              <div class="ws-q-item">
+                (2) 套用「探究二」先備知識，以中心 <span class="math">O</span> 為頂點，在邊長 <span class="math">1</span> 的 <span class="math">1/4</span> 小正方形內摺出最大正三角形，其與中線的夾角為
+                <input class="blank" data-ans="15" type="text" /><span class="ans-hint">15</span> °，邊長為 <span class="math"><span class="frac"><span>1</span><span>cos 15°</span></span> = <span class="sqrt">√<span class="sqrt-over">6</span></span> - <span class="sqrt">√<span class="sqrt-over">2</span></span></span>。
+              </div>
+              <div class="ws-q-item">
+                (3) 此 <span class="math">1/4</span> 最大正三角形的邊長剛好等於大正方形最大正六邊形的邊長！利用它依序複製摺出其餘
+                <input class="blank" data-ans="5" type="text" /><span class="ans-hint">5</span> 個正三角形並沿底邊收邊攤開，即得邊長約為
+                <input class="blank" data-ans="1.035" data-alt="1.04" placeholder="例:1.035" type="text" /><span class="ans-hint">1.035</span> 的最大正六邊形。
+              </div>
+              <div class="ws-q-item">
+                (4) 【<span class="math">cos θ</span> 極值證明】改設正方形邊長為 <span class="math">1</span>、正六邊形邊長為 <span class="math">x</span>、偏轉角為 <span class="math">θ</span>，則主對角線（直徑）長為
+                <input class="blank" data-ans="2x" placeholder="例:2x" type="text" /><span class="ans-hint">2x</span>，由 <span class="math">cos θ = 1/(2x)</span> 得面積 <span class="math">A = <span class="frac"><span>3<span class="sqrt">√<span class="sqrt-over">3</span></span></span><span>8 cos²θ</span></span></span>；在對稱區間 <span class="math">0° ≤ θ ≤ 15°</span> 中，當 <span class="math">θ = 15°</span> 時分母最小、面積最大，約佔原正方形面積
+                <input class="blank" data-ans="69.62" data-alt="69.6" placeholder="例:69.62" type="text" /><span class="ans-hint">69.62</span> %（此時六邊形對角線與正方形對角線重疊）。
+              </div>
+            </div>
+          </div>
+          <div id="hint-4" class="ws-hint-box">
+            💡 <strong>提示：</strong>圓周 <span class="math">360° ÷ 6 = 60°</span>；大正方形邊長為 <span class="math">2</span> 時正六邊形邊長 <span class="math">1 ÷ cos 15° ≈ 1.035</span>。若改設正方形邊長為 <span class="math">1</span>，則主對角線為 <span class="math">2x</span>，最大面積為 <span class="math">3√3 - 9/2 ≈ 0.6962</span>（即 <span class="math">69.62%</span>）。
+          </div>
+        </div>
+
         <div id="grade-banner" class="grade-banner"></div>
       </article>
     </section>
@@ -1823,9 +2052,10 @@
   <script>
     /* ==================== 1. 分頁切換邏輯 ==================== */
     function switchTab(idx) {
-      for (let i = 1; i <= 4; i++) {
+      for (let i = 1; i <= 5; i++) {
         const btn = document.getElementById(`tab-btn-${i}`);
         const panel = document.getElementById(`panel-${i}`);
+        if (!btn || !panel) continue;
         if (i === idx) {
           btn.classList.add('active');
           panel.classList.add('active');
@@ -1836,20 +2066,29 @@
       }
       if (idx === 1) {
         stopM2Play();
+        stopM3Play();
         stopCmpPlay();
         selectM1Step(1, true, true);
       } else if (idx === 2) {
         stopM1Play();
+        stopM3Play();
         stopCmpPlay();
         selectM2Step(1, true, true);
       } else if (idx === 3) {
         stopM1Play();
         stopM2Play();
+        stopM3Play();
         renderCmp1();
         startCmpPlay(true);
+      } else if (idx === 5) {
+        stopM1Play();
+        stopM2Play();
+        stopCmpPlay();
+        requestAnimationFrame(() => selectM3Step(1, true, true));
       } else {
         stopM1Play();
         stopM2Play();
+        stopM3Play();
         stopCmpPlay();
       }
     }
@@ -1857,13 +2096,15 @@
     /* ==================== 2. 3D 幾何摺紙引擎與透視相機 ==================== */
     const m1Cam = { yaw: 0, pitch: 0.56 };
     const m2Cam = { yaw: 0, pitch: 0.56 };
+    const m3Cam = { yaw: 0, pitch: 0.56 };
 
     function resetCam(which) {
-      const cam = which === 'm1' ? m1Cam : m2Cam;
+      const cam = which === 'm1' ? m1Cam : which === 'm2' ? m2Cam : m3Cam;
       cam.yaw = 0;
       cam.pitch = 0.56;
       if (which === 'm1') renderM1();
-      else renderM2();
+      else if (which === 'm2') renderM2();
+      else renderM3();
     }
 
     function p3(x, y, z = 0) {
@@ -1944,7 +2185,7 @@
 
     function drawTableGrid3D(ctx, camera) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+      ctx.strokeStyle = 'rgba(116, 134, 122, 0.22)';
       ctx.lineWidth = 1;
       const zPlane = -0.04;
       for (let t = -0.4; t <= 2.41; t += 0.4) {
@@ -2079,11 +2320,133 @@
       ctx.restore();
     }
 
+    function drawStageHint3D(ctx, size, text, accent = '#0f172a') {
+      if (!text) return;
+      ctx.save();
+      ctx.font = 'bold 12px -apple-system, "Noto Sans TC", sans-serif';
+      const padX = 12;
+      const w = Math.min(size - 24, ctx.measureText(text).width + padX * 2);
+      const h = 24;
+      const x = (size - w) / 2;
+      const y = size - 32;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, size / 2, y + h / 2 + 0.5, w - 12);
+      ctx.restore();
+    }
+
+    /* ==================== 2B. 摺紙 Web Audio 音效引擎 ==================== */
+    let sfxEnabled = true;
+    let sharedAudioCtx = null;
+
+    function getAudioCtx() {
+      if (!sharedAudioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) sharedAudioCtx = new AC();
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
+    }
+
+    function toggleSfx() {
+      sfxEnabled = !sfxEnabled;
+      const btn = document.getElementById('sfx-toggle-btn');
+      if (btn) {
+        btn.textContent = sfxEnabled ? '🔊 音效：開' : '🔇 音效：關';
+        btn.style.opacity = sfxEnabled ? '1' : '0.72';
+      }
+      if (sfxEnabled) playOrigamiSfx('crease');
+    }
+
+    function playOrigamiSfx(kind) {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (kind === 'fold') {
+          // 柔和紙張翻摺沙沙聲
+          const len = Math.floor(ctx.sampleRate * 0.13);
+          const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.sin((i / len) * Math.PI);
+          }
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(900, now);
+          filter.frequency.exponentialRampToValueAtTime(1700, now + 0.12);
+          filter.Q.value = 1.6;
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          src.start(now);
+        } else if (kind === 'crease') {
+          // 壓線清脆聲
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(620, now);
+          osc.frequency.exponentialRampToValueAtTime(280, now + 0.07);
+          gain.gain.setValueAtTime(0.10, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (kind === 'step') {
+          // 步驟完成提示音
+          [523.25, 659.25].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.09, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.18);
+          });
+        } else if (kind === 'done') {
+          // 全部完成和弦
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.11, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.36);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.36);
+          });
+        }
+      } catch (e) {}
+    }
+
     /* ==================== 3. 分頁 1：方法一（底邊正△）模擬器 ==================== */
     const m1Themes = {
-      orange: { front: '#f6bd7c', back: '#fffdf7', border: '#b45309' },
-      yellow: { front: '#fde073', back: '#fffef5', border: '#a16207' },
-      pink:   { front: '#f7a8ce', back: '#fff9fc', border: '#be185d' }
+      orange: { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' },
+      yellow: { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' },
+      pink:   { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' }
     };
 
     const m1StepsData = {
@@ -2137,15 +2500,14 @@
       stopM1Play();
       m1State.step = step;
       m1State.autoChain = autoChain;
-      // 自動切換對應色紙顏色以呼應手寫筆記（可隨時手動覆蓋）
-      if (step === 1) setM1Color('orange');
-      else if (step === 2) setM1Color('yellow');
-      else if (step === 3) setM1Color('pink');
+      // 統一使用橘色色紙
+      setM1Color('orange');
       document.getElementById('m1-color').value = m1State.color;
       updateM1UI();
 
       if (autoPlay) {
         m1State.progress = 0;
+        m1State.sfxFlags = {};
         document.getElementById('m1-slider').value = 0;
         document.getElementById('m1-pct').textContent = '0%';
         startM1Play();
@@ -2169,22 +2531,37 @@
 
     function startM1Play() {
       m1State.playing = true;
+      if (!m1State.sfxFlags) m1State.sfxFlags = {};
       document.getElementById('m1-play-btn').textContent = '⏸ 暫停動畫';
-      if (m1State.progress >= 0.99) m1State.progress = 0;
+      if (m1State.progress >= 0.99) {
+        m1State.progress = 0;
+        m1State.sfxFlags = {};
+      }
+      if (m1State.progress < 0.05 && !m1State.sfxFlags.start) {
+        m1State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
 
       const tick = () => {
         if (!m1State.playing) return;
-        m1State.progress += 0.0055;
+        const prev = m1State.progress;
+        const speed = (m1State.step === 3 && m1State.progress <= 0.45) ? 0.0042 * 0.225 : 0.0042;
+        m1State.progress += speed;
+        if (prev < 0.5 && m1State.progress >= 0.5 && !m1State.sfxFlags.mid) {
+          m1State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
         if (m1State.progress >= 1) {
           m1State.progress = 1;
           document.getElementById('m1-slider').value = 100;
           document.getElementById('m1-pct').textContent = '100%';
           renderM1();
+          playOrigamiSfx(m1State.step === 4 ? 'done' : 'step');
           const shouldChain = m1State.autoChain && m1State.step < 4;
           const nextStep = m1State.step + 1;
           stopM1Play();
           if (shouldChain) {
-            m1State.chainTimer = setTimeout(() => selectM1Step(nextStep, true, true), 650);
+            m1State.chainTimer = setTimeout(() => selectM1Step(nextStep, true, true), 1000);
           }
           return;
         }
@@ -2209,9 +2586,11 @@
     }
 
     function toggleM1Play() {
-      if (m1State.playing) stopM1Play();
-      else {
-        if (m1State.progress >= 0.99) m1State.progress = 0;
+      if (m1State.playing) {
+        stopM1Play();
+      } else if (m1State.progress >= 0.99) {
+        selectM1Step(1, true, true);
+      } else {
         startM1Play();
       }
     }
@@ -2249,12 +2628,16 @@
       const L_fold = p3(0, 2 / sqrt3, 0);
       const R_fold = p3(2, 2 / sqrt3, 0);
 
+      const ease = (t) => {
+        const x = Math.max(0, Math.min(1, t));
+        return 0.5 - 0.5 * Math.cos(Math.PI * x);
+      };
       const prog = m1State.progress;
 
       if (m1State.step === 1) {
-        const foldAmt = Math.sin(prog * Math.PI) * 0.88;
+        const foldAmt = Math.sin(ease(prog) * Math.PI) * 0.88;
         scene.addPoly([A, C, T_mid, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
-        if (foldAmt > 0.01) {
+        if (foldAmt > 0.002) {
           const B_f = fold3D(B, C, T_mid, foldAmt, 'front');
           const TR_f = fold3D(TR, C, T_mid, foldAmt, 'front');
           scene.addPoly([C, B_f, TR_f, T_mid], theme.front, theme.back, theme.border, 1.6, 4, true);
@@ -2262,15 +2645,16 @@
           scene.addPoly([C, B, TR, T_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
         }
       } else if (m1State.step === 2) {
+        const eProg = ease(prog);
         scene.addPoly([L_fold, B, TR, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
-        const A_f = fold3D(A, B, L_fold, prog, 'front');
-        scene.addPoly([B, L_fold, A_f], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
+        const A_f = fold3D(A, B, L_fold, eProg, 'front');
+        scene.addPoly([B, L_fold, A_f], theme.front, theme.back, theme.border, 1.6, 5, eProg > 0.02 && eProg < 0.98);
       } else if (m1State.step === 3) {
         if (prog <= 0.45) {
           // 階段 1 (0% ~ 45%)：對稱鏡像示範 —— 固定 A，將右下角 B 沿 A-R_fold 摺向 P 再展開，壓出對稱摺痕 PA
-          const pSym = Math.sin((prog / 0.45) * Math.PI);
+          const pSym = Math.sin(ease(prog / 0.45) * Math.PI);
           scene.addPoly([A, R_fold, TR, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
-          if (pSym > 0.01) {
+          if (pSym > 0.002) {
             const B_f = fold3D(B, A, R_fold, pSym, 'front');
             scene.addPoly([A, B_f, R_fold], theme.front, theme.back, theme.border, 1.6, 5, true);
           } else {
@@ -2278,7 +2662,7 @@
           }
         } else {
           // 階段 2 (45% ~ 100%)：沿 PA、PB 將左右與上方多餘紙翼對稱向後折，向後折部分全改為透明虛線
-          const pTuck = Math.min(1, (prog - 0.45) / 0.55);
+          const pTuck = ease((prog - 0.45) / 0.55);
           const backAmt = pTuck * 0.38;
           const TL_f = fold3D(TL, A, P, backAmt, 'back');
           const T_mid_L = fold3D(T_mid, A, P, backAmt, 'back');
@@ -2327,14 +2711,16 @@
         drawLabel3D(ctx, camera, B, 'B', '#0f172a', 6, 14);
         drawLabel3D(ctx, camera, C, 'C', '#0f172a', -4, 16);
 
-        const pP = camera.project(p3(P.x, P.y, 0.02));
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#e11d48';
-        ctx.fill();
-        ctx.restore();
-        drawLabel3D(ctx, camera, P, 'P', '#0f172a', 7, 4);
+        if (m1State.step !== 1) {
+          const pP = camera.project(p3(P.x, P.y, 0.02));
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#e11d48';
+          ctx.fill();
+          ctx.restore();
+          drawLabel3D(ctx, camera, P, 'P', '#0f172a', 7, 4);
+        }
 
         if (m1State.step === 1) {
           drawLabel3D(ctx, camera, p3(0.5, 0), '1', '#334155', -4, 15);
@@ -2343,29 +2729,44 @@
         } else if (m1State.step === 2) {
           drawDashed3D(ctx, camera, B, P, '#e11d48', [4, 3], 1.7, 0.015);
           drawLabel3D(ctx, camera, p3(1.55, 0.9), 'PB = 2', '#e11d48', 6, 0);
-        } else if (m1State.step === 3 || m1State.step === 4) {
+        } else if (m1State.step === 3) {
+          if (prog <= 0.45) {
+            drawDashed3D(ctx, camera, A, P, '#e11d48', [4, 3], 1.7, 0.015);
+          }
+        } else if (m1State.step === 4) {
           drawLabel3D(ctx, camera, p3(1.5, 0), '1', '#0f172a', -4, 15);
           drawLabel3D(ctx, camera, p3(1.55, 0.9), '2', '#e11d48', 6, 0);
           drawLabel3D(ctx, camera, p3(0.45, 0.9), '2', '#e11d48', -14, 0);
           drawLabel3D(ctx, camera, p3(1, 0.85), '√3', '#4f46e5', -22, 4);
           drawLabel3D(ctx, camera, p3(1.72, 0.16), '60°', '#4f46e5', -10, -4);
+          drawAngleArc3D(ctx, camera, B, 120, 180, 0.32, '#4f46e5', 0.02);
         }
+      }
+      if (showNotes) {
+        const m1Hint = m1State.step === 1
+          ? (prog < 0.5 ? '右半邊向垂直中線對摺…' : '展開並壓出垂直中線（平分底邊）')
+          : m1State.step === 2
+          ? (prog < 0.85 ? '固定 B 點，將頂點 A 摺向垂直中線 P' : 'A 落於 P 點 ⇒ PB = AB = 2！')
+          : m1State.step === 3
+          ? (prog <= 0.45 ? '對稱摺出 PA 摺痕並展開' : '將兩側多餘紙翼向後收齊，完成正 △PAB')
+          : '直角 △PCB 滿足 1 : √3 : 2 ⇒ ∠PBC = 60°';
+        drawStageHint3D(ctx, size, m1Hint, '#b45309');
       }
       ctx.restore();
     }
 
     /* ==================== 4. 分頁 2：方法二（最大正△）模擬器 ==================== */
     const m2Themes = {
-      amber:  { front: '#f6bd7c', back: '#fffdf9', border: '#c27d38' },
-      pink:   { front: '#f7a8ce', back: '#fffafc', border: '#be5b8b' },
-      violet: { front: '#d8ccf2', back: '#fcfaff', border: '#7c3aed' }
+      amber:  { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' },
+      pink:   { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' },
+      violet: { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' }
     };
 
     const m2StepsData = {
       1: {
-        badge: '步驟 1 / 4：對摺垂直與水平中線',
-        title: '步驟 1：對摺找出垂直與水平中線',
-        desc: '設正方形邊長為 2。先左右對摺並展開壓出垂直中線（距左邊界距離為 1），再上下對摺壓出水平中線作為對稱參考。',
+        badge: '步驟 1 / 4：對摺水平與垂直中線',
+        title: '步驟 1：對摺找出水平與垂直中線',
+        desc: '設正方形邊長為 2。先上下對摺並展開壓出水平中線作為對稱參考，再左右對摺壓出垂直中線（距左邊界距離為 1）。',
         math: '💡 摺紙原理預告：垂直中線提供長度 1 的股，配合正方形邊長 2，即可構造出 1 : √3 : 2 的 60° 角！'
       },
       2: {
@@ -2412,14 +2813,13 @@
       stopM2Play();
       m2State.step = step;
       m2State.autoChain = autoChain;
-      if (step === 1) setM2Color('amber');
-      else if (step === 2 || step === 3) setM2Color('pink');
-      else if (step === 4) setM2Color('violet');
+      setM2Color('amber');
       document.getElementById('m2-color').value = m2State.color;
       updateM2UI();
 
       if (autoPlay) {
         m2State.progress = 0;
+        m2State.sfxFlags = {};
         document.getElementById('m2-slider').value = 0;
         document.getElementById('m2-pct').textContent = '0%';
         startM2Play();
@@ -2443,22 +2843,36 @@
 
     function startM2Play() {
       m2State.playing = true;
+      if (!m2State.sfxFlags) m2State.sfxFlags = {};
       document.getElementById('m2-play-btn').textContent = '⏸ 暫停動畫';
-      if (m2State.progress >= 0.99) m2State.progress = 0;
+      if (m2State.progress >= 0.99) {
+        m2State.progress = 0;
+        m2State.sfxFlags = {};
+      }
+      if (m2State.progress < 0.05 && !m2State.sfxFlags.start) {
+        m2State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
 
       const tick = () => {
         if (!m2State.playing) return;
-        m2State.progress += 0.0055;
+        const prev = m2State.progress;
+        m2State.progress += 0.0042;
+        if (prev < 0.5 && m2State.progress >= 0.5 && !m2State.sfxFlags.mid) {
+          m2State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
         if (m2State.progress >= 1) {
           m2State.progress = 1;
           document.getElementById('m2-slider').value = 100;
           document.getElementById('m2-pct').textContent = '100%';
           renderM2();
+          playOrigamiSfx(m2State.step === 4 ? 'done' : 'step');
           const shouldChain = m2State.autoChain && m2State.step < 4;
           const nextStep = m2State.step + 1;
           stopM2Play();
           if (shouldChain) {
-            m2State.chainTimer = setTimeout(() => selectM2Step(nextStep, true, true), 650);
+            m2State.chainTimer = setTimeout(() => selectM2Step(nextStep, true, true), 1000);
           }
           return;
         }
@@ -2483,9 +2897,11 @@
     }
 
     function toggleM2Play() {
-      if (m2State.playing) stopM2Play();
-      else {
-        if (m2State.progress >= 0.99) m2State.progress = 0;
+      if (m2State.playing) {
+        stopM2Play();
+      } else if (m2State.progress >= 0.99) {
+        selectM2Step(1, true, true);
+      } else {
         startM2Play();
       }
     }
@@ -2527,41 +2943,49 @@
       const C_tri = p3(2 * tan15, 2, 0);
       const B_tri = p3(2, 2 * tan15, 0);
 
+      const ease = (t) => {
+        const x = Math.max(0, Math.min(1, t));
+        return 0.5 - 0.5 * Math.cos(Math.PI * x);
+      };
       const prog = m2State.progress;
 
       if (m2State.step === 1) {
         if (prog <= 0.5) {
-          const foldAmt = Math.sin(prog * 2 * Math.PI) * 0.85;
-          scene.addPoly([A, C_mid, T_mid, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
-          if (foldAmt > 0.01) {
-            const Df = fold3D(D, C_mid, T_mid, foldAmt, 'front');
-            const Ef = fold3D(E, C_mid, T_mid, foldAmt, 'front');
-            scene.addPoly([C_mid, Df, Ef, T_mid], theme.front, theme.back, theme.border, 1.6, 4, true);
-          } else {
-            scene.addPoly([C_mid, D, E, T_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
-          }
-        } else {
-          const foldAmt = Math.sin((prog - 0.5) * 2 * Math.PI) * 0.85;
+          const foldAmt = Math.sin(ease(prog * 2) * Math.PI) * 0.85;
           scene.addPoly([A, D, R_mid, L_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
-          if (foldAmt > 0.01) {
+          if (foldAmt > 0.002) {
             const Ef = fold3D(E, L_mid, R_mid, foldAmt, 'front');
             const Bf = fold3D(B_orig, L_mid, R_mid, foldAmt, 'front');
             scene.addPoly([L_mid, R_mid, Ef, Bf], theme.front, theme.back, theme.border, 1.6, 4, true);
           } else {
             scene.addPoly([L_mid, R_mid, E, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
           }
+        } else {
+          const foldAmt = Math.sin(ease((prog - 0.5) * 2) * Math.PI) * 0.85;
+          scene.addPoly([A, C_mid, T_mid, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
+          if (foldAmt > 0.002) {
+            const Df = fold3D(D, C_mid, T_mid, foldAmt, 'front');
+            const Ef = fold3D(E, C_mid, T_mid, foldAmt, 'front');
+            scene.addPoly([C_mid, Df, Ef, T_mid], theme.front, theme.back, theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([C_mid, D, E, T_mid], theme.front, theme.back, theme.border, 1.8, 0, false);
+          }
         }
       } else if (m2State.step === 2) {
+        const eProg = ease(prog);
         scene.addPoly([A, D, E, C_tri], theme.front, theme.back, theme.border, 1.8, 0, false);
-        const Bf = fold3D(B_orig, A, C_tri, prog, 'front');
-        scene.addPoly([A, C_tri, Bf], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
+        const Bf = fold3D(B_orig, A, C_tri, eProg, 'front');
+        const lift = eProg * 0.006;
+        scene.addPoly([p3(A.x, A.y, lift), p3(C_tri.x, C_tri.y, lift), p3(Bf.x, Bf.y, Bf.z + lift)], theme.front, theme.back, theme.border, 1.6, 150, eProg > 0.02 && eProg < 0.98);
       } else if (m2State.step === 3) {
+        const eProg = ease(prog);
         scene.addPoly([A, B_tri, E, B_orig], theme.front, theme.back, theme.border, 1.8, 0, false);
-        const Df = fold3D(D, A, B_tri, prog, 'front');
-        scene.addPoly([A, Df, B_tri], theme.front, theme.back, theme.border, 1.6, 5, prog > 0.04);
+        const Df = fold3D(D, A, B_tri, eProg, 'front');
+        const lift = eProg * 0.006;
+        scene.addPoly([p3(A.x, A.y, lift), p3(Df.x, Df.y, Df.z + lift), p3(B_tri.x, B_tri.y, lift)], theme.front, theme.back, theme.border, 1.6, 150, eProg > 0.02 && eProg < 0.98);
       } else if (m2State.step === 4) {
-        const p1 = Math.min(1, prog * 2);
-        const p2 = Math.max(0, (prog - 0.5) * 2);
+        const p1 = ease(prog * 2);
+        const p2 = ease((prog - 0.5) * 2);
         const isACBack = p1 > 0.04;
         const isBCBack = p2 > 0.04;
         const backStroke = 'rgba(100, 116, 139, 0.8)';
@@ -2580,6 +3004,9 @@
           scene.addPoly([C_tri, B_tri, Ef], isBCBack ? null : theme.front, isBCBack ? null : theme.back, isBCBack ? backStroke : theme.border, 1.4, -4, false, isBCBack ? [5, 4] : null);
         }
 
+        // 保留原本正方形的透明虛線輪廓，清楚對照最大正 △ABC 的內接關係
+        scene.addPoly([A, D, E, B_orig], 'rgba(255, 255, 255, 0.25)', 'rgba(255, 255, 255, 0.25)', 'rgba(100, 116, 139, 0.75)', 1.4, -6, false, [5, 4]);
+
         // 中央完整最大正 △ABC 主體（保持在最前方）
         const doneTri = prog > 0.85;
         scene.addPoly([A, B_tri, C_tri], theme.front, theme.back, doneTri ? '#e11d48' : theme.border, doneTri ? 2.6 : 1.8, 10, false);
@@ -2588,8 +3015,12 @@
       scene.flush(ctx);
 
       if (m2State.step === 1) {
-        drawDashed3D(ctx, camera, C_mid, T_mid, '#334155', [5, 4], 1.6);
-        if (prog > 0.5) drawDashed3D(ctx, camera, L_mid, R_mid, '#334155', [5, 4], 1.6);
+        if (prog <= 0.5) {
+          drawDashed3D(ctx, camera, L_mid, R_mid, '#334155', [5, 4], 1.6);
+        } else {
+          drawDashed3D(ctx, camera, L_mid, p3(1, 1, 0), '#334155', [5, 4], 1.6);
+          drawDashed3D(ctx, camera, C_mid, T_mid, '#334155', [5, 4], 1.6);
+        }
       } else if (m2State.step === 2) {
         drawDashed3D(ctx, camera, C_mid, T_mid, '#64748b', [4, 4], 1.3);
         drawDashed3D(ctx, camera, L_mid, R_mid, '#94a3b8', [4, 4], 1.1);
@@ -2610,38 +3041,61 @@
         } else if (m2State.step === 2) {
           drawDashed3D(ctx, camera, A, P_pt, '#e11d48', [4, 3], 1.7, 0.015);
           const pP = camera.project(p3(P_pt.x, P_pt.y, 0.02));
+          const pC = camera.project(p3(C_tri.x, C_tri.y, 0.02));
           ctx.save();
           ctx.beginPath();
           ctx.arc(pP.x, pP.y, 4, 0, Math.PI * 2);
           ctx.fillStyle = '#e11d48';
           ctx.fill();
+          ctx.beginPath();
+          ctx.arc(pC.x, pC.y, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#e11d48';
+          ctx.fill();
           ctx.restore();
+          drawLabel3D(ctx, camera, C_tri, 'C', '#e11d48', -4, -7);
           drawLabel3D(ctx, camera, P_pt, 'P', '#e11d48', 7, 4);
-          drawLabel3D(ctx, camera, p3(0.5, 0), '1', '#0f172a', -4, 15);
-          drawLabel3D(ctx, camera, p3(1, 0.85), '√3', '#0f172a', 6, 4);
-          drawLabel3D(ctx, camera, p3(0.5, 0.9), '2', '#0f172a', 6, 4);
           drawLabel3D(ctx, camera, p3(0.32, 0.16), '60°', '#4f46e5', 0, 0);
-          drawLabel3D(ctx, camera, p3(0.18, 0.42), '15°', '#e11d48', 0, 0);
-          drawLabel3D(ctx, camera, p3(0.06, 0.56), '15°', '#e11d48', 0, 0);
+          drawLabel3D(ctx, camera, p3(0.05, 0.56), 'θ=15°', '#e11d48', 0, 0);
+          drawAngleArc3D(ctx, camera, A, 0, 60, 0.30, '#4f46e5', 0.016);
+          drawAngleArc3D(ctx, camera, A, 75, 90, 0.46, '#e11d48', 0.016);
         } else if (m2State.step === 3) {
           drawDashed3D(ctx, camera, A, Q_pt, '#e11d48', [4, 3], 1.7, 0.015);
           const pQ = camera.project(p3(Q_pt.x, Q_pt.y, 0.02));
+          const pB = camera.project(p3(B_tri.x, B_tri.y, 0.02));
           ctx.save();
           ctx.beginPath();
           ctx.arc(pQ.x, pQ.y, 4, 0, Math.PI * 2);
           ctx.fillStyle = '#e11d48';
           ctx.fill();
+          ctx.beginPath();
+          ctx.arc(pB.x, pB.y, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#e11d48';
+          ctx.fill();
           ctx.restore();
+          drawLabel3D(ctx, camera, B_tri, 'B', '#e11d48', 7, 5);
           drawLabel3D(ctx, camera, Q_pt, 'Q', '#e11d48', 6, -6);
           drawLabel3D(ctx, camera, p3(0.36, 0.34), '60°', '#4f46e5', 0, 0);
           drawLabel3D(ctx, camera, p3(0.48, 0.12), 'α=15°', '#e11d48', 0, 0);
+          drawAngleArc3D(ctx, camera, A, 15, 75, 0.32, '#4f46e5', 0.016);
+          drawAngleArc3D(ctx, camera, A, 0, 15, 0.46, '#e11d48', 0.016);
         } else if (m2State.step === 4) {
           drawLabel3D(ctx, camera, B_tri, 'B', '#e11d48', 7, 5);
           drawLabel3D(ctx, camera, C_tri, 'C', '#e11d48', -4, -7);
           drawLabel3D(ctx, camera, p3(0.28, 0.24), '60°', '#e11d48', 0, 0);
           drawLabel3D(ctx, camera, p3(1.66, 0.56), '60°', '#e11d48', 0, 0);
           drawLabel3D(ctx, camera, p3(0.56, 1.66), '60°', '#e11d48', 0, 0);
+          drawAngleArc3D(ctx, camera, A, 15, 75, 0.28, '#e11d48', 0.018);
         }
+      }
+      if (showNotes) {
+        const m2Hint = m2State.step === 1
+          ? (prog <= 0.5 ? '壓出水平中線作為對稱參考' : '壓出垂直中線（提供邊長 1 的底股）')
+          : m2State.step === 2
+          ? (prog < 0.85 ? '將左上角摺向垂直中線 P（構造 60°）' : '平分剩餘 30° ⇒ 壓出 θ = 15° 摺痕！')
+          : m2State.step === 3
+          ? (prog < 0.85 ? '將右下角摺向水平中線 Q' : '兩條 15° 摺痕夾出 60° 內角！')
+          : (prog < 0.5 ? '兩側 15° 紙翼向後收進背面…' : '收齊右上角，完成最大內接正 △ABC！');
+        drawStageHint3D(ctx, size, m2Hint, '#4f46e5');
       }
       ctx.restore();
     }
@@ -2690,17 +3144,17 @@
       ctx.lineTo(p20.x, p20.y);
       ctx.lineTo(pP.x, pP.y);
       ctx.closePath();
-      ctx.fillStyle = 'rgba(217, 119, 6, 0.18)';
+      ctx.fillStyle = 'rgba(184, 118, 50, 0.16)';
       ctx.fill();
-      ctx.strokeStyle = '#d97706';
+      ctx.strokeStyle = '#b87632';
       ctx.lineWidth = 2.3;
       ctx.stroke();
 
       ctx.font = 'bold 12px -apple-system, sans-serif';
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = '#243040';
       ctx.fillText('A', p00.x - 14, p00.y + 12);
       ctx.fillText('B', p20.x + 5, p20.y + 12);
-      ctx.fillStyle = '#d97706';
+      ctx.fillStyle = '#b87632';
       ctx.fillText('P', pP.x + 6, pP.y + 4);
       ctx.fillText('邊長 = 2', (p00.x + p20.x) / 2 - 22, p00.y + 15);
       ctx.restore();
@@ -2975,7 +3429,7 @@
         banner.style.background = '#ecfdf5';
         banner.style.color = '#065f46';
         banner.style.border = '1.5px solid #6ee7b7';
-        banner.textContent = `🎉 恭喜全對！全部 ${blanks.length} 格完全正確，你已徹底精通兩種正方形摺正三角形的原理！`;
+        banner.textContent = `🎉 恭喜全對！全部 ${blanks.length} 格完全正確，你已徹底精通正方形摺正三角形與最大正六邊形的原理！`;
         playTone('win');
         launchConfetti();
       } else {
@@ -3265,10 +3719,411 @@
       });
     }
 
+    /* ==================== 4B. 延伸課程：最大正六邊形模擬器 ==================== */
+    const m3Themes = {
+      orange: { front: '#aed6b8', back: '#f4f9f5', border: '#357a50' },
+      yellow: { front: '#aed6b8', back: '#f4f9f5', border: '#357a50' },
+      green:  { front: '#aed6b8', back: '#f4f9f5', border: '#357a50' }
+    };
+
+    const m3StepsData = {
+      1: {
+        badge: '步驟 1 / 4：先將正方形分成四個小正方形',
+        title: '步驟 1：先將正方形分成四個小正方形',
+        desc: '設大正方形邊長為 2，先左右、上下各對摺一次並展開，壓出十字中線，找出中心點 O，同時將大正方形分成 4 個邊長為 1 的 1/4 小正方形。',
+        math: '💡 先備知識連結：邊長 1 的 1/4 小正方形內接最大正△邊長為 1 / cos(15°) = √6 - √2 ≈ 1.035，剛好等於邊長 2 大正方形內接最大正六邊形的邊長！'
+      },
+      2: {
+        badge: '步驟 2 / 4：將正方形沿對角線對摺成 △',
+        title: '步驟 2：將正方形沿對角線對摺成等腰直角 △',
+        desc: '沿著左上到右下的對角線對摺，使左下角疊合到右上角。此時中心 O 位在斜邊中點，而直角處剛好包含一個完整的 1/4 小正方形（虛線格）。',
+        math: '💡 對稱對齊：對角線（45°）將成為正六邊形的對稱軸，並直接把兩側 60° 扇區摺到同一側，為接下來「複製 6 個正△」做好準備！'
+      },
+      3: {
+        badge: '步驟 3 / 4：再從 1/4 的正方形中摺最大正 △',
+        title: '步驟 3：在 1/4 小正方形中摺出最大正 △（先備知識）',
+        desc: '以斜邊中點 O 為頂點，套用「方法二（15° 最大正△）」的先備知識，將左右兩側多餘紙翼沿著與中線夾 15° 的兩條摺線向內摺疊，壓出頂角 60° 的最大正△！',
+        math: '💡 角度巧合：對角線為 135° / -45°，兩條摺線分別在 75° 與 15°，左右兩翼剛好各是 60°（135°-75°=60°、15°-(-45°)=60°），摺進來後完全重疊在正△上！'
+      },
+      4: {
+        badge: '步驟 4 / 4：利用此最大正 △ 再去摺其餘 5 個正 △',
+        title: '步驟 4：壓出外邊界並攤開，完成最大正六邊形',
+        desc: '先沿著正△的底邊將右上多餘角向內折出外邊界（圖 7），再將全部紙張攤開（圖 8）。因前面對摺疊合了 6 層，攤開後即同時完成 6 個全等正△組成的最大正六邊形！',
+        math: '★ 完工規格：正六邊形邊長 R = 1 / cos(15°) = √6 - √2 ≈ 1.035（約為大正方形邊長的 51.76%），面積佔大正方形約 69.62%！'
+      }
+    };
+
+    const m3State = { step: 1, progress: 1, playing: false, raf: null, color: 'green', autoChain: false, chainTimer: null };
+
+    function setM3Color(val) {
+      m3State.color = val;
+      document.getElementById('m3-swatch').style.background = m3Themes[val].front;
+      renderM3();
+    }
+
+    function updateM3UI() {
+      const info = m3StepsData[m3State.step];
+      document.getElementById('m3-step-badge').textContent = info.badge;
+      document.getElementById('m3-title').textContent = info.title;
+      document.getElementById('m3-desc').textContent = info.desc;
+      document.getElementById('m3-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        const b = document.getElementById(`m3-btn-${i}`);
+        b.className = i === m3State.step ? 'step-card-btn active-emerald' : 'step-card-btn';
+      }
+    }
+
+    function selectM3Step(step, autoPlay = true, autoChain = false) {
+      stopM3Play();
+      m3State.step = step;
+      m3State.autoChain = autoChain;
+      m3State.progress = autoPlay ? 0 : 1;
+      setM3Color('green');
+      document.getElementById('m3-color').value = m3State.color;
+      updateM3UI();
+
+      if (autoPlay) {
+        m3State.sfxFlags = {};
+        document.getElementById('m3-slider').value = 0;
+        document.getElementById('m3-pct').textContent = '0%';
+        startM3Play();
+      } else {
+        document.getElementById('m3-slider').value = 100;
+        document.getElementById('m3-pct').textContent = '100%';
+        renderM3();
+      }
+    }
+
+    function prevM3Step() { selectM3Step(m3State.step > 1 ? m3State.step - 1 : 4, true); }
+    function nextM3Step() { selectM3Step(m3State.step < 4 ? m3State.step + 1 : 1, true); }
+
+    function onM3Slider(val) {
+      stopM3Play();
+      m3State.progress = Number(val) / 100;
+      document.getElementById('m3-pct').textContent = `${val}%`;
+      renderM3();
+    }
+
+    function startM3Play() {
+      m3State.playing = true;
+      if (!m3State.sfxFlags) m3State.sfxFlags = {};
+      document.getElementById('m3-play-btn').textContent = '⏸ 暫停動畫';
+      if (m3State.progress >= 0.99) {
+        m3State.progress = 0;
+        m3State.sfxFlags = {};
+      }
+      if (m3State.progress < 0.05 && !m3State.sfxFlags.start) {
+        m3State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
+
+      const tick = () => {
+        if (!m3State.playing) return;
+        const prev = m3State.progress;
+        const speed = m3State.step === 4 ? 0.0030 : 0.0038;
+        m3State.progress += speed;
+        if (prev < 0.5 && m3State.progress >= 0.5 && !m3State.sfxFlags.mid) {
+          m3State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
+        if (m3State.progress >= 1) {
+          m3State.progress = 1;
+          document.getElementById('m3-slider').value = 100;
+          document.getElementById('m3-pct').textContent = '100%';
+          renderM3();
+          playOrigamiSfx(m3State.step === 4 ? 'done' : 'step');
+          const shouldChain = m3State.autoChain && m3State.step < 4;
+          const nextStep = m3State.step + 1;
+          stopM3Play();
+          if (shouldChain) {
+            m3State.chainTimer = setTimeout(() => selectM3Step(nextStep, true, true), 1100);
+          }
+          return;
+        }
+        const pct = Math.round(m3State.progress * 100);
+        document.getElementById('m3-slider').value = pct;
+        document.getElementById('m3-pct').textContent = `${pct}%`;
+        renderM3();
+        m3State.raf = requestAnimationFrame(tick);
+      };
+      m3State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM3Play() {
+      m3State.playing = false;
+      m3State.autoChain = false;
+      if (m3State.chainTimer) {
+        clearTimeout(m3State.chainTimer);
+        m3State.chainTimer = null;
+      }
+      if (m3State.raf) cancelAnimationFrame(m3State.raf);
+      const btn = document.getElementById('m3-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM3Play() {
+      if (m3State.playing) {
+        stopM3Play();
+      } else if (m3State.progress >= 0.99) {
+        selectM3Step(1, true, true);
+      } else {
+        startM3Play();
+      }
+    }
+
+    function drawAngleArc3D(ctx, camera, center, deg1, deg2, radius, color = '#e11d48', zOffset = 0.015) {
+      const steps = 16;
+      ctx.save();
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const ang = ((deg1 + (deg2 - deg1) * (i / steps)) * Math.PI) / 180;
+        const pt = p3(center.x + radius * Math.cos(ang), center.y + radius * Math.sin(ang), (center.z || 0) + zOffset);
+        const s = camera.project(pt);
+        if (i === 0) ctx.moveTo(s.x, s.y);
+        else ctx.lineTo(s.x, s.y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function renderM3() {
+      const canvas = document.getElementById('canvasM3');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m3Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+
+      const theme = m3Themes[m3State.color];
+      const showNotes = document.getElementById('m3-show-notes').checked;
+      const tan15 = Math.tan(15 * Math.PI / 180);
+      const R = 1 / Math.cos(15 * Math.PI / 180);
+
+      const BL = p3(0, 0, 0);
+      const BR = p3(2, 0, 0);
+      const TR = p3(2, 2, 0);
+      const TL = p3(0, 2, 0);
+      const BM = p3(1, 0, 0);
+      const TM = p3(1, 2, 0);
+      const LM = p3(0, 1, 0);
+      const RM = p3(2, 1, 0);
+      const O  = p3(1, 1, 0);
+
+      const V_top   = p3(1 + tan15, 2, 0);
+      const V_right = p3(2, 1 + tan15, 0);
+
+      const H1 = V_right;
+      const H2 = V_top;
+      const H3 = p3(1 - R / Math.SQRT2, 1 + R / Math.SQRT2, 0);
+      const H4 = p3(0, 1 - tan15, 0);
+      const H5 = p3(1 - tan15, 0, 0);
+      const H6 = p3(1 + R / Math.SQRT2, 1 - R / Math.SQRT2, 0);
+
+      const ease = (t) => {
+        const x = Math.max(0, Math.min(1, t));
+        return 0.5 - 0.5 * Math.cos(Math.PI * x);
+      };
+      const prog = m3State.progress;
+
+      if (m3State.step === 1) {
+        if (prog <= 0.5) {
+          const foldAmt = Math.sin(ease(prog * 2) * Math.PI) * 0.85;
+          scene.addPoly([BL, BM, TM, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
+          if (foldAmt > 0.002) {
+            const BRf = fold3D(BR, BM, TM, foldAmt, 'front');
+            const TRf = fold3D(TR, BM, TM, foldAmt, 'front');
+            scene.addPoly([BM, BRf, TRf, TM], theme.front, theme.back, theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([BM, BR, TR, TM], theme.front, theme.back, theme.border, 1.8, 0, false);
+          }
+          if (prog > 0.85) {
+            // fallback
+          }
+        } else {
+          const foldAmt = Math.sin(ease((prog - 0.5) * 2) * Math.PI) * 0.85;
+          scene.addPoly([BL, BR, RM, LM], theme.front, theme.back, theme.border, 1.8, 0, false);
+          if (foldAmt > 0.002) {
+            const TRf = fold3D(TR, LM, RM, foldAmt, 'front');
+            const TLf = fold3D(TL, LM, RM, foldAmt, 'front');
+            scene.addPoly([LM, RM, TRf, TLf], theme.front, theme.back, theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([LM, RM, TR, TL], theme.front, theme.back, theme.border, 1.8, 0, false);
+            if (prog > 0.85 && showNotes) {
+              scene.addPoly([O, RM, TR, TM], 'rgba(5, 150, 105, 0.14)', 'rgba(5, 150, 105, 0.14)', '#059669', 1.6, 2, false);
+            }
+          }
+        }
+        scene.flush(ctx);
+        if (showNotes) {
+          const vPeak = prog <= 0.5 && Math.sin(ease(prog * 2) * Math.PI) > 0.72;
+          const hPeak = prog > 0.5 && Math.sin(ease((prog - 0.5) * 2) * Math.PI) > 0.72;
+          if (prog <= 0.5) {
+            drawDashed3D(ctx, camera, BM, TM, vPeak ? '#059669' : '#475569', [5, 4], vPeak ? 2.4 : 1.6);
+          } else {
+            drawDashed3D(ctx, camera, BM, O, '#475569', [5, 4], 1.6);
+          }
+          if (prog > 0.48) drawDashed3D(ctx, camera, LM, RM, hPeak ? '#059669' : '#475569', [5, 4], hPeak ? 2.4 : 1.6);
+          drawLabel3D(ctx, camera, O, 'O', '#059669', 6, -6);
+          drawLabel3D(ctx, camera, p3(1.5, 1.5), '1/4', '#059669', -10, 4);
+        }
+      } else if (m3State.step === 2) {
+        const eProg = ease(prog);
+        scene.addPoly([TL, BR, TR], theme.front, theme.back, theme.border, 1.8, 0, false);
+        if (showNotes) {
+          scene.addPoly([O, RM, TR, TM], 'rgba(5, 150, 105, 0.10)', 'rgba(5, 150, 105, 0.10)', null, 0, 1, false);
+        }
+        const BLf = fold3D(BL, TL, BR, eProg, 'front');
+        const BMf = fold3D(BM, TL, BR, eProg, 'front');
+        const LMf = fold3D(LM, TL, BR, eProg, 'front');
+        scene.addPoly([TL, BLf, BR], theme.front, theme.back, theme.border, 1.6, 4, eProg > 0.02 && eProg < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, TL, BR, '#475569', [5, 4], 1.6);
+          drawDashed3D(ctx, camera, O, TM, '#059669', [4, 4], 1.5, 0.012);
+          drawDashed3D(ctx, camera, O, RM, '#059669', [4, 4], 1.5, 0.012);
+          if (eProg < 0.96) {
+            drawDashed3D(ctx, camera, O, BMf, '#64748b', [4, 4], 1.3, 0.008);
+            drawDashed3D(ctx, camera, O, LMf, '#64748b', [4, 4], 1.3, 0.008);
+          }
+          drawLabel3D(ctx, camera, O, 'O', '#059669', -14, 12);
+          drawLabel3D(ctx, camera, p3(1.52, 1.52), '1/4 正方形', '#059669', -24, 4);
+        }
+      } else if (m3State.step === 3) {
+        const pLeft = ease((prog - 0.14) / 0.43);
+        const pRight = ease((prog - 0.57) / 0.43);
+        scene.addPoly([O, V_right, TR, V_top], theme.front, theme.back, theme.border, 1.8, 0, false);
+        if (showNotes && prog > 0.88) {
+          scene.addPoly([O, V_right, V_top], 'rgba(5, 150, 105, 0.14)', 'rgba(5, 150, 105, 0.14)', '#059669', 2.0, 2, false);
+        }
+        const liftPts = (pts, dz) => dz > 0 ? pts.map((q) => p3(q.x, q.y, q.z + dz)) : pts;
+        const TLf = fold3D(TL, O, V_top, pLeft, 'front');
+        const BRf = fold3D(BR, O, V_right, pRight, 'front');
+        scene.addPoly(liftPts([TLf, O, V_top], pLeft > 0.96 ? 0.004 : 0), theme.front, theme.back, theme.border, 1.6, 4, pLeft > 0.02 && pLeft < 0.98);
+        scene.addPoly(liftPts([O, BRf, V_right], pRight > 0.96 ? 0.008 : 0), theme.front, theme.back, theme.border, 1.6, 6, pRight > 0.02 && pRight < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, O, TM, '#475569', [4, 4], 1.3, 0.012);
+          drawDashed3D(ctx, camera, O, RM, '#475569', [4, 4], 1.3, 0.012);
+          drawDashed3D(ctx, camera, O, V_top, '#e11d48', [5, 3], 2.0, 0.016);
+          drawDashed3D(ctx, camera, O, V_right, '#e11d48', [5, 3], 2.0, 0.016);
+          drawAngleArc3D(ctx, camera, O, 15, 75, 0.28, '#059669', 0.016);
+          drawAngleArc3D(ctx, camera, O, 0, 15, 0.42, '#e11d48', 0.016);
+          drawAngleArc3D(ctx, camera, O, 75, 90, 0.42, '#e11d48', 0.016);
+          if (prog > 0.85) {
+            drawDashed3D(ctx, camera, V_top, V_right, '#059669', [5, 3], 2.2, 0.018);
+          }
+          drawLabel3D(ctx, camera, O, 'O (60°)', '#059669', -18, 16);
+          drawLabel3D(ctx, camera, p3(1.13, 1.65), '15°', '#e11d48', -6, 0);
+          drawLabel3D(ctx, camera, p3(1.62, 1.13), '15°', '#e11d48', 0, 4);
+        }
+      } else {
+        if (prog <= 0.28) {
+          const pA = ease(prog / 0.28);
+          const TLf = fold3D(TL, O, V_top, 1, 'front');
+          const BRf = fold3D(BR, O, V_right, 1, 'front');
+          const TRf = fold3D(TR, V_top, V_right, pA, 'front');
+          scene.addPoly([TLf, O, V_top], theme.front, theme.back, theme.border, 1.4, -2, false);
+          scene.addPoly([O, BRf, V_right], theme.front, theme.back, theme.border, 1.4, -1, false);
+          scene.addPoly([O, V_right, V_top], theme.front, theme.back, '#059669', 2.2, 2, false);
+          scene.addPoly([V_top, TRf, V_right], theme.front, theme.back, theme.border, 1.6, 5, pA > 0.02 && pA < 0.98);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, V_top, V_right, '#059669', [5, 3], 2.1, 0.016);
+            drawLabel3D(ctx, camera, O, 'O', '#059669', -14, 14);
+          }
+        } else if (prog <= 0.46) {
+          const u0 = 1 - ease((prog - 0.28) / 0.18);
+          const TLf = fold3D(TL, O, V_top, 1, 'front');
+          const BRf = fold3D(BR, O, V_right, 1, 'front');
+          const TRf = fold3D(TR, V_top, V_right, u0, 'front');
+          scene.addPoly([TLf, O, V_top], theme.front, theme.back, theme.border, 1.4, -2, false);
+          scene.addPoly([O, BRf, V_right], theme.front, theme.back, theme.border, 1.4, -1, false);
+          scene.addPoly([O, V_right, V_top], theme.front, theme.back, '#059669', 2.0, 2, false);
+          scene.addPoly([V_top, TRf, V_right], theme.front, theme.back, theme.border, 1.6, 5, u0 > 0.02 && u0 < 0.98);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, V_top, V_right, '#059669', [5, 3], 2.0, 0.016);
+          }
+        } else if (prog <= 0.72) {
+          const uR = 1 - ease((prog - 0.46) / 0.18);
+          const uL = 1 - ease((prog - 0.54) / 0.18);
+          const TLf = fold3D(TL, O, V_top, uL, 'front');
+          const BRf = fold3D(BR, O, V_right, uR, 'front');
+          scene.addPoly([O, V_right, TR, V_top], theme.front, theme.back, theme.border, 1.8, 0, false);
+          scene.addPoly([TLf, O, V_top], theme.front, theme.back, theme.border, 1.6, 4, uL > 0.02 && uL < 0.98);
+          scene.addPoly([O, BRf, V_right], theme.front, theme.back, theme.border, 1.6, 6, uR > 0.02 && uR < 0.98);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, O, H1, '#475569', [4, 3], 1.4, 0.012);
+            drawDashed3D(ctx, camera, O, H2, '#475569', [4, 3], 1.4, 0.012);
+            drawDashed3D(ctx, camera, H1, H2, '#059669', [5, 3], 2.0, 0.014);
+          }
+        } else {
+          const u2 = 1 - ease((prog - 0.72) / 0.28);
+          const reveal = 1 - u2;
+          scene.addPoly([TL, BR, TR], theme.front, theme.back, theme.border, 1.8, 0, false);
+          const BLf = fold3D(BL, TL, BR, u2, 'front');
+          const H4f = fold3D(H4, TL, BR, u2, 'front');
+          const H5f = fold3D(H5, TL, BR, u2, 'front');
+          if (u2 > 0.01) {
+            scene.addPoly([TL, BLf, BR], theme.front, theme.back, theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([TL, BL, BR], theme.front, theme.back, theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, BM, TM, '#94a3b8', [4, 4], 1.1, 0.008);
+            drawDashed3D(ctx, camera, LM, RM, '#94a3b8', [4, 4], 1.1, 0.008);
+            // 上半部正六邊形邊與放射摺痕
+            [H1, H2, H3, H6].forEach((pt) => drawDashed3D(ctx, camera, O, pt, '#475569', [4, 3], 1.4, 0.012));
+            drawDashed3D(ctx, camera, H6, H1, '#059669', [], 2.4, 0.015);
+            drawDashed3D(ctx, camera, H1, H2, '#059669', [], 2.4, 0.015);
+            drawDashed3D(ctx, camera, H2, H3, '#059669', [], 2.4, 0.015);
+            // 隨左下半片同步展開的另外三邊與放射摺痕
+            drawDashed3D(ctx, camera, O, H4f, '#475569', [4, 3], 1.4, 0.012);
+            drawDashed3D(ctx, camera, O, H5f, '#475569', [4, 3], 1.4, 0.012);
+            drawDashed3D(ctx, camera, H3, H4f, '#059669', [], 2.4, 0.015);
+            drawDashed3D(ctx, camera, H4f, H5f, '#059669', [], 2.4, 0.015);
+            drawDashed3D(ctx, camera, H5f, H6, '#059669', [], 2.4, 0.015);
+            if (reveal > 0.85) {
+              drawAngleArc3D(ctx, camera, O, 15, 75, 0.25, '#059669', 0.016);
+              drawLabel3D(ctx, camera, O, 'O', '#059669', 6, -6);
+              drawLabel3D(ctx, camera, p3(1.48, 1.45), '正六邊形', '#059669', -22, 6);
+            }
+          }
+        }
+      }
+      if (showNotes) {
+        const m3Hint = m3State.step === 1
+          ? (prog <= 0.5 ? '垂直對摺找出中線…' : '水平對摺，畫出 4 個 1/4 小正方形')
+          : m3State.step === 2
+          ? '沿對角線對摺成等腰直角 △（O 在斜邊中點）'
+          : m3State.step === 3
+          ? (prog < 0.15 ? '鎖定 1/4 小正方形與 15° 基準角' : prog < 0.57 ? '先摺入左上翼（60° 重疊）' : '再摺入右下翼，完成 1/4 最大正△！')
+          : (prog <= 0.28 ? '沿正△底邊折入外邊界…' : prog <= 0.72 ? '依序展開兩翼，保留 60° 摺痕' : '沿對角線攤平，浮現最大正六邊形！');
+        drawStageHint3D(ctx, size, m3Hint, '#059669');
+      }
+      ctx.restore();
+    }
+
     /* ==================== 7. 視窗縮放與頁面初始化 ==================== */
     window.addEventListener('resize', () => {
       renderM1();
       renderM2();
+      renderM3();
       renderCmp1();
       updateCmpExplorer(document.getElementById('cmp-theta-slider').value);
     });
@@ -3304,8 +4159,11 @@
       selectM1Step(1, true, true);
       updateM2UI();
       renderM2();
+      updateM3UI();
+      renderM3();
       bindOrbit3D('canvasM1', m1Cam, renderM1);
       bindOrbit3D('canvasM2', m2Cam, renderM2);
+      bindOrbit3D('canvasM3', m3Cam, renderM3);
       renderCmp1();
       updateCmpExplorer(15);
       initSketchPads();
