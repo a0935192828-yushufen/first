@@ -1,0 +1,4109 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>正方形的等分摺紙：三等分、五等分、七等分與芳賀定理｜互動幾何教學與學習單</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d97706'/%3E%3Cstop offset='100%25' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Crect x='6' y='6' width='20' height='20' rx='2' fill='rgba(255,255,255,0.22)' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='12.7' y1='6' x2='12.7' y2='26' stroke='%23fff' stroke-width='1.5' stroke-dasharray='2.5 2'/%3E%3Cline x1='19.3' y1='6' x2='19.3' y2='26' stroke='%23fff' stroke-width='1.5' stroke-dasharray='2.5 2'/%3E%3C/svg%3E" />
+  <style>
+    /* ==================== 1. 設計系統與全域變數 ==================== */
+    :root {
+      --bg-page: #f4f6fb;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-soft: #eef2ff;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Segoe UI", sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ==================== 2. 台灣數學標準符號排版 (零外部CDN) ==================== */
+    .math {
+      font-family: "Times New Roman", Georgia, "Noto Serif TC", serif;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .overline {
+      display: inline-block;
+      border-top: 1.6px solid currentColor;
+      padding-top: 1px;
+      line-height: 1.05;
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 3px;
+      font-size: 0.9em;
+    }
+    .frac > span:first-child {
+      border-bottom: 1.5px solid currentColor;
+      padding: 0 4px 1px;
+      line-height: 1.15;
+    }
+    .frac > span:last-child {
+      padding: 1px 4px 0;
+      line-height: 1.15;
+    }
+
+    /* ==================== 3. 頂部導覽列與五分頁切換 ==================== */
+    header.top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #d97706, #4f46e5);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .brand-title h1 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .brand-title p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: #eef2f6;
+      padding: 4px;
+      border-radius: 13px;
+      width: 100%;
+    }
+
+    @media (min-width: 900px) {
+      .tab-bar {
+        width: auto;
+        display: flex;
+      }
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    @media (min-width: 900px) {
+      .tab-btn {
+        font-size: 0.8rem;
+        padding: 8px 11px;
+      }
+    }
+
+    .tab-btn:hover {
+      color: #0f172a;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    /* ==================== 4. 主要版面容器 ==================== */
+    main.container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    @media (min-width: 768px) {
+      main.container {
+        padding: 24px 20px;
+      }
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.24s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      color: #ffffff;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .header-m1 { background: linear-gradient(135deg, #d97706, #ea580c); }
+    .header-m2 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+    .header-m7 { background: linear-gradient(135deg, #be123c, #e11d48); }
+    .header-m3 { background: linear-gradient(135deg, #059669, #0d9488); }
+    .header-cmp { background: linear-gradient(135deg, #0f766e, #0284c7); }
+
+    .badge-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      margin-bottom: 3px;
+    }
+
+    .card-header h2 {
+      font-size: 1.08rem;
+      font-weight: 800;
+    }
+
+    /* ==================== 5. 摺紙模擬器雙欄與緊貼控制列 ==================== */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 960px) {
+      .sim-grid {
+        grid-template-columns: 1.12fr 0.88fr;
+      }
+    }
+
+    .sim-stage {
+      background: var(--bg-subtle);
+      padding: 12px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    @media (min-width: 960px) {
+      .sim-stage {
+        padding: 20px;
+        border-bottom: none;
+        border-right: 1px solid var(--border-light);
+      }
+    }
+
+    .stage-topbar {
+      width: 100%;
+      max-width: 430px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .step-tag {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .step-tag.m1 {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .step-tag.m3 {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .step-tag.m7 {
+      background: #ffe4e6;
+      color: #9f1239;
+    }
+
+    .toggle-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #334155;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .canvas-box {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      padding: 6px;
+      box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    @media (min-width: 640px) {
+      .canvas-box {
+        max-width: 430px;
+        padding: 10px;
+      }
+    }
+
+    .canvas-box canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 10px;
+      background: radial-gradient(circle at 50% 42%, #f7f8f3 0%, #eaeee6 100%);
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .canvas-box canvas:active {
+      cursor: grabbing;
+    }
+
+    .drag-hint-pill {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .view-reset-fab {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 5px 9px;
+      border-radius: 9px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+      transition: transform 0.12s ease;
+    }
+
+    .view-reset-fab:active { transform: scale(0.95); }
+
+    .quick-replay-fab {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+      transition: transform 0.12s ease;
+    }
+
+    .quick-replay-fab:active { transform: scale(0.95); }
+
+    .docked-controls {
+      width: 100%;
+      max-width: 340px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 0 0 16px 16px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    @media (min-width: 640px) {
+      .docked-controls {
+        max-width: 430px;
+        padding: 12px 14px;
+      }
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1.65fr 1fr;
+      gap: 7px;
+      margin-bottom: 9px;
+    }
+
+    .ctrl-btn {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 9px 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .ctrl-btn:hover { background: #f1f5f9; }
+    .ctrl-btn:active { transform: scale(0.97); }
+
+    .ctrl-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.28);
+    }
+    .ctrl-btn.primary:hover { background: var(--primary-hover); }
+
+    .ctrl-btn.amber-primary {
+      background: #d97706;
+      border-color: #d97706;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.28);
+    }
+
+    .ctrl-btn.emerald-primary {
+      background: #059669;
+      border-color: #059669;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+    }
+
+    .ctrl-btn.rose-primary {
+      background: #be123c;
+      border-color: #be123c;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(190, 18, 60, 0.28);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slider-row label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+    }
+
+    .pct-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .legend-bar {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid #94a3b8;
+      display: inline-block;
+    }
+
+    .sim-sidebar {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    @media (min-width: 960px) {
+      .sim-sidebar { padding: 22px; }
+    }
+
+    .step-grid-btns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .step-card-btn {
+      text-align: left;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-light);
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .step-card-btn:hover { border-color: #a5b4fc; }
+    .step-card-btn.active { border-color: var(--primary); background: var(--primary-soft); }
+    .step-card-btn.active-amber { border-color: #d97706; background: #fffbeb; }
+    .step-card-btn.active-emerald { border-color: #059669; background: #ecfdf5; }
+    .step-card-btn.active-rose { border-color: #be123c; background: #fff1f2; }
+
+    .step-card-btn .s-num {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .step-card-btn.active .s-num { color: var(--primary); }
+    .step-card-btn.active-amber .s-num { color: #b45309; }
+    .step-card-btn.active-emerald .s-num { color: #059669; }
+    .step-card-btn.active-rose .s-num { color: #be123c; }
+
+    .step-card-btn .s-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 2px;
+    }
+
+    .explain-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 15px;
+      flex: 1;
+    }
+
+    .explain-box h3 {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .explain-box p {
+      font-size: 0.86rem;
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .math-callout {
+      margin-top: 10px;
+      background: #ffffff;
+      border-left: 4px solid var(--primary);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #1e1b4b;
+      line-height: 1.6;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    .math-callout.amber { border-left-color: #d97706; color: #78350f; }
+    .math-callout.emerald { border-left-color: #059669; color: #064e3b; }
+    .math-callout.rose { border-left-color: #be123c; color: #881337; }
+
+    /* ==================== 6. 分頁 4：等分原理互動探索器 ==================== */
+    .cmp-dual-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 18px;
+    }
+
+    @media (min-width: 820px) {
+      .cmp-dual-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .cmp-panel {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cmp-panel h3 {
+      font-size: 0.94rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .cmp-canvas-wrap {
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 6px;
+      margin: 8px 0;
+    }
+
+    .cmp-canvas-wrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .theta-control-card {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #c7d2fe;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: 4px;
+    }
+
+    .n-pill-group {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .n-pill-btn {
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .n-pill-btn.active {
+      background: #d97706;
+      border-color: #d97706;
+      color: #ffffff;
+    }
+
+    .stats-mini-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .stat-box {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 7px 4px;
+    }
+
+    .stat-box .lbl {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .stat-box .val {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #0f172a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .cmp-table-wrap {
+      padding: 0 18px 20px;
+      overflow-x: auto;
+    }
+
+    table.cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      min-width: 600px;
+    }
+
+    table.cmp-table th,
+    table.cmp-table td {
+      border: 1px solid var(--border-light);
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    table.cmp-table th {
+      background: #f1f5f9;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    table.cmp-table td:first-child {
+      font-weight: 700;
+      text-align: left;
+      background: #f8fafc;
+    }
+
+    .highlight-win {
+      background: #ecfdf5;
+      color: #065f46;
+      font-weight: 800;
+    }
+
+    /* ==================== 7. 分頁 5：課堂學習單 (互動批改 + A4 列印) ==================== */
+    .ws-toolbar {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ws-btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ws-action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .ws-action-btn.grade { background: var(--emerald); color: #ffffff; }
+    .ws-action-btn.ans { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
+    .ws-action-btn.ans.active-toggle { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+    .ws-action-btn.print { background: var(--primary); color: #ffffff; }
+
+    .ws-helper-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+      font-size: 0.78rem;
+      color: #475569;
+    }
+
+    .ws-progress-pill {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .ws-progress-pill.complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .ws-sec-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ws-sec-head .ws-sec-badge { margin-bottom: 0; }
+
+    .ws-hint-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .ws-hint-btn:hover { background: #f1f5f9; color: #0f172a; }
+
+    .ws-hint-box {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .ws-hint-box.open { display: block; }
+    .quiz-mode .diagram-hint { display: none; }
+
+    .worksheet-paper {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 24px 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (min-width: 768px) {
+      .worksheet-paper { padding: 36px 40px; }
+    }
+
+    .ws-header {
+      border-bottom: 2.5px solid #0f172a;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+
+    .ws-title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ws-title-row h2 {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .ws-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .ws-meta-item {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .ws-meta-item input {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #475569;
+      outline: none;
+      padding: 2px 4px;
+      font-size: 0.88rem;
+      text-align: center;
+      background: transparent;
+    }
+
+    .ws-section {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .ws-sec-badge {
+      display: inline-block;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ws-sec-badge.amber { background: #fef3c7; color: #92400e; }
+    .ws-sec-badge.indigo { background: #e0e7ff; color: #3730a3; }
+    .ws-sec-badge.emerald { background: #d1fae5; color: #065f46; }
+
+    .ws-two-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    @media (min-width: 720px) {
+      .ws-two-col { grid-template-columns: 210px 1fr; }
+    }
+
+    .ws-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ws-diagram svg {
+      width: 196px;
+      height: 196px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+
+    .ws-diagram span {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .ws-q-list {
+      font-size: 0.88rem;
+      line-height: 1.85;
+      color: #1e293b;
+    }
+
+    .ws-q-item { margin-bottom: 6px; }
+
+    input.blank {
+      width: 68px;
+      border: none;
+      border-bottom: 2px solid #475569;
+      background: #f8fafc;
+      text-align: center;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--primary);
+      padding: 1px 4px;
+      border-radius: 4px 4px 0 0;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    input.blank:focus { border-bottom-color: var(--primary); background: #eef2ff; }
+    input.blank.correct { border-bottom-color: #059669; background: #d1fae5; color: #065f46; }
+    input.blank.wrong { border-bottom-color: #e11d48; background: #ffe4e6; color: #9f1239; }
+
+    .ans-hint {
+      display: none;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 1px 6px;
+      border-radius: 5px;
+      margin-left: 3px;
+    }
+
+    .show-ans .ans-hint { display: inline-block; }
+
+    .sketch-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .sketch-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .sketch-box {
+      border: 1px dashed #94a3b8;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fcfcfd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sketch-box p {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .sketch-canvas {
+      width: 196px;
+      height: 196px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .sketch-tools {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .sketch-tool-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .sketch-tool-btn.active {
+      background: #eef2ff;
+      border-color: #4f46e5;
+      color: #3730a3;
+    }
+
+    .grade-banner {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ==================== 8. A4 列印專用樣式 ==================== */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 10pt;
+      }
+      header.top-nav,
+      .ws-toolbar,
+      .ws-helper-bar,
+      .ws-hint-btn,
+      .ws-hint-box,
+      .sketch-tools,
+      .grade-banner,
+      .ans-hint,
+      footer.site-footer,
+      #confettiCanvas {
+        display: none !important;
+      }
+      main.container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .tab-panel { display: none !important; }
+      #panel-6 { display: block !important; }
+      .worksheet-paper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .ws-header {
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+      }
+      .ws-section {
+        border: 1.2px solid #64748b !important;
+        padding: 10px 12px !important;
+        margin-bottom: 10px !important;
+        break-inside: avoid;
+      }
+      .sketch-canvas {
+        width: 140px !important;
+        height: 140px !important;
+        border: none !important;
+      }
+      input.blank {
+        background: transparent !important;
+        border-bottom: 1.4px solid #000000 !important;
+        color: #000000 !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 滿分慶祝彩帶 Canvas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- ==================== 頂部導覽列 ==================== -->
+  <header class="top-nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3.5" y="3.5" width="17" height="17" rx="2" fill="rgba(255,255,255,0.22)" />
+            <line x1="9.2" y1="3.5" x2="9.2" y2="20.5" stroke-width="1.5" stroke-dasharray="2.5 2" />
+            <line x1="14.8" y1="3.5" x2="14.8" y2="20.5" stroke-width="1.5" stroke-dasharray="2.5 2" />
+            <line x1="3.5" y1="20.5" x2="20.5" y2="3.5" stroke-width="1.2" stroke-opacity="0.7" />
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>正方形的等分摺紙：三、五、七等分</h1>
+          <p>3D 動態摺紙模擬 × 相似三角形與芳賀定理 × 課堂互動學習單</p>
+        </div>
+      </div>
+
+      <nav class="tab-bar" role="tablist">
+        <button id="tab-btn-1" class="tab-btn active" onclick="switchTab(1)">① 三等分摺紙</button>
+        <button id="tab-btn-2" class="tab-btn" onclick="switchTab(2)">② 五等分摺紙</button>
+        <button id="tab-btn-3" class="tab-btn" onclick="switchTab(3)">③ 七等分摺紙</button>
+        <button id="tab-btn-4" class="tab-btn" onclick="switchTab(4)">④ 延伸：芳賀定理</button>
+        <button id="tab-btn-5" class="tab-btn" onclick="switchTab(5)">⑤ 等分原理探索</button>
+        <button id="tab-btn-6" class="tab-btn" onclick="switchTab(6)">⑥ 課堂學習單</button>
+        <button id="sfx-toggle-btn" type="button" class="tab-btn" onclick="toggleSfx()" title="開啟或關閉摺紙音效" style="background:#f1f5f9;color:#0f172a;">🔊 音效：開</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ==================== 分頁 1：三等分摺紙（對角線 × 中點交叉法） ==================== -->
+    <section id="panel-1" class="tab-panel active">
+      <div class="card">
+        <div class="card-header header-m1">
+          <div>
+            <span class="badge-pill">單元一 · 相似三角形 1 : 2 交叉法</span>
+            <h2>正方形三等分摺紙：對角線 <span class="math"><span class="overline">AC</span></span> × 中點連線 <span class="math"><span class="overline">BM</span></span></h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            設正方形邊長 = 2
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m1-step-badge" class="step-tag m1">步驟 1 / 4：左右對摺找出上邊中點 M</span>
+              <label class="toggle-check">
+                <input id="m1-show-notes" type="checkbox" checked onchange="renderM1()" />
+                <span>輔助線與相似標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM1"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m1')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM1Step(m1State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM1Step()">← 上一步</button>
+                <button id="m1-play-btn" class="ctrl-btn amber-primary" onclick="toggleM1Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM1Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m1-slider">摺疊進度</label>
+                <input id="m1-slider" type="range" min="0" max="100" value="100" oninput="onM1Slider(this.value)" />
+                <span id="m1-pct" class="pct-pill" style="background:#fef3c7;color:#b45309;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#ecc8a1;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#faf7f0;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>輔助摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #c84b61;display:inline-block;"></span>三等分線</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m1-btn-1" class="step-card-btn active-amber" onclick="selectM1Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">對摺找上邊中點 M</div>
+                </button>
+                <button id="m1-btn-2" class="step-card-btn" onclick="selectM1Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">AC 與 BM 交叉得 P</div>
+                </button>
+                <button id="m1-btn-3" class="step-card-btn" onclick="selectM1Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">過 P 點摺出右側 1/3</div>
+                </button>
+                <button id="m1-btn-4" class="step-card-btn" onclick="selectM1Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">剩餘 2/3 對摺完成</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m1-title">步驟 1：左右對摺找出上邊中點 M</h3>
+              <p id="m1-desc">
+                設正方形邊長為 2，左下、右下、右上、左上頂點依序記為 A、B、C、D。將左右兩邊對齊對摺並展開，壓出垂直中線，找出上邊中點 M（此時 MC = 1，佔上邊的 1/2）。
+              </p>
+              <div id="m1-math" class="math-callout amber">
+                💡 幾何關鍵：中點 M 讓上邊短段 MC = 1，底邊全長 AB = 2，為下一步創造 1 : 2 的相似比例！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 2：五等分摺紙（1/4 點 × 對角線交叉法） ==================== -->
+    <section id="panel-2" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m2">
+          <div>
+            <span class="badge-pill">單元二 · 相似三角形 1 : 4 交叉法</span>
+            <h2>正方形五等分摺紙：由 <span class="math">1/4</span> 點推導 <span class="math">1/5</span> 再連續對摺</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            關鍵觀察：5 - 1 = 4 = 2²
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m2-step-badge" class="step-tag">步驟 1 / 4：兩次對摺找出 1/4 點 Q</span>
+              <label class="toggle-check">
+                <input id="m2-show-notes" type="checkbox" checked onchange="renderM2()" />
+                <span>輔助線與相似標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM2"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m2')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM2Step(m2State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM2Step()">← 上一步</button>
+                <button id="m2-play-btn" class="ctrl-btn primary" onclick="toggleM2Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM2Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m2-slider">摺疊進度</label>
+                <input id="m2-slider" type="range" min="0" max="100" value="100" oninput="onM2Slider(this.value)" />
+                <span id="m2-pct" class="pct-pill">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#b8cbe8;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#f5f8fc;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>輔助摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #4f46e5;display:inline-block;"></span>五等分線</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m2-btn-1" class="step-card-btn active" onclick="selectM2Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">兩次對摺找 1/4 點 Q</div>
+                </button>
+                <button id="m2-btn-2" class="step-card-btn" onclick="selectM2Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">AC 與 BQ 交叉得 R</div>
+                </button>
+                <button id="m2-btn-3" class="step-card-btn" onclick="selectM2Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">過 R 點摺出右側 1/5</div>
+                </button>
+                <button id="m2-btn-4" class="step-card-btn" onclick="selectM2Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">剩餘 4/5 連摺兩次</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m2-title">步驟 1：兩次對摺找出上邊 1/4 點 Q</h3>
+              <p id="m2-desc">
+                設正方形邊長為 2。先左右對摺壓出中線 x = 1，再將右邊界對齊中線對摺並展開，在上邊壓出 1/4 點 Q(1.5, 2)，此時 QC = 0.5（佔上邊全長的 1/4）。
+              </p>
+              <div id="m2-math" class="math-callout">
+                💡 幾何推廣：三等分借用 1/2 點（1:2），五等分則借用 1/4 點（1:4）！因為 4 是 2 的次方，只要對摺兩次就能精準折出 1/4。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 3：七等分摺紙（1/6 點 × 對角線交叉法） ==================== -->
+    <section id="panel-3" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m7">
+          <div>
+            <span class="badge-pill">單元三 · 相似三角形 1 : 6 交叉法</span>
+            <h2>正方形七等分摺紙：借用 <span class="math">1/6</span> 點推導 <span class="math">1/7</span> 再均分剩餘 <span class="math">6/7</span></h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            關鍵觀察：7 - 1 = 6 = 2 × 3
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m7-step-badge" class="step-tag m7">步驟 1 / 4：由 1/3 再對摺找出上邊 1/6 點 S</span>
+              <label class="toggle-check">
+                <input id="m7-show-notes" type="checkbox" checked onchange="renderM7()" />
+                <span>輔助線與相似標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM7"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m7')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM7Step(m7State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM7Step()">← 上一步</button>
+                <button id="m7-play-btn" class="ctrl-btn rose-primary" onclick="toggleM7Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM7Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m7-slider">摺疊進度</label>
+                <input id="m7-slider" type="range" min="0" max="100" value="100" oninput="onM7Slider(this.value)" />
+                <span id="m7-pct" class="pct-pill" style="background:#ffe4e6;color:#9f1239;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#e8c4cc;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#fdf7f8;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>輔助摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #be123c;display:inline-block;"></span>七等分線</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m7-btn-1" class="step-card-btn active-rose" onclick="selectM7Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">由 1/3 對摺找 1/6 點 S</div>
+                </button>
+                <button id="m7-btn-2" class="step-card-btn" onclick="selectM7Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">AC 與 BS 交叉得 T</div>
+                </button>
+                <button id="m7-btn-3" class="step-card-btn" onclick="selectM7Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">過 T 點摺出右側 1/7</div>
+                </button>
+                <button id="m7-btn-4" class="step-card-btn" onclick="selectM7Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">剩餘 6/7 對摺再三等分</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m7-title">步驟 1：由右側 1/3 再對摺找出上邊 1/6 點 S</h3>
+              <p id="m7-desc">
+                設正方形邊長為 2。先利用單元一的方法壓出右側 1/3 摺線（x = 4/3），再將右邊界向左對齊該摺線對摺並展開，即可在上邊精準壓出右側 1/6 點 S(5/3, 2)，此時 SC = 1/3（佔總邊長的 1/6）。
+              </p>
+              <div id="m7-math" class="math-callout rose">
+                💡 幾何接力：要折出 1/7，先找 1/6！因為 6 = 2 × 3，只要先三等分再對摺一次，就能精準取得 1/6 點 S，創造 1 : 6 的相似比例！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 4：延伸課程——芳賀第一定理（一摺三等分） ==================== -->
+    <section id="panel-4" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m3">
+          <div>
+            <span class="badge-pill">延伸課程 · 芳賀第一定理（Haga's First Theorem）</span>
+            <h2>最神奇的一摺三等分：翻折一角誕生三組 <span class="math">3 : 4 : 5</span> 相似直角△</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            畢氏定理 × 相似三角形
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m3-step-badge" class="step-tag m3">步驟 1 / 4：對摺標出上邊中點 M</span>
+              <label class="toggle-check">
+                <input id="m3-show-notes" type="checkbox" checked onchange="renderM3()" />
+                <span>輔助線與 3:4:5 標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM3"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m3')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM3Step(m3State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM3Step()">← 上一步</button>
+                <button id="m3-play-btn" class="ctrl-btn emerald-primary" onclick="toggleM3Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM3Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m3-slider">摺疊進度</label>
+                <input id="m3-slider" type="range" min="0" max="100" value="100" oninput="onM3Slider(this.value)" />
+                <span id="m3-pct" class="pct-pill" style="background:#d1fae5;color:#065f46;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#aed6b8;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#f4f9f5;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #059669;display:inline-block;"></span>水平三等分線</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m3-btn-1" class="step-card-btn active-emerald" onclick="selectM3Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">找出上邊中點 M</div>
+                </button>
+                <button id="m3-btn-2" class="step-card-btn" onclick="selectM3Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">右下角 B 摺向 M</div>
+                </button>
+                <button id="m3-btn-3" class="step-card-btn" onclick="selectM3Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">3:4:5 相似△證明</div>
+                </button>
+                <button id="m3-btn-4" class="step-card-btn" onclick="selectM3Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">過 G 點完成三等分</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m3-title">步驟 1：對摺找出上邊中點 M</h3>
+              <p id="m3-desc">
+                設正方形邊長為 2，先左右對摺（或僅在上邊輕捏記號），找出上邊中點 M(1, 2)，使 DM = MC = 1。
+              </p>
+              <div id="m3-math" class="math-callout emerald">
+                💡 芳賀和夫（Kazuo Haga）發現：只需把右下角頂點 B 精準摺向中點 M，不畫任何對角線，紙邊就會自動在左邊界截出 1/3 與 2/3！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 5：等分原理互動探索器 ==================== -->
+    <section id="panel-5" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-cmp">
+          <div>
+            <span class="badge-pill">PART 5 · 通用 N 等分與芳賀公式實驗室</span>
+            <h2>從三等分、五等分、七等分推廣到任意 <span class="math">N</span> 等分</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            正規化單位正方形（邊長 = 1）
+          </span>
+        </div>
+
+        <div class="cmp-dual-grid">
+          <!-- 左側：交叉對角線 N 等分探索器 -->
+          <div class="cmp-panel">
+            <h3 style="color:#b45309;">探索一：交叉對角線 <span class="math">1/(N-1) → 1/N</span></h3>
+            <p style="font-size:0.78rem;color:#64748b;">選擇等分數 <span class="math">N</span>，觀察相似三角形如何精準定位 <span class="math">1/N</span></p>
+            <div class="n-pill-group">
+              <button class="n-pill-btn active" onclick="setExploreN(3, this)">3 等分</button>
+              <button class="n-pill-btn" onclick="setExploreN(5, this)">5 等分</button>
+              <button class="n-pill-btn" onclick="setExploreN(7, this)">7 等分</button>
+              <button class="n-pill-btn" onclick="setExploreN(9, this)">9 等分</button>
+            </div>
+            <div class="cmp-canvas-wrap">
+              <canvas id="canvasCmp1"></canvas>
+            </div>
+            <div id="cmp1-sim-pill" style="width:100%;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:6px 10px;margin:2px 0 4px;font-size:0.78rem;font-weight:800;color:#78350f;text-align:center;">
+              📐 相似三角形：<span style="color:#d97706;">△PQC（橘）</span> <span class="math">～</span> <span style="color:#4f46e5;">△PBA（紫）</span>（AA 相似，<span class="math"><span class="overline">QC</span> ∥ <span class="overline">AB</span></span>）
+            </div>
+            <div class="stats-mini-grid">
+              <div class="stat-box">
+                <div class="lbl">先備等分點</div>
+                <div id="cmp1-base-val" class="val" style="color:#d97706;">1/2</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">相似三角形比</div>
+                <div id="cmp1-ratio-val" class="val">1 : 2</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">交點截出右側</div>
+                <div id="cmp1-target-val" class="val" style="color:#e11d48;">1/3</div>
+              </div>
+            </div>
+            <div id="cmp1-note" style="margin-top:8px;font-size:0.78rem;color:#475569;text-align:center;">
+              剩餘左側寬度為 2/3，剛好只需再對摺 1 次即完成 3 等分！
+            </div>
+          </div>
+
+          <!-- 右側：芳賀定理動態滑桿探索器 -->
+          <div class="cmp-panel" style="border-color:#c7d2fe;background:#f5f7ff;">
+            <h3 style="color:#3730a3;">探索二：芳賀定理動態滑桿（<span class="math">x = <span class="overline">MC</span></span>）</h3>
+            <p style="font-size:0.78rem;color:#4f46e5;">調整上邊點 <span class="math">M</span> 距右角距離 <span class="math">x</span>，一摺可折出 <span class="math">1/3</span>、<span class="math">1/5</span> 與 <span class="math">1/7</span>！</p>
+            <div class="cmp-canvas-wrap">
+              <canvas id="canvasCmp2"></canvas>
+            </div>
+            <div style="width:100%;background:#ffffff;border:1px solid #c7d2fe;border-radius:10px;padding:6px 10px;margin:2px 0 6px;font-size:0.78rem;font-weight:800;color:#1e1b4b;text-align:center;">
+              📐 相似直角三角形：<span style="color:#d97706;">△MEC（橘）</span> <span class="math">～</span> <span style="color:#059669;">△DGM（綠）</span>（AA 相似，<span class="math">∠GME = 90°</span>）
+            </div>
+
+            <div class="theta-control-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px;flex-wrap:wrap;">
+                <span style="font-size:0.78rem;font-weight:800;">上邊右段 <span class="math">x</span>：</span>
+                <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                  <span id="haga-x-badge" style="font-size:0.8rem;font-weight:900;color:#4f46e5;font-family:monospace;">x = 0.50 (1/2) ★ 截出 1/3！</span>
+                  <button type="button" class="sketch-tool-btn" onclick="setHagaX(0.5)">1/2 → 1/3</button>
+                  <button type="button" class="sketch-tool-btn" onclick="setHagaX(2/3)">2/3 → 1/5</button>
+                  <button type="button" class="sketch-tool-btn" onclick="setHagaX(0.75)">3/4 → 1/7</button>
+                </div>
+              </div>
+              <input id="haga-x-slider" type="range" min="0.15" max="0.85" step="0.005" value="0.5" oninput="renderCmp2(Number(this.value))" />
+              <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:#64748b;margin-top:3px;">
+                <span style="color:#059669;font-weight:800;">x = 1/2 (1/3)</span>
+                <span style="color:#4f46e5;font-weight:800;">x = 2/3 (1/5)</span>
+                <span style="color:#be123c;font-weight:800;">x = 3/4 (1/7)</span>
+              </div>
+            </div>
+
+            <div class="stats-mini-grid">
+              <div class="stat-box">
+                <div class="lbl">公式 <span class="math">DG = 2x/(1+x)</span></div>
+                <div id="haga-dg-val" class="val" style="color:#4f46e5;">0.667</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">截出下段 <span class="math">AG = (1-x)/(1+x)</span></div>
+                <div id="haga-ag-val" class="val" style="color:#e11d48;">0.333</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">右邊上段 <span class="math">EC</span></div>
+                <div id="haga-ec-val" class="val" style="color:#059669;">0.375</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmp-table-wrap">
+          <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:10px;color:#0f172a;">📊 四種等分摺紙法完整規格對照表（正方形邊長 = 1）</h3>
+          <table class="cmp-table">
+            <thead>
+              <tr>
+                <th>比較項目</th>
+                <th>三等分（對角線交叉法）</th>
+                <th>五等分（對角線交叉法）</th>
+                <th>七等分（對角線交叉法）</th>
+                <th>芳賀第一定理（通用）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>先備基準點</td>
+                <td>上邊中點 <span class="math">M</span>（距右 <span class="math">1/2</span>）</td>
+                <td>上邊四分點 <span class="math">Q</span>（距右 <span class="math">1/4</span>）</td>
+                <td>上邊六分點 <span class="math">S</span>（距右 <span class="math">1/6</span>）</td>
+                <td>上邊點 <span class="math">M</span>（距右 <span class="math">x</span>）</td>
+              </tr>
+              <tr>
+                <td>核心幾何定理</td>
+                <td><span class="math">△PMC ～ △PBA</span>（<span class="math">1 : 2</span>）</td>
+                <td><span class="math">△RQC ～ △RBA</span>（<span class="math">1 : 4</span>）</td>
+                <td><span class="math">△TSC ～ △TBA</span>（<span class="math">1 : 6</span>）</td>
+                <td class="highlight-win">畢氏定理 ＋ <span class="math">△MEC ～ △DGM</span></td>
+              </tr>
+              <tr>
+                <td>關鍵定位點座標</td>
+                <td><span class="math">P(2/3, 2/3)</span>，截出右 <span class="math">1/3</span></td>
+                <td><span class="math">R(4/5, 4/5)</span>，截出右 <span class="math">1/5</span></td>
+                <td><span class="math">T(6/7, 6/7)</span>，截出右 <span class="math">1/7</span></td>
+                <td><span class="math">G(0, (1-x)/(1+x))</span></td>
+              </tr>
+              <tr>
+                <td>剩餘段處理方式</td>
+                <td>剩 <span class="math">2/3</span> 對摺 <strong>1 次</strong>平分</td>
+                <td>剩 <span class="math">4/5</span> 連摺 <strong>2 次</strong>四等分</td>
+                <td>剩 <span class="math">6/7</span> 對摺成兩段 <span class="math">3/7</span> 再三等分</td>
+                <td>剩餘段依等分數再對摺細分</td>
+              </tr>
+              <tr>
+                <td>課堂教學優勢</td>
+                <td>思路統一，易推廣至 <span class="math">N</span> 等分</td>
+                <td>與三等分完全對偶，結構優美</td>
+                <td>串聯「三等分 → 1/6 → 1/7」遞推思維</td>
+                <td class="highlight-win">免摺對角線，<span class="math">x=1/2, 2/3, 3/4</span> 分得 <span class="math">1/3, 1/5, 1/7</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 6：課堂學習單（線上批改 ＋ A4 列印） ==================== -->
+    <section id="panel-6" class="tab-panel">
+      <div class="ws-toolbar">
+        <div>
+          <h2 style="font-size:0.98rem;font-weight:800;color:#1e1b4b;">📝 課堂探究學習單（線上互動批改 / A4 紙本列印）</h2>
+          <p style="font-size:0.78rem;color:#4338ca;">學生可直接在空格填答並按「核對互動答案」；教師點擊「列印學習單 (A4)」即可輸出整齊紙本。</p>
+        </div>
+        <div class="ws-btn-group">
+          <button class="ws-action-btn grade" onclick="gradeWorksheet()">✓ 核對互動答案</button>
+          <button class="ws-action-btn ans" onclick="toggleAnswerKey()">👁 顯示/隱藏解答</button>
+          <button id="ws-quiz-btn" class="ws-action-btn ans" onclick="toggleQuizMode()">📝 測驗模式</button>
+          <button class="ws-action-btn ans" onclick="resetWorksheet()">↺ 清除重填</button>
+          <button class="ws-action-btn print" onclick="window.print()">🖨️ 列印學習單 (A4)</button>
+        </div>
+      </div>
+
+      <article id="worksheet-root" class="worksheet-paper">
+        <div class="ws-helper-bar">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>⌨️ 填答說明：分數請輸入如 <code>1/3</code>、<code>4/5</code>，按 <code>Enter</code> 自動跳下一格</span>
+          </div>
+          <span id="ws-progress-pill" class="ws-progress-pill">填答進度：0 / 17 格</span>
+        </div>
+
+        <div class="ws-header">
+          <div class="ws-title-row">
+            <h2>【數學探究學習單】正方形的三等分、五等分、七等分與芳賀定理</h2>
+            <span style="font-size:0.76rem;font-weight:700;padding:3px 9px;border:1px solid #94a3b8;border-radius:6px;">
+              幾何摺紙 × 相似三角形 × 畢氏定理
+            </span>
+          </div>
+          <div class="ws-meta-grid">
+            <div class="ws-meta-item"><span>班級：</span><input id="ws-meta-class" type="text" placeholder="請填寫" /></div>
+            <div class="ws-meta-item"><span>座號：</span><input id="ws-meta-seat" type="text" placeholder="請填寫" /></div>
+            <div class="ws-meta-item"><span>姓名：</span><input id="ws-meta-name" type="text" placeholder="請填寫" /></div>
+          </div>
+        </div>
+
+        <!-- 探究一：三等分摺紙 -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge amber">探究一：三等分摺紙 —— 對角線 <span class="math"><span class="overline">AC</span></span> 與中點連線 <span class="math"><span class="overline">BM</span></span></span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-1')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="25" y="20" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="2" />
+                <line x1="25" y1="190" x2="195" y2="20" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 3" />
+                <line x1="195" y1="190" x2="110" y2="20" stroke="#d97706" stroke-width="1.8" />
+                <line x1="138.3" y1="20" x2="138.3" y2="190" stroke="#e11d48" stroke-width="2" stroke-dasharray="5 3" />
+                <line x1="81.7" y1="20" x2="81.7" y2="190" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="5 3" />
+                <polygon points="110,20 195,20 138.3,76.7" fill="rgba(217,119,6,0.14)" stroke="none" />
+                <polygon points="25,190 195,190 138.3,76.7" fill="rgba(79,70,229,0.08)" stroke="none" />
+                <circle cx="110" cy="20" r="3" fill="#d97706" />
+                <circle cx="138.3" cy="76.7" r="3.8" fill="#e11d48" />
+                <text x="12" y="202" font-size="13" font-weight="bold">A</text>
+                <text x="198" y="202" font-size="13" font-weight="bold">B</text>
+                <text x="198" y="24" font-size="13" font-weight="bold">C</text>
+                <text x="12" y="24" font-size="13" font-weight="bold">D</text>
+                <text x="104" y="14" font-size="13" font-weight="bold" fill="#d97706">M</text>
+                <text x="145" y="80" font-size="13" font-weight="bold" fill="#e11d48">P</text>
+                <text class="diagram-hint" x="150" y="15" font-size="11" font-weight="bold" fill="#d97706">1</text>
+                <text class="diagram-hint" x="105" y="206" font-size="11" font-weight="bold">2</text>
+              </svg>
+              <span>圖(一)：三等分相似三角形示意圖</span>
+            </div>
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 設正方形邊長為 <span class="math">2</span>，<span class="math">M</span> 為上邊 <span class="math"><span class="overline">DC</span></span> 中點，則 <span class="math"><span class="overline">MC</span> =</span>
+                <input class="blank" data-ans="1" type="text" /><span class="ans-hint">1</span>，故 <span class="math"><span class="overline">MC</span> : <span class="overline">AB</span> = 1 :</span>
+                <input class="blank" data-ans="2" type="text" /><span class="ans-hint">2</span>。
+              </div>
+              <div class="ws-q-item">
+                (2) 因為 <span class="math"><span class="overline">MC</span> ∥ <span class="overline">AB</span></span>，由內錯角相等可知 <span class="math">△PMC ～ △PBA</span>（<span class="math">AA</span> 相似），因此交點 <span class="math">P</span> 到右邊界與左邊界的距離比為 <span class="math">1 : 2</span>，右側寬度佔全長的
+                <input class="blank" data-ans="1/3" placeholder="例:1/3" type="text" /><span class="ans-hint">1/3</span>。
+              </div>
+              <div class="ws-q-item">
+                (3) 過 <span class="math">P</span> 點垂直摺出第一條等分線後，左側剩餘寬度佔全長的
+                <input class="blank" data-ans="2/3" placeholder="例:2/3" type="text" /><span class="ans-hint">2/3</span>，只需將剩餘部分對摺平分即可完成三等分。
+              </div>
+            </div>
+          </div>
+          <div id="hint-1" class="ws-hint-box">
+            💡 <strong>提示：</strong>中點把長度 2 平分為 1；相似三角形對應高（與水平距離）之比等於底邊之比 1 : 2，總共分成 1 + 2 = 3 份！
+          </div>
+        </div>
+
+        <!-- 探究二：五等分摺紙 -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge indigo">探究二：五等分摺紙 —— 由 <span class="math">1/4</span> 點推導 <span class="math">1/5</span></span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-2')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="25" y="20" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="2" />
+                <line x1="25" y1="190" x2="195" y2="20" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 3" />
+                <line x1="195" y1="190" x2="152.5" y2="20" stroke="#4f46e5" stroke-width="1.8" />
+                <line x1="161" y1="20" x2="161" y2="190" stroke="#e11d48" stroke-width="2" stroke-dasharray="5 3" />
+                <line x1="127" y1="20" x2="127" y2="190" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="3 3" />
+                <line x1="93" y1="20" x2="93" y2="190" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="3 3" />
+                <line x1="59" y1="20" x2="59" y2="190" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="3 3" />
+                <circle cx="152.5" cy="20" r="3" fill="#4f46e5" />
+                <circle cx="161" cy="54" r="3.8" fill="#e11d48" />
+                <text x="12" y="202" font-size="13" font-weight="bold">A</text>
+                <text x="198" y="202" font-size="13" font-weight="bold">B</text>
+                <text x="198" y="24" font-size="13" font-weight="bold">C</text>
+                <text x="148" y="14" font-size="13" font-weight="bold" fill="#4f46e5">Q</text>
+                <text x="167" y="58" font-size="13" font-weight="bold" fill="#e11d48">R</text>
+                <text class="diagram-hint" x="167" y="14" font-size="10.5" font-weight="bold" fill="#4f46e5">1/4</text>
+              </svg>
+              <span>圖(二)：五等分定位點 <span class="math">R</span> 示意圖</span>
+            </div>
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 將正方形對摺兩次，在上邊右側找出 <span class="math">1/4</span> 等分點 <span class="math">Q</span>，此時 <span class="math"><span class="overline">QC</span> : <span class="overline">AB</span> = 1 :</span>
+                <input class="blank" data-ans="4" type="text" /><span class="ans-hint">4</span>。
+              </div>
+              <div class="ws-q-item">
+                (2) 對角線 <span class="math"><span class="overline">AC</span></span> 與 <span class="math"><span class="overline">BQ</span></span> 交於點 <span class="math">R</span>，由 <span class="math">△RQC ～ △RBA</span> 可知 <span class="math">R</span> 將寬度分為 <span class="math">1 : 4</span>，因此過 <span class="math">R</span> 點垂直摺線所截出的右側寬度佔全長的
+                <input class="blank" data-ans="1/5" placeholder="例:1/5" type="text" /><span class="ans-hint">1/5</span>。
+              </div>
+              <div class="ws-q-item">
+                (3) 左側剩餘寬度佔全長的
+                <input class="blank" data-ans="4/5" placeholder="例:4/5" type="text" /><span class="ans-hint">4/5</span>；因為 <span class="math">4 = 2²</span>，將剩餘部分連續對摺
+                <input class="blank" data-ans="2" type="text" /><span class="ans-hint">2</span> 次（四等分），即可完成正方形五等分！
+              </div>
+              <div class="ws-q-item">
+                (4) <strong>七等分推廣</strong>：若想用對角線交叉法折出 <strong>7 等分</strong>，上邊應先由 1/3 再對摺找出右側
+                <input class="blank" data-ans="1/6" placeholder="例:1/6" type="text" /><span class="ans-hint">1/6</span> 點 <span class="math">S</span>，利用 <span class="math">1 : 6</span> 相似比截出右側 <span class="math">1/7</span>；左側剩餘
+                <input class="blank" data-ans="6/7" placeholder="例:6/7" type="text" /><span class="ans-hint">6/7</span> 先對摺平分成兩段 <span class="math">3/7</span> 再各自三等分即可完工！
+              </div>
+              <div class="ws-q-item">
+                (5) 進階思考：若想用同樣方法折出 <strong>9 等分</strong>，上邊應先對摺 3 次找出
+                <input class="blank" data-ans="1/8" placeholder="例:1/8" type="text" /><span class="ans-hint">1/8</span> 點。
+              </div>
+            </div>
+          </div>
+          <div id="hint-2" class="ws-hint-box">
+            💡 <strong>提示：</strong>比例 1 : 4 總共有 1 + 4 = 5 份；要得 1/N，上邊需先找 1/(N-1)！對摺 1 次得 2 等分、對摺 2 次得 4 等分、對摺 3 次得 8 等分。
+          </div>
+        </div>
+
+        <!-- 探究三：手繪摺痕練習框 -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge emerald">探究三：動手繪製三等分與五等分的關鍵輔助線與等分線</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-3')">💡 小提示</button>
+          </div>
+          <div class="ws-q-list" style="margin-bottom:8px;">
+            請在下方兩個正方形框中，分別畫出<strong>對角線與基準連線（輔助虛線）</strong>，以及過交點折出的<strong>垂直等分線（紅線）</strong>：
+          </div>
+          <div id="hint-3" class="ws-hint-box" style="margin-bottom:10px;">
+            💡 <strong>提示：</strong>先用「輔助虛線」畫出左下到右上的對角線，以及右下到上邊中點（或 1/4 點）的連線，再從交點往下畫垂直紅線！
+          </div>
+          <div class="sketch-grid">
+            <div class="sketch-box">
+              <p>【練習框 A】正方形三等分摺痕圖</p>
+              <canvas id="sketchCanvasA" class="sketch-canvas" width="196" height="196"></canvas>
+              <div class="sketch-tools">
+                <button type="button" class="sketch-tool-btn active" data-pad="A" data-mode="dash" onclick="setSketchMode('A','dash',this)">輔助虛線</button>
+                <button type="button" class="sketch-tool-btn" data-pad="A" data-mode="solid" onclick="setSketchMode('A','solid',this)">等分紅線</button>
+                <button type="button" class="sketch-tool-btn active" data-pad="A" data-tool="line" onclick="toggleSketchTool('A',this)">📏 直線</button>
+                <button type="button" class="sketch-tool-btn" onclick="undoSketch('A')">↩ 復原</button>
+                <button type="button" class="sketch-tool-btn" onclick="clearSketch('A')">清除</button>
+                <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('A')">參考圖</button>
+              </div>
+            </div>
+            <div class="sketch-box">
+              <p>【練習框 B】正方形五等分摺痕圖</p>
+              <canvas id="sketchCanvasB" class="sketch-canvas" width="196" height="196"></canvas>
+              <div class="sketch-tools">
+                <button type="button" class="sketch-tool-btn active" data-pad="B" data-mode="dash" onclick="setSketchMode('B','dash',this)">輔助虛線</button>
+                <button type="button" class="sketch-tool-btn" data-pad="B" data-mode="solid" onclick="setSketchMode('B','solid',this)">等分紅線</button>
+                <button type="button" class="sketch-tool-btn active" data-pad="B" data-tool="line" onclick="toggleSketchTool('B',this)">📏 直線</button>
+                <button type="button" class="sketch-tool-btn" onclick="undoSketch('B')">↩ 復原</button>
+                <button type="button" class="sketch-tool-btn" onclick="clearSketch('B')">清除</button>
+                <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('B')">參考圖</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 探究四：芳賀第一定理 -->
+        <div class="ws-section" style="margin-bottom:0;">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge emerald">探究四（延伸）：芳賀第一定理與 <span class="math">3 : 4 : 5</span> 相似直角三角形</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-4')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="25" y="20" width="170" height="170" fill="#fff" stroke="#0f172a" stroke-width="2" />
+                <!-- 翻折紙片 F(25,168.75) E(195,83.75) M(110,20) A'(8,156) -->
+                <polygon points="25,168.75 195,83.75 110,20 8,156" fill="rgba(5,150,105,0.12)" stroke="#059669" stroke-width="1.8" />
+                <line x1="25" y1="168.75" x2="195" y2="83.75" stroke="#475569" stroke-width="1.4" stroke-dasharray="4 3" />
+                <circle cx="110" cy="20" r="3" fill="#059669" />
+                <circle cx="25" cy="133.3" r="3.8" fill="#e11d48" />
+                <text x="105" y="14" font-size="13" font-weight="bold" fill="#059669">M</text>
+                <text x="199" y="88" font-size="13" font-weight="bold">E</text>
+                <text x="12" y="137" font-size="13" font-weight="bold" fill="#e11d48">G</text>
+                <text x="12" y="24" font-size="13" font-weight="bold">D</text>
+                <text x="198" y="24" font-size="13" font-weight="bold">C</text>
+                <text class="diagram-hint" x="55" y="65" font-size="11" font-weight="bold" fill="#059669">3:4:5</text>
+                <text class="diagram-hint" x="150" y="48" font-size="11" font-weight="bold" fill="#059669">3:4:5</text>
+              </svg>
+              <span>圖(三)：芳賀第一定理示意圖</span>
+            </div>
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 設正方形邊長為 <span class="math">1</span>，<span class="math">M</span> 為上邊中點（<span class="math"><span class="overline">MC</span> = 1/2</span>）。將右下角 <span class="math">B</span> 摺向 <span class="math">M</span>，令右邊上段 <span class="math"><span class="overline">EC</span> = a</span>，則斜邊 <span class="math"><span class="overline">EM</span> = <span class="overline">EB</span> = 1 - a</span>。由畢氏定理 <span class="math">a² + (1/2)² = (1 - a)²</span> 解得 <span class="math">a =</span>
+                <input class="blank" data-ans="3/8" placeholder="例:3/8" type="text" /><span class="ans-hint">3/8</span>。
+              </div>
+              <div class="ws-q-item">
+                (2) 因此直角 <span class="math">△MEC</span> 三邊長為 <span class="math">3/8、4/8、5/8</span>，三邊比例恰好為
+                <input class="blank" data-ans="3:4:5" data-alt="3：4：5" placeholder="例:3:4:5" type="text" /><span class="ans-hint">3:4:5</span>！
+              </div>
+              <div class="ws-q-item">
+                (3) 因 <span class="math">∠GME = 90°</span>，故 <span class="math">△DGM ～ △CME</span>，可得 <span class="math"><span class="overline">DG</span> : <span class="overline">DM</span> = 4 : 3</span>；又 <span class="math"><span class="overline">DM</span> = 1/2</span>，故 <span class="math"><span class="overline">DG</span> =</span>
+                <input class="blank" data-ans="2/3" placeholder="例:2/3" type="text" /><span class="ans-hint">2/3</span>，下段 <span class="math"><span class="overline">AG</span> =</span>
+                <input class="blank" data-ans="1/3" placeholder="例:1/3" type="text" /><span class="ans-hint">1/3</span>！
+              </div>
+              <div class="ws-q-item">
+                (4) 若將上邊點 <span class="math">M</span> 設在距右角 <span class="math">x = 2/3</span> 處，代入芳賀公式 <span class="math"><span class="overline">AG</span> = (1-x)/(1+x)</span>，一摺可截出 <span class="math"><span class="overline">AG</span> =</span>
+                <input class="blank" data-ans="1/5" placeholder="例:1/5" type="text" /><span class="ans-hint">1/5</span>（五等分）；若設在 <span class="math">x = 3/4</span> 處，更可一摺直接截出
+                <input class="blank" data-ans="1/7" placeholder="例:1/7" type="text" /><span class="ans-hint">1/7</span>（七等分！）。
+              </div>
+            </div>
+          </div>
+          <div id="hint-4" class="ws-hint-box">
+            💡 <strong>提示：</strong>展開 <span class="math">a² + 1/4 = 1 - 2a + a²</span> 可消去 <span class="math">a²</span>，得 <span class="math">2a = 3/4 ⇒ a = 3/8</span>。代入 <span class="math">x = 2/3</span> 得 <span class="math">(1/3) ÷ (5/3) = 1/5</span>！
+          </div>
+        </div>
+
+        <div id="grade-banner" class="grade-banner"></div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" style="text-align:center;padding:18px;font-size:0.76rem;color:#94a3b8;">
+    正方形的等分摺紙：三等分、五等分、七等分與芳賀定理｜互動幾何摺紙教學與課堂學習單
+  </footer>
+
+  <!-- ==================== JavaScript 3D 摺紙模擬與互動引擎 ==================== -->
+  <script>
+    /* ==================== 1. 分頁切換邏輯 ==================== */
+    function switchTab(idx) {
+      for (let i = 1; i <= 6; i++) {
+        const btn = document.getElementById(`tab-btn-${i}`);
+        const panel = document.getElementById(`panel-${i}`);
+        if (!btn || !panel) continue;
+        if (i === idx) {
+          btn.classList.add('active');
+          panel.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+          panel.classList.remove('active');
+        }
+      }
+      stopM1Play();
+      stopM2Play();
+      stopM7Play();
+      stopM3Play();
+      if (idx === 1) {
+        selectM1Step(1, true, true);
+      } else if (idx === 2) {
+        selectM2Step(1, true, true);
+      } else if (idx === 3) {
+        selectM7Step(1, true, true);
+      } else if (idx === 4) {
+        requestAnimationFrame(() => selectM3Step(1, true, true));
+      } else if (idx === 5) {
+        renderCmp1();
+        renderCmp2(Number(document.getElementById('haga-x-slider').value));
+      }
+    }
+
+    /* ==================== 2. 3D 幾何摺紙引擎與透視相機 ==================== */
+    const m1Cam = { yaw: 0, pitch: 0.56 };
+    const m2Cam = { yaw: 0, pitch: 0.56 };
+    const m7Cam = { yaw: 0, pitch: 0.56 };
+    const m3Cam = { yaw: 0, pitch: 0.56 };
+
+    function resetCam(which) {
+      const cam = which === 'm1' ? m1Cam : which === 'm2' ? m2Cam : which === 'm7' ? m7Cam : m3Cam;
+      cam.yaw = 0;
+      cam.pitch = 0.56;
+      if (which === 'm1') renderM1();
+      else if (which === 'm2') renderM2();
+      else if (which === 'm7') renderM7();
+      else renderM3();
+    }
+
+    function p3(x, y, z = 0) {
+      return { x, y, z };
+    }
+
+    function easeCos(t) {
+      const x = Math.max(0, Math.min(1, t));
+      return 0.5 - 0.5 * Math.cos(Math.PI * x);
+    }
+
+    function fold3D(P, L1, L2, progress, side = 'front') {
+      const p = p3(P.x, P.y, P.z || 0);
+      const a = p3(L1.x, L1.y, L1.z || 0);
+      const b = p3(L2.x, L2.y, L2.z || 0);
+      const ux0 = b.x - a.x, uy0 = b.y - a.y, uz0 = b.z - a.z;
+      const uLen = Math.hypot(ux0, uy0, uz0) || 1;
+      const ux = ux0 / uLen, uy = uy0 / uLen, uz = uz0 / uLen;
+
+      const vx = p.x - a.x, vy = p.y - a.y, vz = p.z - a.z;
+      const cx = uy * vz - uz * vy;
+      const cy = uz * vx - ux * vz;
+      const cz = ux * vy - uy * vx;
+
+      let dir = 1;
+      if (side === 'front') dir = cz < 0 ? -1 : 1;
+      else dir = cz > 0 ? -1 : 1;
+
+      const theta = dir * Math.PI * progress;
+      const cosT = Math.cos(theta);
+      const sinT = Math.sin(theta);
+      const dotUV = ux * vx + uy * vy + uz * vz;
+      const oneMinusCos = 1 - cosT;
+
+      return {
+        x: a.x + vx * cosT + cx * sinT + ux * dotUV * oneMinusCos,
+        y: a.y + vy * cosT + cy * sinT + uy * dotUV * oneMinusCos,
+        z: a.z + vz * cosT + cz * sinT + uz * dotUV * oneMinusCos
+      };
+    }
+
+    function shadeHex(hex, factor) {
+      if (!hex || hex[0] !== '#') return hex;
+      const clean = hex.slice(1);
+      const num = parseInt(clean, 16);
+      const r = Math.min(255, Math.max(0, Math.round(((num >> 16) & 255) * factor)));
+      const g = Math.min(255, Math.max(0, Math.round(((num >> 8) & 255) * factor)));
+      const b = Math.min(255, Math.max(0, Math.round((num & 255) * factor)));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function createCamera3D(cam, size) {
+      const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
+      const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+      const dist = 5.6;
+      const fov = size * 1.56;
+
+      const toCam = (pt) => {
+        const px = pt.x - 1;
+        const py = pt.y - 1;
+        const pz = pt.z || 0;
+        const x1 = px * cy - py * sy;
+        const y1 = px * sy + py * cy;
+        return {
+          x: x1,
+          y: y1 * cp + pz * sp,
+          z: -y1 * sp + pz * cp
+        };
+      };
+
+      const project = (pt) => {
+        const c = toCam(pt);
+        const s = fov / Math.max(0.8, dist - c.z);
+        return {
+          x: size * 0.5 + c.x * s,
+          y: size * 0.53 - c.y * s,
+          z: c.z
+        };
+      };
+
+      return { toCam, project, dist };
+    }
+
+    function drawTableGrid3D(ctx, camera) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(116, 134, 122, 0.22)';
+      ctx.lineWidth = 1;
+      const zPlane = -0.04;
+      for (let t = -0.4; t <= 2.41; t += 0.4) {
+        const h1 = camera.project(p3(-0.4, t, zPlane));
+        const h2 = camera.project(p3(2.4, t, zPlane));
+        ctx.beginPath();
+        ctx.moveTo(h1.x, h1.y);
+        ctx.lineTo(h2.x, h2.y);
+        ctx.stroke();
+
+        const v1 = camera.project(p3(t, -0.4, zPlane));
+        const v2 = camera.project(p3(t, 2.4, zPlane));
+        ctx.beginPath();
+        ctx.moveTo(v1.x, v1.y);
+        ctx.lineTo(v2.x, v2.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function createScene3D(camera) {
+      const faces = [];
+      const light = { x: 0.36, y: 0.52, z: 0.77 };
+
+      function addPoly(pts, frontColor, backColor, stroke, lineWidth = 1.6, zBias = 0, castShadow = false, lineDash = null) {
+        const camPts = pts.map((pt) => camera.toCam(pt));
+        const screenPts = pts.map((pt) => camera.project(pt));
+
+        let avgZ = 0, cx = 0, cy = 0, cz = 0;
+        let maxWorldZ = -Infinity;
+        pts.forEach((pt, idx) => {
+          avgZ += camPts[idx].z;
+          cx += camPts[idx].x;
+          cy += camPts[idx].y;
+          cz += camPts[idx].z;
+          if ((pt.z || 0) > maxWorldZ) maxWorldZ = pt.z || 0;
+        });
+        avgZ /= pts.length;
+        cx /= pts.length;
+        cy /= pts.length;
+        cz /= pts.length;
+
+        const e1x = camPts[1].x - camPts[0].x, e1y = camPts[1].y - camPts[0].y, e1z = camPts[1].z - camPts[0].z;
+        const e2x = camPts[2].x - camPts[0].x, e2y = camPts[2].y - camPts[0].y, e2z = camPts[2].z - camPts[0].z;
+        let nx = e1y * e2z - e1z * e2y;
+        let ny = e1z * e2x - e1x * e2z;
+        let nz = e1x * e2y - e1y * e2x;
+        const nLen = Math.hypot(nx, ny, nz) || 1;
+        nx /= nLen; ny /= nLen; nz /= nLen;
+
+        const vx = -cx, vy = -cy, vz = camera.dist - cz;
+        const isFront = (nx * vx + ny * vy + nz * vz) >= 0;
+        const rawColor = isFront ? frontColor : (backColor || frontColor);
+
+        let fill = rawColor;
+        if (rawColor && rawColor[0] === '#') {
+          const ndotl = Math.abs(nx * light.x + ny * light.y + nz * light.z);
+          fill = shadeHex(rawColor, 0.78 + 0.25 * ndotl);
+        }
+
+        if (castShadow && maxWorldZ > 0.04) {
+          const shPts = pts.map((pt) => {
+            const lift = Math.max(0, pt.z || 0);
+            return camera.project(p3(pt.x + lift * 0.08, pt.y - lift * 0.06, -0.025));
+          });
+          faces.push({
+            screenPts: shPts,
+            avgZ: -10,
+            zBias: -100,
+            fill: 'rgba(15, 23, 42, 0.13)',
+            stroke: null,
+            lineWidth: 0,
+            lineDash: null
+          });
+        }
+
+        faces.push({ screenPts, avgZ, zBias, fill, stroke, lineWidth, lineDash });
+      }
+
+      function flush(ctx) {
+        faces.sort((a, b) => (a.avgZ + a.zBias * 0.002) - (b.avgZ + b.zBias * 0.002));
+        faces.forEach((f) => {
+          ctx.save();
+          ctx.beginPath();
+          f.screenPts.forEach((p, idx) => {
+            if (idx === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          });
+          ctx.closePath();
+          if (f.fill) {
+            ctx.fillStyle = f.fill;
+            ctx.fill();
+          }
+          if (f.stroke) {
+            if (f.lineDash) ctx.setLineDash(f.lineDash);
+            ctx.strokeStyle = f.stroke;
+            ctx.lineWidth = f.lineWidth;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+
+      return { addPoly, flush };
+    }
+
+    function drawDashed3D(ctx, camera, p1, p2, color = '#475569', dash = [5, 4], width = 1.5, zOffset = 0.008) {
+      const a = camera.project(p3(p1.x, p1.y, (p1.z || 0) + zOffset));
+      const b = camera.project(p3(p2.x, p2.y, (p2.z || 0) + zOffset));
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash(dash);
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPoint3D(ctx, camera, pt, color = '#e11d48', r = 4.2, zOffset = 0.012) {
+      const p = camera.project(p3(pt.x, pt.y, (pt.z || 0) + zOffset));
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLabel3D(ctx, camera, pt, text, color = '#0f172a', ox = 0, oy = 0) {
+      const p = camera.project(p3(pt.x, pt.y, (pt.z || 0) + 0.014));
+      ctx.save();
+      ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
+      ctx.lineWidth = 3.2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.strokeText(text, p.x + ox, p.y + oy);
+      ctx.fillStyle = color;
+      ctx.fillText(text, p.x + ox, p.y + oy);
+      ctx.restore();
+    }
+
+    function drawStageHint3D(ctx, size, text, accent = '#0f172a') {
+      if (!text) return;
+      ctx.save();
+      ctx.font = 'bold 12px -apple-system, "Noto Sans TC", sans-serif';
+      const padX = 12;
+      const w = Math.min(size - 24, ctx.measureText(text).width + padX * 2);
+      const h = 24;
+      const x = (size - w) / 2;
+      const y = size - 32;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, size / 2, y + h / 2 + 0.5, w - 12);
+      ctx.restore();
+    }
+
+    /* ==================== 2B. Web Audio 摺紙音效引擎 ==================== */
+    let sfxEnabled = true;
+    let sharedAudioCtx = null;
+
+    function getAudioCtx() {
+      if (!sharedAudioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) sharedAudioCtx = new AC();
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
+    }
+
+    function toggleSfx() {
+      sfxEnabled = !sfxEnabled;
+      const btn = document.getElementById('sfx-toggle-btn');
+      if (btn) {
+        btn.textContent = sfxEnabled ? '🔊 音效：開' : '🔇 音效：關';
+        btn.style.opacity = sfxEnabled ? '1' : '0.72';
+      }
+      if (sfxEnabled) playOrigamiSfx('crease');
+    }
+
+    function playOrigamiSfx(kind) {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        if (kind === 'fold') {
+          const len = Math.floor(ctx.sampleRate * 0.13);
+          const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.sin((i / len) * Math.PI);
+          }
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(900, now);
+          filter.frequency.exponentialRampToValueAtTime(1700, now + 0.12);
+          filter.Q.value = 1.6;
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          src.start(now);
+        } else if (kind === 'crease') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(620, now);
+          osc.frequency.exponentialRampToValueAtTime(280, now + 0.07);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (kind === 'step') {
+          [523.25, 659.25].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.09, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.18);
+          });
+        } else if (kind === 'done') {
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.11, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.36);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.36);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function liftPts(pts, dz) {
+      return dz > 0 ? pts.map((q) => p3(q.x, q.y, (q.z || 0) + dz)) : pts;
+    }
+
+    /* ==================== 3. 分頁 1：三等分摺紙模擬器 ==================== */
+    const m1Theme = { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' };
+    const m1StepsData = {
+      1: {
+        badge: '步驟 1 / 4：左右對摺找出上邊中點 M',
+        title: '步驟 1：左右對摺找出上邊中點 M',
+        desc: '設正方形邊長為 2，頂點依序為 A(0,0)、B(2,0)、C(2,2)、D(0,2)。將左右兩邊對齊對摺並展開，壓出垂直中線，標出上邊中點 M(1, 2)，此時 MC = 1。',
+        math: '💡 幾何關鍵：中點 M 讓上邊短段 MC = 1，底邊全長 AB = 2，為下一步創造 1 : 2 的相似比例！'
+      },
+      2: {
+        badge: '步驟 2 / 4：摺出對角線 AC 與連線 BM，交於 P 點',
+        title: '步驟 2：摺出對角線 AC 與連線 BM，求出 1 : 2 交點 P',
+        desc: '先沿對角線 AC 對摺並展開，再沿右下頂點 B 到中點 M 的連線 BM 對摺並展開，兩條摺痕交於 P(4/3, 4/3)。',
+        math: '📐 相似證明：因 MC ∥ AB，△PMC ～ △PBA（AA 相似），且 MC : AB = 1 : 2，故 P 點將寬度與高度精準分為 1 : 2（右側佔 1/3）！'
+      },
+      3: {
+        badge: '步驟 3 / 4：過交點 P 垂直摺出右側 1/3',
+        title: '步驟 3：保持上下邊對齊，過交點 P 摺出第一條三等分線',
+        desc: '沿過 P 點的垂直線 x = 4/3，將右側紙片向左翻摺，並確保上下邊完全對齊。此時右側被摺入的寬度為 2/3，精準佔總邊長的 1/3！',
+        math: '💡 觀察剩餘寬度：整張紙減去右側 1/3，左側剛好剩下 2/3（寬度 4/3），下一步只要再平分一次即可！'
+      },
+      4: {
+        badge: '步驟 4 / 4：剩餘 2/3 對摺平分，展開完成三等分',
+        title: '步驟 4：將左側 2/3 對摺平分並攤開，完成三等分！',
+        desc: '將左邊界向右摺向第一條摺線 x = 4/3，壓出第二條等分線 x = 2/3，最後將左右兩翼攤開，即得到三等份全等長方形！',
+        math: '★ 完工驗證：三段寬度分別位於 [0, 2/3]、[2/3, 4/3]、[4/3, 2]，每段皆為總邊長的 1/3，完全精準無誤差！'
+      }
+    };
+
+    const m1State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM1UI() {
+      const info = m1StepsData[m1State.step];
+      document.getElementById('m1-step-badge').textContent = info.badge;
+      document.getElementById('m1-title').textContent = info.title;
+      document.getElementById('m1-desc').textContent = info.desc;
+      document.getElementById('m1-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`m1-btn-${i}`).className = i === m1State.step ? 'step-card-btn active-amber' : 'step-card-btn';
+      }
+    }
+
+    function selectM1Step(step, autoPlay = true, autoChain = false) {
+      stopM1Play();
+      m1State.step = step;
+      m1State.autoChain = autoChain;
+      updateM1UI();
+      if (autoPlay) {
+        m1State.progress = 0;
+        m1State.sfxFlags = {};
+        document.getElementById('m1-slider').value = 0;
+        document.getElementById('m1-pct').textContent = '0%';
+        startM1Play();
+      } else {
+        m1State.progress = 1;
+        document.getElementById('m1-slider').value = 100;
+        document.getElementById('m1-pct').textContent = '100%';
+        renderM1();
+      }
+    }
+
+    function prevM1Step() { selectM1Step(m1State.step > 1 ? m1State.step - 1 : 4, true); }
+    function nextM1Step() { selectM1Step(m1State.step < 4 ? m1State.step + 1 : 1, true); }
+
+    function onM1Slider(val) {
+      stopM1Play();
+      m1State.progress = Number(val) / 100;
+      document.getElementById('m1-pct').textContent = `${val}%`;
+      renderM1();
+    }
+
+    function startM1Play() {
+      m1State.playing = true;
+      document.getElementById('m1-play-btn').textContent = '⏸ 暫停動畫';
+      if (m1State.progress >= 0.99) { m1State.progress = 0; m1State.sfxFlags = {}; }
+      if (m1State.progress < 0.05 && !m1State.sfxFlags.start) {
+        m1State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
+      const tick = () => {
+        if (!m1State.playing) return;
+        const prev = m1State.progress;
+        m1State.progress += m1State.step === 2 ? 0.0036 : 0.0042;
+        if (prev < 0.5 && m1State.progress >= 0.5 && !m1State.sfxFlags.mid) {
+          m1State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
+        if (m1State.progress >= 1) {
+          m1State.progress = 1;
+          document.getElementById('m1-slider').value = 100;
+          document.getElementById('m1-pct').textContent = '100%';
+          renderM1();
+          playOrigamiSfx(m1State.step === 4 ? 'done' : 'step');
+          const shouldChain = m1State.autoChain && m1State.step < 4;
+          const nextStep = m1State.step + 1;
+          stopM1Play();
+          if (shouldChain) m1State.chainTimer = setTimeout(() => selectM1Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m1State.progress * 100);
+        document.getElementById('m1-slider').value = pct;
+        document.getElementById('m1-pct').textContent = `${pct}%`;
+        renderM1();
+        m1State.raf = requestAnimationFrame(tick);
+      };
+      m1State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM1Play() {
+      m1State.playing = false;
+      m1State.autoChain = false;
+      if (m1State.chainTimer) { clearTimeout(m1State.chainTimer); m1State.chainTimer = null; }
+      if (m1State.raf) cancelAnimationFrame(m1State.raf);
+      const btn = document.getElementById('m1-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM1Play() {
+      if (m1State.playing) stopM1Play();
+      else if (m1State.progress >= 0.99) selectM1Step(1, true, true);
+      else startM1Play();
+    }
+
+    function renderM1() {
+      const canvas = document.getElementById('canvasM1');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m1Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m1-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const MB = p3(1, 0), M = p3(1, 2);
+      const P = p3(4 / 3, 4 / 3);
+      const X1B = p3(2 / 3, 0), X1T = p3(2 / 3, 2);
+      const X2B = p3(4 / 3, 0), X2T = p3(4 / 3, 2);
+      const prog = m1State.progress;
+
+      if (m1State.step === 1) {
+        const foldAmt = Math.sin(easeCos(prog) * Math.PI) * 0.92;
+        scene.addPoly([A, MB, M, D], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        if (foldAmt > 0.002) {
+          const Bf = fold3D(B, MB, M, foldAmt, 'front');
+          const Cf = fold3D(C, MB, M, foldAmt, 'front');
+          scene.addPoly([MB, Bf, Cf, M], m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, true);
+        } else {
+          scene.addPoly([MB, B, C, M], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        }
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, MB, M, foldAmt > 0.7 ? '#d97706' : '#5b6b7f', [5, 4], foldAmt > 0.7 ? 2.4 : 1.6);
+          drawPoint3D(ctx, camera, M, '#d97706', 4);
+          drawLabel3D(ctx, camera, A, 'A', '#0f172a', -14, 14);
+          drawLabel3D(ctx, camera, B, 'B', '#0f172a', 6, 14);
+          drawLabel3D(ctx, camera, C, 'C', '#0f172a', 6, -6);
+          drawLabel3D(ctx, camera, D, 'D', '#0f172a', -14, -6);
+          drawLabel3D(ctx, camera, M, 'M (1/2)', '#b45309', -18, -10);
+        }
+      } else if (m1State.step === 2) {
+        if (prog <= 0.5) {
+          const f1 = Math.sin(easeCos(prog * 2) * Math.PI) * 0.92;
+          scene.addPoly([A, C, D], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+          if (f1 > 0.002) {
+            const Bf = fold3D(B, A, C, f1, 'front');
+            scene.addPoly([A, Bf, C], m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([A, B, C], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, MB, M, '#94a3b8', [4, 4], 1.2);
+            drawDashed3D(ctx, camera, A, C, '#d97706', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, M, '#d97706', 3.6);
+            drawLabel3D(ctx, camera, A, 'A', '#0f172a', -14, 14);
+            drawLabel3D(ctx, camera, C, 'C', '#0f172a', 6, -6);
+            drawLabel3D(ctx, camera, M, 'M', '#b45309', -6, -10);
+          }
+        } else {
+          const f2 = Math.sin(easeCos((prog - 0.5) * 2) * Math.PI) * 0.92;
+          scene.addPoly([A, B, M, D], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+          if (f2 > 0.002) {
+            const Cf = fold3D(C, B, M, f2, 'front');
+            scene.addPoly([B, Cf, M], m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([B, C, M], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+          }
+          if (prog > 0.85 && showNotes) {
+            scene.addPoly([P, M, C], 'rgba(217,119,6,0.22)', 'rgba(217,119,6,0.22)', '#d97706', 1.4, 2, false);
+            scene.addPoly([P, A, B], 'rgba(79,70,229,0.12)', 'rgba(79,70,229,0.12)', '#4f46e5', 1.4, 2, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, A, C, '#5b6b7f', [5, 4], 1.6);
+            drawDashed3D(ctx, camera, B, M, '#d97706', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, M, '#d97706', 3.6);
+            drawPoint3D(ctx, camera, P, '#c84b61', 4.8);
+            drawLabel3D(ctx, camera, P, 'P (2/3, 2/3)', '#c84b61', 8, 4);
+            drawLabel3D(ctx, camera, A, 'A', '#0f172a', -14, 14);
+            drawLabel3D(ctx, camera, B, 'B', '#0f172a', 6, 14);
+            drawLabel3D(ctx, camera, C, 'C', '#0f172a', 6, -6);
+            drawLabel3D(ctx, camera, M, 'M', '#b45309', -6, -10);
+            if (prog > 0.85) {
+              drawLabel3D(ctx, camera, p3(1.5, 1.78), '1', '#b45309', -4, 4);
+              drawLabel3D(ctx, camera, p3(1.0, 0.25), '2', '#4f46e5', -4, 4);
+            }
+          }
+        }
+      } else if (m1State.step === 3) {
+        const eProg = easeCos(prog);
+        scene.addPoly([A, X2B, X2T, D], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        const Bf = fold3D(B, X2B, X2T, eProg, 'front');
+        const Cf = fold3D(C, X2B, X2T, eProg, 'front');
+        scene.addPoly(liftPts([X2B, Bf, Cf, X2T], eProg > 0.96 ? 0.006 : 0), m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, eProg > 0.02 && eProg < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, A, P, '#94a3b8', [4, 4], 1.3);
+          drawDashed3D(ctx, camera, X2B, X2T, '#c84b61', [5, 3], 2.4, 0.015);
+          drawPoint3D(ctx, camera, P, '#c84b61', 4.5, 0.016);
+          drawLabel3D(ctx, camera, P, 'P', '#c84b61', 8, 4);
+          drawLabel3D(ctx, camera, p3(1.0, 1.0), '1/3 摺入', '#b45309', -22, 4);
+          drawLabel3D(ctx, camera, p3(0.33, 1.0), '剩餘', '#475569', -12, 4);
+        }
+      } else {
+        if (prog <= 0.45) {
+          const pL = easeCos(prog / 0.45);
+          scene.addPoly([X1B, X2B, X2T, X1T], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+          const Bf = fold3D(B, X2B, X2T, 1, 'front');
+          const Cf = fold3D(C, X2B, X2T, 1, 'front');
+          scene.addPoly(liftPts([X2B, Bf, Cf, X2T], 0.005), m1Theme.front, m1Theme.back, m1Theme.border, 1.5, 2, false);
+          const Af = fold3D(A, X1B, X1T, pL, 'front');
+          const Df = fold3D(D, X1B, X1T, pL, 'front');
+          scene.addPoly(liftPts([Af, X1B, X1T, Df], pL > 0.96 ? 0.012 : 0.006), m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 6, pL > 0.02 && pL < 0.98);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, X1B, X1T, '#c84b61', [5, 3], 2.2, 0.018);
+            drawDashed3D(ctx, camera, X2B, X2T, '#c84b61', [5, 3], 2.2, 0.018);
+          }
+        } else {
+          const u = 1 - easeCos((prog - 0.45) / 0.42);
+          scene.addPoly([X1B, X2B, X2T, X1T], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+          const Af = fold3D(A, X1B, X1T, u, 'front');
+          const Df = fold3D(D, X1B, X1T, u, 'front');
+          const Bf = fold3D(B, X2B, X2T, u, 'front');
+          const Cf = fold3D(C, X2B, X2T, u, 'front');
+          scene.addPoly(liftPts([X2B, Bf, Cf, X2T], u > 0.02 ? 0.005 : 0), m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 3, u > 0.02 && u < 0.98);
+          scene.addPoly(liftPts([Af, X1B, X1T, Df], u > 0.02 ? 0.010 : 0), m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 5, u > 0.02 && u < 0.98);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, X1B, X1T, '#c84b61', [], 2.5, 0.016);
+            drawDashed3D(ctx, camera, X2B, X2T, '#c84b61', [], 2.5, 0.016);
+            if (prog > 0.84) {
+              drawLabel3D(ctx, camera, p3(1 / 3, 1.0), '1/3', '#c84b61', -10, 4);
+              drawLabel3D(ctx, camera, p3(1.0, 1.0), '1/3', '#c84b61', -10, 4);
+              drawLabel3D(ctx, camera, p3(5 / 3, 1.0), '1/3', '#c84b61', -10, 4);
+            }
+          }
+        }
+      }
+      if (showNotes) {
+        const hint = m1State.step === 1 ? '左右對摺壓出中點 M (1/2)…'
+          : m1State.step === 2 ? (prog <= 0.5 ? '沿對角線 AC 對摺並展開…' : '沿連線 BM 對摺，找出 1:2 交點 P！')
+          : m1State.step === 3 ? '過交點 P 垂直摺入右側 1/3 寬度'
+          : (prog <= 0.45 ? '將左側 2/3 對摺平分…' : '展開雙翼，完成精準三等分！');
+        drawStageHint3D(ctx, size, hint, '#b45309');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 4. 分頁 2：五等分摺紙模擬器 ==================== */
+    const m2Theme = { front: '#b8cbe8', back: '#f5f8fc', border: '#3b5b92' };
+    const m2StepsData = {
+      1: {
+        badge: '步驟 1 / 4：兩次對摺找出上邊 1/4 點 Q',
+        title: '步驟 1：兩次對摺找出上邊 1/4 點 Q',
+        desc: '設正方形邊長為 2。先左右對摺壓出中線 x = 1，再將右邊界對齊中線對摺並展開，在上邊壓出 1/4 點 Q(1.5, 2)，此時 QC = 0.5（佔總邊長的 1/4）。',
+        math: '💡 幾何推廣：三等分借用 1/2 點（1:2），五等分則借用 1/4 點（1:4）！因為 4 = 2²，對摺兩次即可精準折出 1/4。'
+      },
+      2: {
+        badge: '步驟 2 / 4：摺出對角線 AC 與連線 BQ，交於 R 點',
+        title: '步驟 2：摺出對角線 AC 與連線 BQ，求出 1 : 4 交點 R',
+        desc: '沿對角線 AC 對摺並展開，再沿右下頂點 B 到 1/4 點 Q 的連線 BQ 對摺並展開，兩條摺痕精準交於 R(1.6, 1.6)（即 8/5）。',
+        math: '📐 相似證明：因 QC ∥ AB，△RQC ～ △RBA（AA 相似），QC : AB = 1 : 4，故 R 點將寬度分為 1 : 4，右側精準佔全長的 1/5！'
+      },
+      3: {
+        badge: '步驟 3 / 4：過交點 R 垂直摺出右側 1/5',
+        title: '步驟 3：過交點 R 垂直摺出第一條五等分線',
+        desc: '保持上下邊完全對齊，過 R 點沿垂直線 x = 1.6 將右側 1/5 寬度向左翻摺，右側為 1/5，左側剛好剩餘 4/5！',
+        math: '💡 巧妙設計：為什麼五等分這麼順手？因為 5 - 1 = 4 是 2 的次方，剩餘的 4/5 可以靠「連續對摺兩次」輕鬆四等分！'
+      },
+      4: {
+        badge: '步驟 4 / 4：剩餘 4/5 連續對摺兩次，完成五等分',
+        title: '步驟 4：將左側 4/5 連續對摺兩次並攤開，完成五等分！',
+        desc: '先將左邊界對齊 x = 1.6 對摺，壓出 2/5 線（x = 0.8）；再將左半與右半分別向 2/5 線對摺，壓出 1/5（x = 0.4）與 3/5（x = 1.2），攤平即完成五等分！',
+        math: '★ 完工驗證：四條摺痕位於 x = 0.4, 0.8, 1.2, 1.6（單位邊長之 1/5, 2/5, 3/5, 4/5），五個長方形完全等寬！'
+      }
+    };
+
+    const m2State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM2UI() {
+      const info = m2StepsData[m2State.step];
+      document.getElementById('m2-step-badge').textContent = info.badge;
+      document.getElementById('m2-title').textContent = info.title;
+      document.getElementById('m2-desc').textContent = info.desc;
+      document.getElementById('m2-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`m2-btn-${i}`).className = i === m2State.step ? 'step-card-btn active' : 'step-card-btn';
+      }
+    }
+
+    function selectM2Step(step, autoPlay = true, autoChain = false) {
+      stopM2Play();
+      m2State.step = step;
+      m2State.autoChain = autoChain;
+      updateM2UI();
+      if (autoPlay) {
+        m2State.progress = 0;
+        m2State.sfxFlags = {};
+        document.getElementById('m2-slider').value = 0;
+        document.getElementById('m2-pct').textContent = '0%';
+        startM2Play();
+      } else {
+        m2State.progress = 1;
+        document.getElementById('m2-slider').value = 100;
+        document.getElementById('m2-pct').textContent = '100%';
+        renderM2();
+      }
+    }
+
+    function prevM2Step() { selectM2Step(m2State.step > 1 ? m2State.step - 1 : 4, true); }
+    function nextM2Step() { selectM2Step(m2State.step < 4 ? m2State.step + 1 : 1, true); }
+
+    function onM2Slider(val) {
+      stopM2Play();
+      m2State.progress = Number(val) / 100;
+      document.getElementById('m2-pct').textContent = `${val}%`;
+      renderM2();
+    }
+
+    function startM2Play() {
+      m2State.playing = true;
+      document.getElementById('m2-play-btn').textContent = '⏸ 暫停動畫';
+      if (m2State.progress >= 0.99) { m2State.progress = 0; m2State.sfxFlags = {}; }
+      if (m2State.progress < 0.05 && !m2State.sfxFlags.start) {
+        m2State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
+      const tick = () => {
+        if (!m2State.playing) return;
+        const prev = m2State.progress;
+        m2State.progress += m2State.step === 4 ? 0.0032 : 0.0038;
+        if (prev < 0.5 && m2State.progress >= 0.5 && !m2State.sfxFlags.mid) {
+          m2State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
+        if (m2State.progress >= 1) {
+          m2State.progress = 1;
+          document.getElementById('m2-slider').value = 100;
+          document.getElementById('m2-pct').textContent = '100%';
+          renderM2();
+          playOrigamiSfx(m2State.step === 4 ? 'done' : 'step');
+          const shouldChain = m2State.autoChain && m2State.step < 4;
+          const nextStep = m2State.step + 1;
+          stopM2Play();
+          if (shouldChain) m2State.chainTimer = setTimeout(() => selectM2Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m2State.progress * 100);
+        document.getElementById('m2-slider').value = pct;
+        document.getElementById('m2-pct').textContent = `${pct}%`;
+        renderM2();
+        m2State.raf = requestAnimationFrame(tick);
+      };
+      m2State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM2Play() {
+      m2State.playing = false;
+      m2State.autoChain = false;
+      if (m2State.chainTimer) { clearTimeout(m2State.chainTimer); m2State.chainTimer = null; }
+      if (m2State.raf) cancelAnimationFrame(m2State.raf);
+      const btn = document.getElementById('m2-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM2Play() {
+      if (m2State.playing) stopM2Play();
+      else if (m2State.progress >= 0.99) selectM2Step(1, true, true);
+      else startM2Play();
+    }
+
+    function renderM2() {
+      const canvas = document.getElementById('canvasM2');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m2Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m2-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const MB = p3(1, 0), M = p3(1, 2);
+      const QB = p3(1.5, 0), Q = p3(1.5, 2);
+      const R = p3(1.6, 1.6);
+      const prog = m2State.progress;
+
+      if (m2State.step === 1) {
+        if (prog <= 0.5) {
+          const f1 = Math.sin(easeCos(prog * 2) * Math.PI) * 0.9;
+          scene.addPoly([A, MB, M, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          if (f1 > 0.002) {
+            const Bf = fold3D(B, MB, M, f1, 'front');
+            const Cf = fold3D(C, MB, M, f1, 'front');
+            scene.addPoly([MB, Bf, Cf, M], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([MB, B, C, M], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, MB, M, '#4f46e5', [5, 4], 2.0);
+            drawPoint3D(ctx, camera, M, '#4f46e5', 3.8);
+            drawLabel3D(ctx, camera, M, 'M (1/2)', '#3730a3', -16, -10);
+          }
+        } else {
+          const f2 = Math.sin(easeCos((prog - 0.5) * 2) * Math.PI) * 0.9;
+          scene.addPoly([A, QB, Q, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          if (f2 > 0.002) {
+            const Bf = fold3D(B, QB, Q, f2, 'front');
+            const Cf = fold3D(C, QB, Q, f2, 'front');
+            scene.addPoly([QB, Bf, Cf, Q], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([QB, B, C, Q], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, MB, M, '#94a3b8', [4, 4], 1.3);
+            drawDashed3D(ctx, camera, QB, Q, '#4f46e5', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, Q, '#4f46e5', 4.4);
+            drawLabel3D(ctx, camera, Q, 'Q (右1/4)', '#3730a3', -24, -10);
+          }
+        }
+      } else if (m2State.step === 2) {
+        if (prog <= 0.5) {
+          const f1 = Math.sin(easeCos(prog * 2) * Math.PI) * 0.9;
+          scene.addPoly([A, C, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          if (f1 > 0.002) {
+            const Bf = fold3D(B, A, C, f1, 'front');
+            scene.addPoly([A, Bf, C], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([A, B, C], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, A, C, '#4f46e5', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, Q, '#4f46e5', 3.8);
+            drawLabel3D(ctx, camera, Q, 'Q', '#3730a3', -4, -10);
+          }
+        } else {
+          const f2 = Math.sin(easeCos((prog - 0.5) * 2) * Math.PI) * 0.9;
+          scene.addPoly([A, B, Q, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          if (f2 > 0.002) {
+            const Cf = fold3D(C, B, Q, f2, 'front');
+            scene.addPoly([B, Cf, Q], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([B, C, Q], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          }
+          if (prog > 0.85 && showNotes) {
+            scene.addPoly([R, Q, C], 'rgba(79,70,229,0.22)', 'rgba(79,70,229,0.22)', '#4f46e5', 1.4, 2, false);
+            scene.addPoly([R, A, B], 'rgba(225,29,72,0.10)', 'rgba(225,29,72,0.10)', '#e11d48', 1.4, 2, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, A, C, '#5b6b7f', [5, 4], 1.6);
+            drawDashed3D(ctx, camera, B, Q, '#4f46e5', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, Q, '#4f46e5', 3.8);
+            drawPoint3D(ctx, camera, R, '#e11d48', 4.8);
+            drawLabel3D(ctx, camera, R, 'R (4/5, 4/5)', '#e11d48', -78, 18);
+            drawLabel3D(ctx, camera, Q, 'Q', '#3730a3', -4, -10);
+            if (prog > 0.85) {
+              drawLabel3D(ctx, camera, p3(1.74, 1.88), '1', '#3730a3', -4, 4);
+              drawLabel3D(ctx, camera, p3(1.0, 0.25), '4', '#e11d48', -4, 4);
+            }
+          }
+        }
+      } else if (m2State.step === 3) {
+        const eProg = easeCos(prog);
+        const RB = p3(1.6, 0), RT = p3(1.6, 2);
+        scene.addPoly([A, RB, RT, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+        const Bf = fold3D(B, RB, RT, eProg, 'front');
+        const Cf = fold3D(C, RB, RT, eProg, 'front');
+        scene.addPoly(liftPts([RB, Bf, Cf, RT], eProg > 0.96 ? 0.006 : 0), m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, eProg > 0.02 && eProg < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, A, R, '#94a3b8', [4, 4], 1.3);
+          drawDashed3D(ctx, camera, RB, RT, '#4f46e5', [5, 3], 2.4, 0.015);
+          drawPoint3D(ctx, camera, R, '#e11d48', 4.5, 0.016);
+          drawLabel3D(ctx, camera, p3(0.8, 1.0), '剩餘 4/5', '#3730a3', -24, 4);
+          drawLabel3D(ctx, camera, p3(1.4, 1.0), '1/5', '#e11d48', -10, 4);
+        }
+      } else {
+        const X1B = p3(0.4, 0), X1T = p3(0.4, 2);
+        const X2B = p3(0.8, 0), X2T = p3(0.8, 2);
+        const X3B = p3(1.2, 0), X3T = p3(1.2, 2);
+        const X4B = p3(1.6, 0), X4T = p3(1.6, 2);
+
+        if (prog <= 0.38) {
+          // 將左邊界對齊 1.6 壓出 0.8 (2/5)
+          const fMid = Math.sin(easeCos(prog / 0.38) * Math.PI) * 0.92;
+          scene.addPoly([X2B, X4B, X4T, X2T], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          scene.addPoly([X4B, B, C, X4T], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          if (fMid > 0.002) {
+            const Af = fold3D(A, X2B, X2T, fMid, 'front');
+            const Df = fold3D(D, X2B, X2T, fMid, 'front');
+            scene.addPoly([Af, X2B, X2T, Df], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([A, X2B, X2T, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, X4B, X4T, '#4f46e5', [], 2.2, 0.015);
+            drawDashed3D(ctx, camera, X2B, X2T, '#e11d48', [5, 3], 2.2, 0.015);
+          }
+        } else if (prog <= 0.78) {
+          // 同時壓出 0.4 (1/5) 與 1.2 (3/5)
+          const fSub = Math.sin(easeCos((prog - 0.38) / 0.40) * Math.PI) * 0.92;
+          scene.addPoly([X1B, X3B, X3T, X1T], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          const Af = fold3D(A, X1B, X1T, fSub, 'front');
+          const Df = fold3D(D, X1B, X1T, fSub, 'front');
+          const X4Bf = fold3D(X4B, X3B, X3T, fSub, 'front');
+          const X4Tf = fold3D(X4T, X3B, X3T, fSub, 'front');
+          const Bf = fold3D(B, X3B, X3T, fSub, 'front');
+          const Cf = fold3D(C, X3B, X3T, fSub, 'front');
+          scene.addPoly([Af, X1B, X1T, Df], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, fSub > 0.02);
+          scene.addPoly([X3B, X4Bf, X4Tf, X3T], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, fSub > 0.02);
+          scene.addPoly([X4Bf, Bf, Cf, X4Tf], m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 5, fSub > 0.02);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, X1B, X1T, '#e11d48', [5, 3], 2.2, 0.015);
+            drawDashed3D(ctx, camera, X2B, X2T, '#4f46e5', [], 2.0, 0.015);
+            drawDashed3D(ctx, camera, X3B, X3T, '#e11d48', [5, 3], 2.2, 0.015);
+          }
+        } else {
+          scene.addPoly([A, B, C, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+          scene.flush(ctx);
+          if (showNotes) {
+            [0.4, 0.8, 1.2, 1.6].forEach((xv) => {
+              drawDashed3D(ctx, camera, p3(xv, 0), p3(xv, 2), '#4f46e5', [], 2.4, 0.015);
+            });
+            [0.2, 0.6, 1.0, 1.4, 1.8].forEach((xv) => {
+              drawLabel3D(ctx, camera, p3(xv, 1.0), '1/5', '#3730a3', -10, 4);
+            });
+          }
+        }
+      }
+      if (showNotes) {
+        const hint = m2State.step === 1 ? (prog <= 0.5 ? '第一次對摺找出中線 (1/2)…' : '右半再對摺，找出 1/4 點 Q！')
+          : m2State.step === 2 ? (prog <= 0.5 ? '沿對角線 AC 對摺並展開…' : '沿連線 BQ 對摺，找出 1:4 交點 R！')
+          : m2State.step === 3 ? '過交點 R 垂直摺入右側 1/5 寬度'
+          : (prog <= 0.38 ? '第一次對摺剩餘 4/5，壓出 2/5 線…' : prog <= 0.78 ? '再對摺壓出 1/5 與 3/5 摺痕…' : '攤平完成精準五等分！');
+        drawStageHint3D(ctx, size, hint, '#4f46e5');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 4B. 分頁 3：七等分摺紙模擬器 ==================== */
+    const m7Theme = { front: '#e8c4cc', back: '#fdf7f8', border: '#9f4a5c' };
+    const m7StepsData = {
+      1: {
+        badge: '步驟 1 / 4：由 1/3 再對摺找出上邊 1/6 點 S',
+        title: '步驟 1：由右側 1/3 再對摺找出上邊 1/6 點 S',
+        desc: '設正方形邊長為 2。先借用三等分壓出右側 1/3 線（x = 4/3），再將右邊界向左對齊 x = 4/3 對摺並展開，在上邊壓出右側 1/6 點 S(5/3, 2)，此時 SC = 1/3（佔總邊長的 1/6）。',
+        math: '💡 幾何接力：三等分借用 1/2、五等分借用 1/4，七等分則借用 1/6！因為 6 = 2 × 3，先三等分再對摺一次即可精準定位 1/6 點 S！'
+      },
+      2: {
+        badge: '步驟 2 / 4：摺出對角線 AC 與連線 BS，交於 T 點',
+        title: '步驟 2：摺出對角線 AC 與連線 BS，求出 1 : 6 交點 T',
+        desc: '沿對角線 AC 對摺並展開，再沿右下頂點 B 到 1/6 點 S 的連線 BS 對摺並展開，兩條摺痕精準交於 T(12/7, 12/7)（單位正方形座標為 (6/7, 6/7)）。',
+        math: '📐 相似證明：因 SC ∥ AB，△TSC ～ △TBA（AA 相似），SC : AB = 1 : 6，故交點 T 將寬度精準分為 1 : 6，右側佔全長的 1/7！'
+      },
+      3: {
+        badge: '步驟 3 / 4：過交點 T 垂直摺出右側 1/7',
+        title: '步驟 3：保持上下邊對齊，過交點 T 摺出第一條七等分線',
+        desc: '沿過 T 點的垂直線 x = 12/7 將右側 1/7 寬度向左翻摺，右側精準佔總邊長的 1/7，左側剛好剩餘 6/7！',
+        math: '💡 結構拆解：剩餘的 6/7 可以看成「2 份 3/7」！下一步先對摺平分成兩段 3/7，再把每段三等分（或以右側 1/7 寬度依序摺齊）即可完工！'
+      },
+      4: {
+        badge: '步驟 4 / 4：剩餘 6/7 先對摺成兩段 3/7，再均分完成七等分',
+        title: '步驟 4：將左側 6/7 對摺壓出 3/7，再細分攤開完成七等分！',
+        desc: '先將左邊界向右對齊 x = 12/7 對摺，壓出中分線 3/7（x = 6/7）；再分別將左側與右側各 3/7 三等分壓出 1/7、2/7、4/7、5/7，攤平即得七等分！',
+        math: '★ 進階彩蛋：在分頁 5 芳賀定理探索器中，只要把 M 點移到距右邊 x = 3/4 處一摺（產生 7:24:25 直角△），也能直接截出 1/7！'
+      }
+    };
+
+    const m7State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM7UI() {
+      const info = m7StepsData[m7State.step];
+      document.getElementById('m7-step-badge').textContent = info.badge;
+      document.getElementById('m7-title').textContent = info.title;
+      document.getElementById('m7-desc').textContent = info.desc;
+      document.getElementById('m7-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`m7-btn-${i}`).className = i === m7State.step ? 'step-card-btn active-rose' : 'step-card-btn';
+      }
+    }
+
+    function selectM7Step(step, autoPlay = true, autoChain = false) {
+      stopM7Play();
+      m7State.step = step;
+      m7State.autoChain = autoChain;
+      updateM7UI();
+      if (autoPlay) {
+        m7State.progress = 0;
+        m7State.sfxFlags = {};
+        document.getElementById('m7-slider').value = 0;
+        document.getElementById('m7-pct').textContent = '0%';
+        startM7Play();
+      } else {
+        m7State.progress = 1;
+        document.getElementById('m7-slider').value = 100;
+        document.getElementById('m7-pct').textContent = '100%';
+        renderM7();
+      }
+    }
+
+    function prevM7Step() { selectM7Step(m7State.step > 1 ? m7State.step - 1 : 4, true); }
+    function nextM7Step() { selectM7Step(m7State.step < 4 ? m7State.step + 1 : 1, true); }
+
+    function onM7Slider(val) {
+      stopM7Play();
+      m7State.progress = Number(val) / 100;
+      document.getElementById('m7-pct').textContent = `${val}%`;
+      renderM7();
+    }
+
+    function startM7Play() {
+      m7State.playing = true;
+      document.getElementById('m7-play-btn').textContent = '⏸ 暫停動畫';
+      if (m7State.progress >= 0.99) { m7State.progress = 0; m7State.sfxFlags = {}; }
+      if (m7State.progress < 0.05 && !m7State.sfxFlags.start) {
+        m7State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
+      const tick = () => {
+        if (!m7State.playing) return;
+        const prev = m7State.progress;
+        m7State.progress += m7State.step === 4 ? 0.0030 : 0.0038;
+        if (prev < 0.5 && m7State.progress >= 0.5 && !m7State.sfxFlags.mid) {
+          m7State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
+        if (m7State.progress >= 1) {
+          m7State.progress = 1;
+          document.getElementById('m7-slider').value = 100;
+          document.getElementById('m7-pct').textContent = '100%';
+          renderM7();
+          playOrigamiSfx(m7State.step === 4 ? 'done' : 'step');
+          const shouldChain = m7State.autoChain && m7State.step < 4;
+          const nextStep = m7State.step + 1;
+          stopM7Play();
+          if (shouldChain) m7State.chainTimer = setTimeout(() => selectM7Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m7State.progress * 100);
+        document.getElementById('m7-slider').value = pct;
+        document.getElementById('m7-pct').textContent = `${pct}%`;
+        renderM7();
+        m7State.raf = requestAnimationFrame(tick);
+      };
+      m7State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM7Play() {
+      m7State.playing = false;
+      m7State.autoChain = false;
+      if (m7State.chainTimer) { clearTimeout(m7State.chainTimer); m7State.chainTimer = null; }
+      if (m7State.raf) cancelAnimationFrame(m7State.raf);
+      const btn = document.getElementById('m7-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM7Play() {
+      if (m7State.playing) stopM7Play();
+      else if (m7State.progress >= 0.99) selectM7Step(1, true, true);
+      else startM7Play();
+    }
+
+    function renderM7() {
+      const canvas = document.getElementById('canvasM7');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m7Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m7-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const P3B = p3(4 / 3, 0), P3T = p3(4 / 3, 2);
+      const SB = p3(5 / 3, 0), S = p3(5 / 3, 2);
+      const T = p3(12 / 7, 12 / 7);
+      const prog = m7State.progress;
+
+      if (m7State.step === 1) {
+        if (prog <= 0.48) {
+          const f1 = Math.sin(easeCos(prog / 0.48) * Math.PI) * 0.9;
+          scene.addPoly([A, P3B, P3T, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          if (f1 > 0.002) {
+            const Bf = fold3D(B, P3B, P3T, f1, 'front');
+            const Cf = fold3D(C, P3B, P3T, f1, 'front');
+            scene.addPoly([P3B, Bf, Cf, P3T], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([P3B, B, C, P3T], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, P3B, P3T, '#be123c', [5, 4], 2.0);
+            drawPoint3D(ctx, camera, P3T, '#be123c', 3.8);
+            drawLabel3D(ctx, camera, P3T, '右1/3', '#9f1239', -18, -10);
+          }
+        } else {
+          const f2 = Math.sin(easeCos((prog - 0.48) / 0.52) * Math.PI) * 0.9;
+          scene.addPoly([A, SB, S, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          if (f2 > 0.002) {
+            const Bf = fold3D(B, SB, S, f2, 'front');
+            const Cf = fold3D(C, SB, S, f2, 'front');
+            scene.addPoly([SB, Bf, Cf, S], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([SB, B, C, S], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, P3B, P3T, '#94a3b8', [4, 4], 1.3);
+            drawDashed3D(ctx, camera, SB, S, '#be123c', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, S, '#be123c', 4.4);
+            drawLabel3D(ctx, camera, S, 'S (右1/6)', '#9f1239', -26, -10);
+          }
+        }
+      } else if (m7State.step === 2) {
+        if (prog <= 0.5) {
+          const f1 = Math.sin(easeCos(prog * 2) * Math.PI) * 0.9;
+          scene.addPoly([A, C, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          if (f1 > 0.002) {
+            const Bf = fold3D(B, A, C, f1, 'front');
+            scene.addPoly([A, Bf, C], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([A, B, C], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, A, C, '#be123c', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, S, '#be123c', 3.8);
+            drawLabel3D(ctx, camera, S, 'S', '#9f1239', -4, -10);
+          }
+        } else {
+          const f2 = Math.sin(easeCos((prog - 0.5) * 2) * Math.PI) * 0.9;
+          scene.addPoly([A, B, S, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          if (f2 > 0.002) {
+            const Cf = fold3D(C, B, S, f2, 'front');
+            scene.addPoly([B, Cf, S], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([B, C, S], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          }
+          if (prog > 0.85 && showNotes) {
+            scene.addPoly([T, S, C], 'rgba(190,18,60,0.22)', 'rgba(190,18,60,0.22)', '#be123c', 1.4, 2, false);
+            scene.addPoly([T, A, B], 'rgba(79,70,229,0.10)', 'rgba(79,70,229,0.10)', '#4f46e5', 1.4, 2, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, A, C, '#5b6b7f', [5, 4], 1.6);
+            drawDashed3D(ctx, camera, B, S, '#be123c', [5, 4], 2.1);
+            drawPoint3D(ctx, camera, S, '#be123c', 3.8);
+            drawPoint3D(ctx, camera, T, '#e11d48', 4.8);
+            drawLabel3D(ctx, camera, T, 'T (6/7, 6/7)', '#be123c', -84, 20);
+            drawLabel3D(ctx, camera, S, 'S', '#9f1239', -4, -10);
+            if (prog > 0.85) {
+              drawLabel3D(ctx, camera, p3(1.83, 1.90), '1', '#9f1239', -4, 4);
+              drawLabel3D(ctx, camera, p3(1.0, 0.25), '6', '#4f46e5', -4, 4);
+            }
+          }
+        }
+      } else if (m7State.step === 3) {
+        const eProg = easeCos(prog);
+        const TB = p3(12 / 7, 0), TT = p3(12 / 7, 2);
+        scene.addPoly([A, TB, TT, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+        const Bf = fold3D(B, TB, TT, eProg, 'front');
+        const Cf = fold3D(C, TB, TT, eProg, 'front');
+        scene.addPoly(liftPts([TB, Bf, Cf, TT], eProg > 0.96 ? 0.006 : 0), m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, eProg > 0.02 && eProg < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, A, T, '#94a3b8', [4, 4], 1.3);
+          drawDashed3D(ctx, camera, TB, TT, '#be123c', [5, 3], 2.4, 0.015);
+          drawPoint3D(ctx, camera, T, '#e11d48', 4.5, 0.016);
+          drawLabel3D(ctx, camera, p3(0.85, 1.0), '剩餘 6/7', '#9f1239', -24, 4);
+          drawLabel3D(ctx, camera, p3(1.56, 1.0), '1/7', '#be123c', -10, 4);
+        }
+      } else {
+        const xk = (k) => (2 * k) / 7;
+        const X1B = p3(xk(1), 0), X1T = p3(xk(1), 2);
+        const X2B = p3(xk(2), 0), X2T = p3(xk(2), 2);
+        const X3B = p3(xk(3), 0), X3T = p3(xk(3), 2);
+        const X4B = p3(xk(4), 0), X4T = p3(xk(4), 2);
+        const X5B = p3(xk(5), 0), X5T = p3(xk(5), 2);
+        const X6B = p3(xk(6), 0), X6T = p3(xk(6), 2);
+
+        if (prog <= 0.36) {
+          // 步驟 4-1：將左側 6/7 對摺壓出 3/7 線
+          const fMid = Math.sin(easeCos(prog / 0.36) * Math.PI) * 0.92;
+          scene.addPoly([X3B, X6B, X6T, X3T], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          scene.addPoly([X6B, B, C, X6T], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          if (fMid > 0.002) {
+            const Af = fold3D(A, X3B, X3T, fMid, 'front');
+            const Df = fold3D(D, X3B, X3T, fMid, 'front');
+            scene.addPoly([Af, X3B, X3T, Df], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, true);
+          } else {
+            scene.addPoly([A, X3B, X3T, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          }
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, X6B, X6T, '#be123c', [], 2.2, 0.015);
+            drawDashed3D(ctx, camera, X3B, X3T, '#e11d48', [5, 3], 2.2, 0.015);
+            drawLabel3D(ctx, camera, p3(xk(3), 1.0), '3/7', '#be123c', -10, -10);
+          }
+        } else if (prog <= 0.74) {
+          // 步驟 4-2：左右兩段 3/7 各三等分（同時翻折 1/7 與 5/7 翼片）
+          const fSub = Math.sin(easeCos((prog - 0.36) / 0.38) * Math.PI) * 0.9;
+          scene.addPoly([X1B, X5B, X5T, X1T], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          const Af = fold3D(A, X1B, X1T, fSub, 'front');
+          const Df = fold3D(D, X1B, X1T, fSub, 'front');
+          const X6Bf = fold3D(X6B, X5B, X5T, fSub, 'front');
+          const X6Tf = fold3D(X6T, X5B, X5T, fSub, 'front');
+          const Bf = fold3D(B, X5B, X5T, fSub, 'front');
+          const Cf = fold3D(C, X5B, X5T, fSub, 'front');
+          scene.addPoly([Af, X1B, X1T, Df], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, fSub > 0.02);
+          scene.addPoly([X5B, X6Bf, X6Tf, X5T], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 4, fSub > 0.02);
+          scene.addPoly([X6Bf, Bf, Cf, X6Tf], m7Theme.front, m7Theme.back, m7Theme.border, 1.6, 5, fSub > 0.02);
+          scene.flush(ctx);
+          if (showNotes) {
+            [1, 2, 4, 5].forEach((k) => {
+              drawDashed3D(ctx, camera, p3(xk(k), 0), p3(xk(k), 2), '#e11d48', [5, 3], 2.0, 0.015);
+            });
+            drawDashed3D(ctx, camera, X3B, X3T, '#be123c', [], 2.0, 0.015);
+          }
+        } else {
+          scene.addPoly([A, B, C, D], m7Theme.front, m7Theme.back, m7Theme.border, 1.8, 0, false);
+          scene.flush(ctx);
+          if (showNotes) {
+            for (let k = 1; k <= 6; k++) {
+              drawDashed3D(ctx, camera, p3(xk(k), 0), p3(xk(k), 2), '#be123c', [], 2.3, 0.015);
+            }
+            for (let k = 0; k < 7; k++) {
+              drawLabel3D(ctx, camera, p3((2 * k + 1) / 7, 1.0), '1/7', '#9f1239', -10, 4);
+            }
+          }
+        }
+      }
+      if (showNotes) {
+        const hint = m7State.step === 1 ? (prog <= 0.48 ? '先標出右側 1/3 線…' : '右側 1/3 再對摺，找出 1/6 點 S！')
+          : m7State.step === 2 ? (prog <= 0.5 ? '沿對角線 AC 對摺並展開…' : '沿連線 BS 對摺，找出 1:6 交點 T！')
+          : m7State.step === 3 ? '過交點 T 垂直摺入右側 1/7 寬度'
+          : (prog <= 0.36 ? '將剩餘 6/7 對摺壓出 3/7 線…' : prog <= 0.74 ? '左右兩段 3/7 再各自分成三份…' : '攤平完成精準七等分！');
+        drawStageHint3D(ctx, size, hint, '#be123c');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 5. 分頁 4：延伸——芳賀第一定理模擬器 ==================== */
+    const m3Theme = { front: '#aed6b8', back: '#f4f9f5', border: '#2d7a5b' };
+    const m3StepsData = {
+      1: {
+        badge: '步驟 1 / 4：對摺標出上邊中點 M',
+        title: '步驟 1：對摺找出上邊中點 M',
+        desc: '設正方形邊長為 2，先左右對摺並展開（或僅在上邊捏出記號），找出上邊中點 M(1, 2)，使 DM = MC = 1。',
+        math: '💡 芳賀第一定理預告：接下來完全不必摺對角線，只要將右下角 B 摺向 M，就能直接截出精準的 1/3 與 2/3！'
+      },
+      2: {
+        badge: '步驟 2 / 4：將右下角頂點 B 摺向上邊中點 M',
+        title: '步驟 2：核心一摺 —— 右下角 B 精準摺向中點 M',
+        desc: '沿摺痕 FE（F(0, 0.25) 到 E(2, 1.25)）將下方紙片向上翻摺，使頂點 B(2,0) 精準疊合至上邊中點 M(1,2)！注意翻摺後的底邊與左邊界交於點 G(0, 2/3)。',
+        math: '✨ 神奇結果：交點 G 將左邊界精準分成 DG = 4/3（佔 2/3）與 AG = 2/3（佔 1/3）！'
+      },
+      3: {
+        badge: '步驟 3 / 4：三組 3 : 4 : 5 相似直角三角形驗證',
+        title: '步驟 3：揭開秘密 —— 三組 3 : 4 : 5 相似直角三角形',
+        desc: '翻摺後露出三個直角三角形：右上 △MEC（邊長 3/4, 1, 5/4）、左上 △DGM（邊長 1, 4/3, 5/3）以及左下突出小角 △A\'FG，三者全部都是 3 : 4 : 5 相似三角形！',
+        math: '📐 畢氏驗證（邊長=1）：設 EC = a，則 a² + (1/2)² = (1-a)² ⇒ a = 3/8，故 △MEC 為 3:4:5，再由相似得 DG = (4/3)×(1/2) = 2/3！'
+      },
+      4: {
+        badge: '步驟 4 / 4：過 G 點水平摺出 1/3 並攤開完成三等分',
+        title: '步驟 4：沿 G 點摺出水平三等分線並攤開完成！',
+        desc: '展開翻摺角保留 G 點標記，過 G(0, 2/3) 水平摺入下側 1/3，再將上方剩餘 2/3 對摺平分並攤開，即完成漂亮的三等分！',
+        math: '★ 進階彩蛋：在分頁 4 的探索器中，只要把 M 點移到 x = 2/3 處再做同樣一摺，下段 AG 就會變成 1/5（五等分）！'
+      }
+    };
+
+    const m3State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM3UI() {
+      const info = m3StepsData[m3State.step];
+      document.getElementById('m3-step-badge').textContent = info.badge;
+      document.getElementById('m3-title').textContent = info.title;
+      document.getElementById('m3-desc').textContent = info.desc;
+      document.getElementById('m3-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`m3-btn-${i}`).className = i === m3State.step ? 'step-card-btn active-emerald' : 'step-card-btn';
+      }
+    }
+
+    function selectM3Step(step, autoPlay = true, autoChain = false) {
+      stopM3Play();
+      m3State.step = step;
+      m3State.autoChain = autoChain;
+      updateM3UI();
+      if (autoPlay) {
+        m3State.progress = 0;
+        m3State.sfxFlags = {};
+        document.getElementById('m3-slider').value = 0;
+        document.getElementById('m3-pct').textContent = '0%';
+        startM3Play();
+      } else {
+        m3State.progress = 1;
+        document.getElementById('m3-slider').value = 100;
+        document.getElementById('m3-pct').textContent = '100%';
+        renderM3();
+      }
+    }
+
+    function prevM3Step() { selectM3Step(m3State.step > 1 ? m3State.step - 1 : 4, true); }
+    function nextM3Step() { selectM3Step(m3State.step < 4 ? m3State.step + 1 : 1, true); }
+
+    function onM3Slider(val) {
+      stopM3Play();
+      m3State.progress = Number(val) / 100;
+      document.getElementById('m3-pct').textContent = `${val}%`;
+      renderM3();
+    }
+
+    function startM3Play() {
+      m3State.playing = true;
+      document.getElementById('m3-play-btn').textContent = '⏸ 暫停動畫';
+      if (m3State.progress >= 0.99) { m3State.progress = 0; m3State.sfxFlags = {}; }
+      if (m3State.progress < 0.05 && !m3State.sfxFlags.start) {
+        m3State.sfxFlags.start = true;
+        playOrigamiSfx('fold');
+      }
+      const tick = () => {
+        if (!m3State.playing) return;
+        const prev = m3State.progress;
+        m3State.progress += m3State.step === 4 ? 0.0034 : 0.0040;
+        if (prev < 0.5 && m3State.progress >= 0.5 && !m3State.sfxFlags.mid) {
+          m3State.sfxFlags.mid = true;
+          playOrigamiSfx('crease');
+        }
+        if (m3State.progress >= 1) {
+          m3State.progress = 1;
+          document.getElementById('m3-slider').value = 100;
+          document.getElementById('m3-pct').textContent = '100%';
+          renderM3();
+          playOrigamiSfx(m3State.step === 4 ? 'done' : 'step');
+          const shouldChain = m3State.autoChain && m3State.step < 4;
+          const nextStep = m3State.step + 1;
+          stopM3Play();
+          if (shouldChain) m3State.chainTimer = setTimeout(() => selectM3Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m3State.progress * 100);
+        document.getElementById('m3-slider').value = pct;
+        document.getElementById('m3-pct').textContent = `${pct}%`;
+        renderM3();
+        m3State.raf = requestAnimationFrame(tick);
+      };
+      m3State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM3Play() {
+      m3State.playing = false;
+      m3State.autoChain = false;
+      if (m3State.chainTimer) { clearTimeout(m3State.chainTimer); m3State.chainTimer = null; }
+      if (m3State.raf) cancelAnimationFrame(m3State.raf);
+      const btn = document.getElementById('m3-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM3Play() {
+      if (m3State.playing) stopM3Play();
+      else if (m3State.progress >= 0.99) selectM3Step(1, true, true);
+      else startM3Play();
+    }
+
+    function renderM3() {
+      const canvas = document.getElementById('canvasM3');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m3Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m3-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const MB = p3(1, 0), M = p3(1, 2);
+      const F = p3(0, 0.25), E = p3(2, 1.25);
+      const G = p3(0, 2 / 3);
+      const Y1L = p3(0, 2 / 3), Y1R = p3(2, 2 / 3);
+      const Y2L = p3(0, 4 / 3), Y2R = p3(2, 4 / 3);
+      const prog = m3State.progress;
+
+      if (m3State.step === 1) {
+        const f1 = Math.sin(easeCos(prog) * Math.PI) * 0.9;
+        scene.addPoly([A, MB, M, D], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+        if (f1 > 0.002) {
+          const Bf = fold3D(B, MB, M, f1, 'front');
+          const Cf = fold3D(C, MB, M, f1, 'front');
+          scene.addPoly([MB, Bf, Cf, M], m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 4, true);
+        } else {
+          scene.addPoly([MB, B, C, M], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+        }
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, MB, M, '#059669', [5, 4], 1.8);
+          drawPoint3D(ctx, camera, M, '#059669', 4.4);
+          drawLabel3D(ctx, camera, M, 'M (1/2)', '#065f46', -18, -10);
+          drawLabel3D(ctx, camera, B, 'B', '#0f172a', 6, 14);
+        }
+      } else if (m3State.step === 2) {
+        const eProg = easeCos(prog);
+        scene.addPoly([F, E, C, D], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+        const Af = fold3D(A, F, E, eProg, 'front');
+        const Bf = fold3D(B, F, E, eProg, 'front');
+        scene.addPoly(liftPts([F, Af, Bf, E], eProg > 0.96 ? 0.006 : 0), m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 4, eProg > 0.02 && eProg < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawDashed3D(ctx, camera, F, E, '#059669', [5, 3], 2.0, 0.015);
+          drawPoint3D(ctx, camera, M, '#059669', 4.2, 0.016);
+          if (eProg > 0.85) {
+            drawPoint3D(ctx, camera, G, '#e11d48', 4.8, 0.018);
+            drawLabel3D(ctx, camera, G, 'G (1/3)', '#e11d48', -50, 4);
+          }
+          drawLabel3D(ctx, camera, M, 'M', '#065f46', -4, -10);
+          drawLabel3D(ctx, camera, E, 'E', '#0f172a', 8, 4);
+          drawLabel3D(ctx, camera, F, 'F', '#0f172a', -14, 6);
+        }
+      } else if (m3State.step === 3) {
+        scene.addPoly([F, E, C, D], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+        const Af = fold3D(A, F, E, 1, 'front');
+        const Bf = fold3D(B, F, E, 1, 'front');
+        scene.addPoly(liftPts([F, Af, Bf, E], 0.006), m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 3, false);
+        if (showNotes) {
+          if (prog > 0.15) {
+            scene.addPoly(liftPts([M, E, C], 0.010), 'rgba(217,119,6,0.28)', 'rgba(217,119,6,0.28)', '#d97706', 1.8, 6, false);
+          }
+          if (prog > 0.45) {
+            scene.addPoly(liftPts([D, G, M], 0.010), 'rgba(79,70,229,0.22)', 'rgba(79,70,229,0.22)', '#4f46e5', 1.8, 6, false);
+          }
+          if (prog > 0.72) {
+            scene.addPoly(liftPts([F, Af, G], 0.012), 'rgba(225,29,72,0.26)', 'rgba(225,29,72,0.26)', '#e11d48', 1.8, 8, false);
+          }
+        }
+        scene.flush(ctx);
+        if (showNotes) {
+          drawPoint3D(ctx, camera, M, '#059669', 4.2, 0.018);
+          drawPoint3D(ctx, camera, G, '#e11d48', 4.8, 0.018);
+          if (prog > 0.15) drawLabel3D(ctx, camera, p3(1.62, 1.72), '3:4:5', '#b45309', -14, 4);
+          if (prog > 0.45) {
+            drawLabel3D(ctx, camera, p3(0.35, 1.55), '3:4:5', '#3730a3', -14, 4);
+            drawLabel3D(ctx, camera, p3(0, 1.33), '2/3', '#3730a3', -28, 4);
+          }
+          if (prog > 0.72) {
+            drawLabel3D(ctx, camera, G, 'G (下1/3)', '#e11d48', -62, 4);
+          }
+        }
+      } else {
+        if (prog <= 0.32) {
+          const u = 1 - easeCos(prog / 0.32);
+          scene.addPoly([F, E, C, D], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+          const Af = fold3D(A, F, E, u, 'front');
+          const Bf = fold3D(B, F, E, u, 'front');
+          scene.addPoly(liftPts([F, Af, Bf, E], u > 0.02 ? 0.006 : 0), m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 4, u > 0.02 && u < 0.98);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawPoint3D(ctx, camera, G, '#e11d48', 4.5, 0.016);
+            drawLabel3D(ctx, camera, G, 'G (1/3)', '#e11d48', -50, 4);
+          }
+        } else if (prog <= 0.72) {
+          const fH = Math.sin(easeCos((prog - 0.32) / 0.40) * Math.PI) * 0.92;
+          scene.addPoly([Y1L, Y1R, Y2R, Y2L], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+          const Af = fold3D(A, Y1L, Y1R, fH, 'front');
+          const Bf = fold3D(B, Y1L, Y1R, fH, 'front');
+          const Cf = fold3D(C, Y2L, Y2R, fH, 'front');
+          const Df = fold3D(D, Y2L, Y2R, fH, 'front');
+          scene.addPoly(liftPts([Af, Bf, Y1R, Y1L], fH > 0.02 ? 0.005 : 0), m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 4, fH > 0.02);
+          scene.addPoly(liftPts([Y2L, Y2R, Cf, Df], fH > 0.02 ? 0.010 : 0), m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 6, fH > 0.02);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, Y1L, Y1R, '#059669', [5, 3], 2.2, 0.016);
+            drawDashed3D(ctx, camera, Y2L, Y2R, '#059669', [5, 3], 2.2, 0.016);
+          }
+        } else {
+          scene.addPoly([A, B, C, D], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+          scene.flush(ctx);
+          if (showNotes) {
+            drawDashed3D(ctx, camera, Y1L, Y1R, '#059669', [], 2.5, 0.016);
+            drawDashed3D(ctx, camera, Y2L, Y2R, '#059669', [], 2.5, 0.016);
+            drawLabel3D(ctx, camera, p3(1.0, 1 / 3), '1/3', '#065f46', -10, 4);
+            drawLabel3D(ctx, camera, p3(1.0, 1.0), '1/3', '#065f46', -10, 4);
+            drawLabel3D(ctx, camera, p3(1.0, 5 / 3), '1/3', '#065f46', -10, 4);
+          }
+        }
+      }
+      if (showNotes) {
+        const hint = m3State.step === 1 ? '左右對摺找出上邊中點 M…'
+          : m3State.step === 2 ? '右下角 B 精準摺向中點 M，截出左邊點 G (1/3)！'
+          : m3State.step === 3 ? '依序點亮三組 3 : 4 : 5 相似直角三角形'
+          : (prog <= 0.32 ? '展開翻折角，保留 G 點記號…' : prog <= 0.72 ? '上下各摺入 1/3 壓出水平摺痕…' : '攤平完成水平三等分！');
+        drawStageHint3D(ctx, size, hint, '#059669');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 6. 分頁 4：互動原理探索器 ==================== */
+    let currentExploreN = 3;
+
+    function setExploreN(n, btn) {
+      currentExploreN = n;
+      document.querySelectorAll('.n-pill-btn').forEach((b) => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderCmp1();
+    }
+
+    function renderCmp1() {
+      const canvas = document.getElementById('canvasCmp1');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(220, Math.floor(canvas.parentElement.getBoundingClientRect().width - 12));
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const pad = 28;
+      const W = size - pad * 2;
+      const toXY = (u, v) => ({ x: pad + u * W, y: pad + (1 - v) * W });
+      const N = currentExploreN;
+      const baseFrac = 1 / (N - 1);
+      const xP = (N - 1) / N;
+      const yP = (N - 1) / N;
+
+      // 正方形底紙
+      ctx.fillStyle = '#fffbeb';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.fillRect(pad, pad, W, W);
+      ctx.strokeRect(pad, pad, W, W);
+
+      // 相似三角形著色（△PQC 橘色 ～ △PBA 紫色）
+      const pA = toXY(0, 0), pB = toXY(1, 0), pC = toXY(1, 1), pD = toXY(0, 1);
+      const pQ = toXY(1 - baseFrac, 1);
+      const pP = toXY(xP, yP);
+
+      ctx.fillStyle = 'rgba(217, 119, 6, 0.26)';
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(pP.x, pP.y); ctx.lineTo(pQ.x, pQ.y); ctx.lineTo(pC.x, pC.y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = 'rgba(79, 70, 229, 0.14)';
+      ctx.strokeStyle = '#4f46e5';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(pP.x, pP.y); ctx.lineTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // N 等分垂直線
+      for (let k = 1; k < N; k++) {
+        const top = toXY(k / N, 1), bot = toXY(k / N, 0);
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash(k === N - 1 ? [] : [4, 4]);
+        ctx.strokeStyle = k === N - 1 ? '#e11d48' : 'rgba(217,119,6,0.55)';
+        ctx.lineWidth = k === N - 1 ? 2.2 : 1.3;
+        ctx.moveTo(top.x, top.y); ctx.lineTo(bot.x, bot.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 對角線 AC 與連線 BQ
+      ctx.save();
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pC.x, pC.y); ctx.stroke();
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(pB.x, pB.y); ctx.lineTo(pQ.x, pQ.y); ctx.stroke();
+      ctx.restore();
+
+      // 標示關鍵點
+      [pQ, pP].forEach((pt, idx) => {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, idx === 1 ? 4.5 : 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = idx === 1 ? '#e11d48' : '#d97706';
+        ctx.fill();
+      });
+
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('A', pA.x - 14, pA.y + 12);
+      ctx.fillText('B', pB.x + 6, pB.y + 12);
+      ctx.fillText('C', pC.x + 6, pC.y + 2);
+      ctx.fillText('D', pD.x - 14, pD.y + 2);
+      ctx.fillStyle = '#b45309';
+      ctx.fillText(`Q (1/${N - 1})`, Math.min(pQ.x - 22, pad + W - 46), pQ.y - 8);
+      ctx.fillStyle = '#e11d48';
+      ctx.fillText('P', pP.x - 14, pP.y - 4);
+      ctx.fillText(`右 1/${N}`, pP.x - 18, pad + W + 18);
+
+      // 標示兩個相似三角形名稱於色塊內
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = '#4f46e5';
+      ctx.fillText('△PBA', pad + W * 0.44, pad + W * 0.86);
+      if (N <= 5) {
+        ctx.fillStyle = '#b45309';
+        ctx.fillText('△PQC', (pP.x + pQ.x + pC.x) / 3 - 16, (pP.y + pQ.y + pC.y) / 3 + 4);
+      }
+
+      document.getElementById('cmp1-base-val').textContent = `1/${N - 1}`;
+      document.getElementById('cmp1-ratio-val').textContent = `1 : ${N - 1}`;
+      document.getElementById('cmp1-target-val').textContent = `1/${N}`;
+      const noteMap = {
+        3: '剩餘左側為 2/3，對摺 1 次即可完成 3 等分！',
+        5: '剩餘左側為 4/5（4 = 2²），連續對摺 2 次即完成 5 等分！',
+        7: '先借用 1/6（先 3 等分再對摺），交點定位 1/7，剩餘 6/7 再 3 等分＋對摺！',
+        9: '剩餘左側為 8/9（8 = 2³），連續對摺 3 次即完成 9 等分！'
+      };
+      document.getElementById('cmp1-note').textContent = noteMap[N] || '';
+      ctx.restore();
+    }
+
+    function setHagaX(val) {
+      const slider = document.getElementById('haga-x-slider');
+      slider.value = val;
+      renderCmp2(val);
+    }
+
+    function renderCmp2(x) {
+      const canvas = document.getElementById('canvasCmp2');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(220, Math.floor(canvas.parentElement.getBoundingClientRect().width - 12));
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const pad = 28;
+      const W = size - pad * 2;
+      const toXY = (u, v) => ({ x: pad + u * W, y: pad + (1 - v) * W });
+
+      // 芳賀定理計算（單位正方形，B(1,0) 摺向 M(1-x, 1)，其中 x = MC 為距右角距離）
+      const dg = (2 * x) / (1 + x);
+      const ag = (1 - x) / (1 + x);
+      const ec = (1 - x * x) / 2; // 驗證: a^2 + x^2 = (1-a)^2 => 2a = 1 - x^2
+      const eb = 1 - ec;
+      // 摺痕為 BM 垂直平分線: -x(u - (2-x)/2) + (v - 1/2) = 0 => v = x*u + (1-x)^2/2
+      const fY = ((1 - x) * (1 - x)) / 2;
+      // A(0,0) 關於摺痕 x*u - v + fY = 0 之對稱點 A'
+      const Acoef = x, Bcoef = -1, Ccoef = fY;
+      const denom = Acoef * Acoef + Bcoef * Bcoef;
+      const ax = -2 * Acoef * Ccoef / denom;
+      const ay = -2 * Bcoef * Ccoef / denom;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.fillRect(pad, pad, W, W);
+      ctx.strokeRect(pad, pad, W, W);
+
+      // 翻折後的四邊形 [F, A', M, E]
+      const pA = toXY(0, 0), pB = toXY(1, 0), pC = toXY(1, 1), pD = toXY(0, 1);
+      const pF = toXY(0, fY), pE = toXY(1, eb), pM = toXY(1 - x, 1), pAp = toXY(ax, ay), pG = toXY(0, ag);
+      ctx.fillStyle = 'rgba(79, 70, 229, 0.10)';
+      ctx.strokeStyle = '#4f46e5';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(pF.x, pF.y); ctx.lineTo(pAp.x, pAp.y); ctx.lineTo(pM.x, pM.y); ctx.lineTo(pE.x, pE.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 標示兩組相似直角三角形：△MEC（橘） ～ △DGM（綠）
+      ctx.fillStyle = 'rgba(217, 119, 6, 0.25)';
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(pM.x, pM.y); ctx.lineTo(pE.x, pE.y); ctx.lineTo(pC.x, pC.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(5, 150, 105, 0.22)';
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(pD.x, pD.y); ctx.lineTo(pG.x, pG.y); ctx.lineTo(pM.x, pM.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 標出 G 點水平線
+      const pGR = toXY(1, ag);
+      ctx.save();
+      ctx.setLineDash([5, 3]);
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(pG.x, pG.y); ctx.lineTo(pGR.x, pGR.y); ctx.stroke();
+      ctx.restore();
+
+      [pM, pG, pE].forEach((pt, idx) => {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, idx === 2 ? 3.5 : 4.2, 0, Math.PI * 2);
+        ctx.fillStyle = idx === 0 ? '#059669' : idx === 1 ? '#e11d48' : '#d97706';
+        ctx.fill();
+      });
+
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('A', pA.x - 14, pA.y + 12);
+      ctx.fillText('B', pB.x + 6, pB.y + 12);
+      ctx.fillText('C', pC.x + 6, pC.y + 2);
+      ctx.fillText('D', pD.x - 14, pD.y + 2);
+      ctx.fillStyle = '#059669';
+      ctx.fillText(`M`, pM.x - 5, pM.y - 8);
+      ctx.fillStyle = '#d97706';
+      ctx.fillText('E', pE.x + 6, pE.y + 4);
+      ctx.fillStyle = '#e11d48';
+      ctx.fillText('G', pG.x - 15, pG.y + 4);
+
+      ctx.font = 'bold 10.5px sans-serif';
+      ctx.fillStyle = '#b45309';
+      ctx.fillText('△MEC', (pM.x + pE.x + pC.x) / 3 - 15, (pM.y + pE.y + pC.y) / 3 + 4);
+      ctx.fillStyle = '#065f46';
+      ctx.fillText('△DGM', (pD.x + pG.x + pM.x) / 3 - 14, (pD.y + pG.y + pM.y) / 3 + 4);
+
+      let tag = `x = ${x.toFixed(2)}`;
+      if (Math.abs(x - 0.5) < 0.012) tag = 'x = 0.50 (1/2) ★ 截出 1/3！';
+      else if (Math.abs(x - 2 / 3) < 0.012) tag = 'x = 0.67 (2/3) ★ 截出 1/5！';
+      else if (Math.abs(x - 0.75) < 0.012) tag = 'x = 0.75 (3/4) ★ 截出 1/7！';
+      document.getElementById('haga-x-badge').textContent = tag;
+      document.getElementById('haga-dg-val').textContent = dg.toFixed(3);
+      document.getElementById('haga-ag-val').textContent = ag.toFixed(3);
+      document.getElementById('haga-ec-val').textContent = ec.toFixed(3);
+      ctx.restore();
+    }
+
+    /* ==================== 7. 分頁 5：課堂學習單互動批改與手繪板 ==================== */
+    const WS_STORAGE_KEY = 'origami_second_ws_v1';
+
+    function updateWorksheetProgress() {
+      const blanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
+      const filled = blanks.filter((b) => b.value.trim() !== '').length;
+      const pill = document.getElementById('ws-progress-pill');
+      if (!pill) return;
+      pill.textContent = `填答進度：${filled} / ${blanks.length} 格`;
+      pill.classList.toggle('complete', filled === blanks.length && blanks.length > 0);
+    }
+
+    function saveWorksheetProgress() {
+      try {
+        const data = {
+          meta: {
+            cls: document.getElementById('ws-meta-class')?.value || '',
+            seat: document.getElementById('ws-meta-seat')?.value || '',
+            name: document.getElementById('ws-meta-name')?.value || ''
+          },
+          blanks: Array.from(document.querySelectorAll('#worksheet-root input.blank')).map((b) => b.value)
+        };
+        localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {}
+      updateWorksheetProgress();
+    }
+
+    function loadWorksheetProgress() {
+      try {
+        const raw = localStorage.getItem(WS_STORAGE_KEY);
+        if (!raw) { updateWorksheetProgress(); return; }
+        const data = JSON.parse(raw);
+        if (data.meta) {
+          if (document.getElementById('ws-meta-class')) document.getElementById('ws-meta-class').value = data.meta.cls || '';
+          if (document.getElementById('ws-meta-seat')) document.getElementById('ws-meta-seat').value = data.meta.seat || '';
+          if (document.getElementById('ws-meta-name')) document.getElementById('ws-meta-name').value = data.meta.name || '';
+        }
+        if (Array.isArray(data.blanks)) {
+          document.querySelectorAll('#worksheet-root input.blank').forEach((b, i) => {
+            if (typeof data.blanks[i] === 'string') b.value = data.blanks[i];
+          });
+        }
+      } catch (e) {}
+      updateWorksheetProgress();
+    }
+
+    function toggleHint(id) {
+      const box = document.getElementById(id);
+      if (box) box.classList.toggle('open');
+    }
+
+    function toggleQuizMode() {
+      const root = document.getElementById('worksheet-root');
+      const btn = document.getElementById('ws-quiz-btn');
+      const active = root.classList.toggle('quiz-mode');
+      if (btn) {
+        btn.classList.toggle('active-toggle', active);
+        btn.textContent = active ? '📝 測驗模式（已開啟）' : '📝 測驗模式';
+      }
+      if (active) {
+        root.classList.remove('show-ans');
+        document.querySelectorAll('.ws-hint-box.open').forEach((b) => b.classList.remove('open'));
+      }
+    }
+
+    function normalizeAns(str) {
+      return (str || '').trim().replace(/\s+/g, '').replace(/：/g, ':').replace(/／/g, '/');
+    }
+
+    function gradeWorksheet() {
+      const blanks = document.querySelectorAll('#worksheet-root input.blank');
+      let correctCount = 0;
+      blanks.forEach((inp) => {
+        const userVal = normalizeAns(inp.value);
+        const ans = normalizeAns(inp.dataset.ans || '');
+        const alt = normalizeAns(inp.dataset.alt || '');
+        inp.classList.remove('correct', 'wrong');
+        if (userVal && (userVal === ans || (alt && userVal === alt))) {
+          inp.classList.add('correct');
+          correctCount++;
+        } else {
+          inp.classList.add('wrong');
+        }
+      });
+      const banner = document.getElementById('grade-banner');
+      banner.style.display = 'block';
+      if (correctCount === blanks.length) {
+        banner.style.background = '#d1fae5';
+        banner.style.color = '#065f46';
+        banner.textContent = `🎉 太棒了！全部 ${blanks.length} 格完全正確！你已經徹底掌握三等分、五等分、七等分與芳賀定理！`;
+        playOrigamiSfx('done');
+        launchConfetti();
+      } else {
+        banner.style.background = '#fef3c7';
+        banner.style.color = '#92400e';
+        banner.textContent = `目前答對 ${correctCount} / ${blanks.length} 格，紅色空格可點擊「💡 小提示」或對照 3D 模擬器再試一次！`;
+        playOrigamiSfx('step');
+      }
+    }
+
+    function toggleAnswerKey() {
+      document.getElementById('worksheet-root').classList.toggle('show-ans');
+    }
+
+    function resetWorksheet() {
+      document.querySelectorAll('#worksheet-root input.blank').forEach((inp) => {
+        inp.value = '';
+        inp.classList.remove('correct', 'wrong');
+      });
+      document.getElementById('grade-banner').style.display = 'none';
+      saveWorksheetProgress();
+    }
+
+    /* 手繪摺痕練習框 */
+    const sketchPads = {};
+    function initSketchPads() {
+      ['A', 'B'].forEach((id) => {
+        const canvas = document.getElementById(`sketchCanvas${id}`);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        sketchPads[id] = { canvas, ctx, mode: 'dash', tool: 'line', strokes: [], drawing: false, start: null, current: null };
+        redrawSketch(id);
+
+        const getPos = (e) => {
+          const r = canvas.getBoundingClientRect();
+          return { x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) };
+        };
+
+        canvas.addEventListener('pointerdown', (e) => {
+          const pad = sketchPads[id];
+          pad.drawing = true;
+          pad.start = getPos(e);
+          pad.current = [pad.start];
+          canvas.setPointerCapture(e.pointerId);
+        });
+        canvas.addEventListener('pointermove', (e) => {
+          const pad = sketchPads[id];
+          if (!pad.drawing) return;
+          const pos = getPos(e);
+          if (pad.tool === 'line') pad.current = [pad.start, pos];
+          else pad.current.push(pos);
+          redrawSketch(id);
+          drawStroke(pad.ctx, { mode: pad.mode, pts: pad.current });
+        });
+        const finish = () => {
+          const pad = sketchPads[id];
+          if (!pad.drawing) return;
+          pad.drawing = false;
+          if (pad.current && pad.current.length >= 2) {
+            pad.strokes.push({ mode: pad.mode, pts: pad.current });
+          }
+          pad.current = null;
+          redrawSketch(id);
+        };
+        canvas.addEventListener('pointerup', finish);
+        canvas.addEventListener('pointercancel', finish);
+      });
+    }
+
+    function drawStroke(ctx, st) {
+      if (!st.pts || st.pts.length < 2) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(st.pts[0].x, st.pts[0].y);
+      for (let i = 1; i < st.pts.length; i++) ctx.lineTo(st.pts[i].x, st.pts[i].y);
+      if (st.mode === 'dash') {
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.6;
+      } else {
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#e11d48';
+        ctx.lineWidth = 2.2;
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function redrawSketch(id) {
+      const pad = sketchPads[id];
+      if (!pad) return;
+      const { ctx, canvas } = pad;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const p = 18, w = canvas.width - p * 2;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(p, p, w, w);
+      pad.strokes.forEach((st) => drawStroke(ctx, st));
+    }
+
+    function setSketchMode(id, mode, btn) {
+      if (!sketchPads[id]) return;
+      sketchPads[id].mode = mode;
+      document.querySelectorAll(`.sketch-tool-btn[data-pad="${id}"][data-mode]`).forEach((b) => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function toggleSketchTool(id, btn) {
+      const pad = sketchPads[id];
+      if (!pad) return;
+      pad.tool = pad.tool === 'line' ? 'free' : 'line';
+      if (btn) {
+        btn.classList.toggle('active', pad.tool === 'line');
+        btn.textContent = pad.tool === 'line' ? '📏 直線' : '✏️ 自由筆';
+      }
+    }
+
+    function undoSketch(id) {
+      if (!sketchPads[id]) return;
+      sketchPads[id].strokes.pop();
+      redrawSketch(id);
+    }
+
+    function clearSketch(id) {
+      if (!sketchPads[id]) return;
+      sketchPads[id].strokes = [];
+      redrawSketch(id);
+    }
+
+    function drawSketchAnswer(id) {
+      const pad = sketchPads[id];
+      if (!pad) return;
+      const p = 18, w = pad.canvas.width - p * 2;
+      if (id === 'A') {
+        pad.strokes = [
+          { mode: 'dash', pts: [{ x: p, y: p + w }, { x: p + w, y: p }] },
+          { mode: 'dash', pts: [{ x: p + w, y: p + w }, { x: p + w * 0.5, y: p }] },
+          { mode: 'solid', pts: [{ x: p + w * (2 / 3), y: p }, { x: p + w * (2 / 3), y: p + w }] },
+          { mode: 'solid', pts: [{ x: p + w * (1 / 3), y: p }, { x: p + w * (1 / 3), y: p + w }] }
+        ];
+      } else {
+        pad.strokes = [
+          { mode: 'dash', pts: [{ x: p, y: p + w }, { x: p + w, y: p }] },
+          { mode: 'dash', pts: [{ x: p + w, y: p + w }, { x: p + w * 0.75, y: p }] },
+          { mode: 'solid', pts: [{ x: p + w * 0.8, y: p }, { x: p + w * 0.8, y: p + w }] },
+          { mode: 'solid', pts: [{ x: p + w * 0.6, y: p }, { x: p + w * 0.6, y: p + w }] },
+          { mode: 'solid', pts: [{ x: p + w * 0.4, y: p }, { x: p + w * 0.4, y: p + w }] },
+          { mode: 'solid', pts: [{ x: p + w * 0.2, y: p }, { x: p + w * 0.2, y: p + w }] }
+        ];
+      }
+      redrawSketch(id);
+    }
+
+    /* 慶祝彩帶 */
+    function launchConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      if (!canvas) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+      const colors = ['#f59e0b', '#4f46e5', '#059669', '#e11d48', '#0284c7'];
+      const parts = Array.from({ length: 80 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 140,
+        vx: (Math.random() - 0.5) * 4,
+        vy: 3 + Math.random() * 4,
+        s: 6 + Math.random() * 6,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        r: Math.random() * 6.28
+      }));
+      let frame = 0;
+      const anim = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        parts.forEach((p) => {
+          p.x += p.vx; p.y += p.vy; p.r += 0.1;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.r);
+          ctx.fillStyle = p.c;
+          ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+          ctx.restore();
+        });
+        frame++;
+        if (frame < 110) requestAnimationFrame(anim);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      };
+      requestAnimationFrame(anim);
+    }
+
+    /* ==================== 8. 3D 拖曳旋轉與初始化 ==================== */
+    function bindOrbit3D(canvasId, cam, renderFn) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      let dragging = false, lastX = 0, lastY = 0;
+      canvas.addEventListener('pointerdown', (e) => {
+        dragging = true; lastX = e.clientX; lastY = e.clientY;
+        canvas.setPointerCapture(e.pointerId);
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX, dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        cam.yaw += dx * 0.01;
+        cam.pitch = Math.max(-1.1, Math.min(1.4, cam.pitch + dy * 0.01));
+        renderFn();
+      });
+      const stopDrag = () => { dragging = false; };
+      canvas.addEventListener('pointerup', stopDrag);
+      canvas.addEventListener('pointercancel', stopDrag);
+    }
+
+    window.addEventListener('resize', () => {
+      renderM1();
+      renderM2();
+      renderM7();
+      renderM3();
+      renderCmp1();
+      renderCmp2(Number(document.getElementById('haga-x-slider').value));
+    });
+
+    window.onload = function () {
+      selectM1Step(1, true, true);
+      updateM2UI(); renderM2();
+      updateM7UI(); renderM7();
+      updateM3UI(); renderM3();
+      bindOrbit3D('canvasM1', m1Cam, renderM1);
+      bindOrbit3D('canvasM2', m2Cam, renderM2);
+      bindOrbit3D('canvasM7', m7Cam, renderM7);
+      bindOrbit3D('canvasM3', m3Cam, renderM3);
+      renderCmp1();
+      renderCmp2(0.5);
+      initSketchPads();
+      loadWorksheetProgress();
+
+      const allBlanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
+      document.querySelectorAll('#worksheet-root input').forEach((inp) => {
+        if (inp.classList.contains('blank')) {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const idx = allBlanks.indexOf(inp);
+              if (idx >= 0 && idx < allBlanks.length - 1) allBlanks[idx + 1].focus();
+              else gradeWorksheet();
+            }
+          });
+        }
+        inp.addEventListener('input', () => {
+          inp.classList.remove('correct', 'wrong');
+          saveWorksheetProgress();
+        });
+      });
+    };
+  </script>
+</body>
+</html>
