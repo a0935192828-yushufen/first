@@ -1,0 +1,2880 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>拋物線摺紙教學設計：焦點、準線與包絡線｜歐氏幾何・解析幾何・微積分・空間變換</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ea580c'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M6 10 Q16 28 26 10' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='13' r='2.3' fill='%23fde047'/%3E%3Cline x1='5' y1='25' x2='27' y2='25' stroke='%23fff' stroke-width='1.5' stroke-dasharray='2.5 2'/%3E%3C/svg%3E" />
+  <style>
+    /* ==================== 1. 設計系統與全域變數 ==================== */
+    :root {
+      --bg-page: #f4f6fb;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Segoe UI", sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ==================== 2. 台灣數學標準符號排版 (零外部CDN) ==================== */
+    .math {
+      font-family: "Times New Roman", Georgia, "Noto Serif TC", serif;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .overline {
+      display: inline-block;
+      border-top: 1.6px solid currentColor;
+      padding-top: 1px;
+      line-height: 1.05;
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 3px;
+      font-size: 0.9em;
+    }
+    .frac > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 4px 1px; line-height: 1.15; }
+    .frac > span:last-child { padding: 1px 4px 0; line-height: 1.15; }
+
+    /* ==================== 3. 頂部導覽列與五分頁切換 ==================== */
+    header.top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #ea580c, #2563eb);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand-title h1 { font-size: 1rem; font-weight: 800; color: #0f172a; line-height: 1.25; }
+    .brand-title p { font-size: 0.72rem; color: var(--text-muted); }
+
+    .domain-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .domain-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+    .domain-tag.geo { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+    .domain-tag.conic { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .domain-tag.calc { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .domain-tag.space { background: #fff1f2; color: #9f1239; border-color: #fecdd3; }
+
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: #eef2f6;
+      padding: 4px;
+      border-radius: 13px;
+      width: 100%;
+    }
+
+    @media (min-width: 900px) {
+      .tab-bar { width: auto; display: flex; }
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    @media (min-width: 900px) {
+      .tab-btn { font-size: 0.82rem; padding: 8px 12px; }
+    }
+
+    .tab-btn:hover { color: #0f172a; }
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    /* ==================== 4. 主要版面容器 ==================== */
+    main.container { max-width: 1220px; margin: 0 auto; padding: 16px; }
+    @media (min-width: 768px) { main.container { padding: 24px 20px; } }
+
+    .tab-panel { display: none; animation: fadeIn 0.24s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      color: #ffffff;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .header-m1 { background: linear-gradient(135deg, #d97706, #ea580c); }
+    .header-m2 { background: linear-gradient(135deg, #2563eb, #4f46e5); }
+    .header-m3 { background: linear-gradient(135deg, #059669, #0d9488); }
+    .header-cmp { background: linear-gradient(135deg, #0f766e, #0284c7); }
+
+    .badge-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      margin-bottom: 3px;
+    }
+
+    .card-header h2 { font-size: 1.08rem; font-weight: 800; }
+
+    /* ==================== 5. 摺紙模擬器雙欄與緊貼控制列 ==================== */
+    .sim-grid { display: grid; grid-template-columns: 1fr; }
+    @media (min-width: 960px) { .sim-grid { grid-template-columns: 1.12fr 0.88fr; } }
+
+    .sim-stage {
+      background: var(--bg-subtle);
+      padding: 12px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    @media (min-width: 960px) {
+      .sim-stage { padding: 20px; border-bottom: none; border-right: 1px solid var(--border-light); }
+    }
+
+    .stage-topbar {
+      width: 100%;
+      max-width: 430px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .step-tag {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .step-tag.m1 { background: #ffedd5; color: #9a3412; }
+    .step-tag.m3 { background: #d1fae5; color: #065f46; }
+
+    .toggle-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #334155;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .canvas-box {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      padding: 6px;
+      box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    @media (min-width: 640px) {
+      .canvas-box { max-width: 430px; padding: 10px; }
+    }
+
+    .canvas-box canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 10px;
+      background: radial-gradient(circle at 50% 42%, #f7f8f3 0%, #eaeee6 100%);
+      cursor: grab;
+      touch-action: none;
+    }
+    .canvas-box canvas:active { cursor: grabbing; }
+
+    .drag-hint-pill {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .view-reset-fab, .quick-replay-fab {
+      position: absolute;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 5px 9px;
+      border-radius: 9px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+      transition: transform 0.12s ease;
+    }
+    .view-reset-fab { left: 10px; }
+    .quick-replay-fab { right: 10px; font-size: 0.75rem; padding: 5px 10px; }
+    .view-reset-fab:active, .quick-replay-fab:active { transform: scale(0.95); }
+
+    .docked-controls {
+      width: 100%;
+      max-width: 340px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 0 0 16px 16px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+    @media (min-width: 640px) { .docked-controls { max-width: 430px; padding: 12px 14px; } }
+
+    .btn-row { display: grid; grid-template-columns: 1fr 1.65fr 1fr; gap: 7px; margin-bottom: 9px; }
+
+    .ctrl-btn {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 9px 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .ctrl-btn:hover { background: #f1f5f9; }
+    .ctrl-btn:active { transform: scale(0.97); }
+    .ctrl-btn.primary { background: var(--primary); border-color: var(--primary); color: #ffffff; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28); }
+    .ctrl-btn.amber-primary { background: #d97706; border-color: #d97706; color: #ffffff; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.28); }
+    .ctrl-btn.emerald-primary { background: #059669; border-color: #059669; color: #ffffff; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28); }
+
+    .slider-row { display: flex; align-items: center; gap: 8px; }
+    .slider-row label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+    }
+
+    .pct-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .legend-bar {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid #94a3b8; display: inline-block; }
+
+    .sim-sidebar { padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
+    @media (min-width: 960px) { .sim-sidebar { padding: 22px; } }
+
+    .step-grid-btns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .step-card-btn {
+      text-align: left;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-light);
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .step-card-btn:hover { border-color: #93c5fd; }
+    .step-card-btn.active { border-color: var(--primary); background: var(--primary-soft); }
+    .step-card-btn.active-amber { border-color: #d97706; background: #fffbeb; }
+    .step-card-btn.active-emerald { border-color: #059669; background: #ecfdf5; }
+
+    .step-card-btn .s-num { font-size: 0.68rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.04em; }
+    .step-card-btn.active .s-num { color: var(--primary); }
+    .step-card-btn.active-amber .s-num { color: #b45309; }
+    .step-card-btn.active-emerald .s-num { color: #059669; }
+    .step-card-btn .s-name { font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-top: 2px; }
+
+    .explain-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 15px;
+      flex: 1;
+    }
+    .explain-box h3 { font-size: 0.96rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+    .explain-box p { font-size: 0.86rem; color: #334155; line-height: 1.65; }
+
+    .math-callout {
+      margin-top: 10px;
+      background: #ffffff;
+      border-left: 4px solid var(--primary);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #1e3a8a;
+      line-height: 1.6;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .math-callout.amber { border-left-color: #d97706; color: #78350f; }
+    .math-callout.emerald { border-left-color: #059669; color: #064e3b; }
+
+    /* ==================== 6. 分頁 4：拋物線互動實驗室 ==================== */
+    .cmp-dual-grid { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+    @media (min-width: 820px) { .cmp-dual-grid { grid-template-columns: 1fr 1fr; } }
+
+    .cmp-panel {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .cmp-panel h3 { font-size: 0.94rem; font-weight: 800; margin-bottom: 4px; text-align: center; }
+
+    .cmp-canvas-wrap {
+      width: 100%;
+      max-width: 310px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 6px;
+      margin: 8px 0;
+    }
+    .cmp-canvas-wrap canvas { width: 100%; height: 100%; display: block; }
+
+    .ctrl-card {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: 4px;
+    }
+
+    .stats-mini-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .stat-box { background: #ffffff; border: 1px solid var(--border-light); border-radius: 10px; padding: 7px 4px; }
+    .stat-box .lbl { font-size: 0.68rem; color: var(--text-muted); }
+    .stat-box .val { font-size: 0.85rem; font-weight: 800; color: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .cmp-table-wrap { padding: 0 18px 20px; overflow-x: auto; }
+    table.cmp-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 640px; }
+    table.cmp-table th, table.cmp-table td { border: 1px solid var(--border-light); padding: 9px 11px; text-align: left; }
+    table.cmp-table th { background: #f1f5f9; font-weight: 800; color: #0f172a; text-align: center; }
+    table.cmp-table td:first-child { font-weight: 800; background: #f8fafc; white-space: nowrap; }
+
+    /* ==================== 7. 分頁 5：課堂學習單 (互動批改 + A4 列印) ==================== */
+    .ws-toolbar {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ws-btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ws-action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .ws-action-btn.grade { background: var(--emerald); color: #ffffff; }
+    .ws-action-btn.ans { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
+    .ws-action-btn.ans.active-toggle { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+    .ws-action-btn.print { background: var(--primary); color: #ffffff; }
+
+    .ws-helper-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+      font-size: 0.78rem;
+      color: #475569;
+    }
+
+    .ws-progress-pill {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      white-space: nowrap;
+    }
+    .ws-progress-pill.complete { background: #d1fae5; color: #065f46; }
+
+    .ws-sec-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .ws-sec-head .ws-sec-badge { margin-bottom: 0; }
+
+    .ws-hint-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .ws-hint-btn:hover { background: #f1f5f9; color: #0f172a; }
+
+    .ws-hint-box {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .ws-hint-box.open { display: block; }
+    .quiz-mode .diagram-hint { display: none; }
+
+    .worksheet-paper {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 24px 22px;
+      box-shadow: var(--shadow-sm);
+    }
+    @media (min-width: 768px) { .worksheet-paper { padding: 36px 40px; } }
+
+    .ws-header { border-bottom: 2.5px solid #0f172a; padding-bottom: 14px; margin-bottom: 20px; }
+    .ws-title-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .ws-title-row h2 { font-size: 1.28rem; font-weight: 900; color: #0f172a; }
+
+    .ws-meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; font-size: 0.88rem; font-weight: 700; }
+    .ws-meta-item { display: flex; align-items: flex-end; gap: 6px; }
+    .ws-meta-item input {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #475569;
+      outline: none;
+      padding: 2px 4px;
+      font-size: 0.88rem;
+      text-align: center;
+      background: transparent;
+    }
+
+    .ws-section { border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 16px; margin-bottom: 18px; }
+    .ws-sec-badge { display: inline-block; font-size: 0.88rem; font-weight: 800; padding: 4px 12px; border-radius: 8px; margin-bottom: 12px; }
+    .ws-sec-badge.amber { background: #fef3c7; color: #92400e; }
+    .ws-sec-badge.blue { background: #dbeafe; color: #1e40af; }
+    .ws-sec-badge.emerald { background: #d1fae5; color: #065f46; }
+
+    .ws-two-col { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: center; }
+    @media (min-width: 720px) { .ws-two-col { grid-template-columns: 210px 1fr; } }
+
+    .ws-diagram { display: flex; flex-direction: column; align-items: center; }
+    .ws-diagram svg { width: 196px; height: 196px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fafafa; }
+    .ws-diagram span { font-size: 0.74rem; color: var(--text-muted); margin-top: 5px; }
+
+    .ws-q-list { font-size: 0.88rem; line-height: 1.85; color: #1e293b; }
+    .ws-q-item { margin-bottom: 6px; }
+
+    input.blank {
+      width: 74px;
+      border: none;
+      border-bottom: 2px solid #475569;
+      background: #f8fafc;
+      text-align: center;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--primary);
+      padding: 1px 4px;
+      border-radius: 4px 4px 0 0;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    input.blank:focus { border-bottom-color: var(--primary); background: #eff6ff; }
+    input.blank.correct { border-bottom-color: #059669; background: #d1fae5; color: #065f46; }
+    input.blank.wrong { border-bottom-color: #e11d48; background: #ffe4e6; color: #9f1239; }
+
+    .ans-hint {
+      display: none;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 1px 6px;
+      border-radius: 5px;
+      margin-left: 3px;
+    }
+    .show-ans .ans-hint { display: inline-block; }
+
+    .sketch-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 10px; }
+    @media (min-width: 640px) { .sketch-grid { grid-template-columns: 1fr 1fr; } }
+
+    .sketch-box {
+      border: 1px dashed #94a3b8;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fcfcfd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sketch-box p { font-size: 0.8rem; font-weight: 700; margin-bottom: 8px; color: #334155; }
+    .sketch-canvas {
+      width: 196px;
+      height: 196px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .sketch-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 8px; }
+    .sketch-tool-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .sketch-tool-btn.active { background: #eff6ff; border-color: #2563eb; color: #1d4ed8; }
+
+    .grade-banner { display: none; margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 800; }
+    #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+
+    /* ==================== 8. A4 列印專用樣式 ==================== */
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; font-size: 10pt; }
+      header.top-nav, .ws-toolbar, .ws-helper-bar, .ws-hint-btn, .ws-hint-box, .sketch-tools, .grade-banner, .ans-hint, footer.site-footer, #confettiCanvas { display: none !important; }
+      main.container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+      .tab-panel { display: none !important; }
+      #panel-5 { display: block !important; }
+      .worksheet-paper { border: none !important; box-shadow: none !important; padding: 0 !important; }
+      .ws-header { padding-bottom: 10px !important; margin-bottom: 12px !important; }
+      .ws-section { border: 1.2px solid #64748b !important; padding: 10px 12px !important; margin-bottom: 10px !important; break-inside: avoid; }
+      .sketch-canvas { width: 140px !important; height: 140px !important; border: none !important; }
+      input.blank { background: transparent !important; border-bottom: 1.4px solid #000000 !important; color: #000000 !important; }
+      @page { size: A4 portrait; margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 滿分慶祝彩帶 Canvas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- ==================== 頂部導覽列 ==================== -->
+  <header class="top-nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7 Q12 22 20 7" stroke-linecap="round" />
+            <circle cx="12" cy="10" r="2" fill="#fde047" stroke="none" />
+            <line x1="3.5" y1="19.5" x2="20.5" y2="19.5" stroke-width="1.5" stroke-dasharray="2.5 2" />
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>拋物線摺紙教學設計：焦點、準線與包絡線</h1>
+          <p>3D 動態摺紙模擬 × 圓錐曲線與光學反射 × 課堂互動學習單</p>
+          <div class="domain-tags" aria-label="涵蓋數學領域">
+            <span class="domain-tag geo">歐氏幾何</span>
+            <span class="domain-tag conic">解析幾何</span>
+            <span class="domain-tag calc">微積分（切線與包絡線）</span>
+            <span class="domain-tag space">空間變換</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="tab-bar" role="tablist">
+        <button id="tab-btn-1" class="tab-btn active" onclick="switchTab(1)">① 單次對摺原理</button>
+        <button id="tab-btn-2" class="tab-btn" onclick="switchTab(2)">② 包絡線成形</button>
+        <button id="tab-btn-3" class="tab-btn" onclick="switchTab(3)">③ 延伸：光學反射</button>
+        <button id="tab-btn-4" class="tab-btn" onclick="switchTab(4)">④ 互動實驗室</button>
+        <button id="tab-btn-5" class="tab-btn" onclick="switchTab(5)">⑤ 課堂學習單</button>
+        <button id="sfx-toggle-btn" type="button" class="tab-btn" onclick="toggleSfx()" title="開啟或關閉摺紙音效" style="background:#f1f5f9;color:#0f172a;">🔊 音效：開</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ==================== 分頁 1：單次對摺原理（中垂線 × 焦點 × 準線） ==================== -->
+    <section id="panel-1" class="tab-panel active">
+      <div class="card">
+        <div class="card-header header-m1">
+          <div>
+            <span class="badge-pill">單元一 · 拋物線的幾何定義與切線構造</span>
+            <h2>將準線上的點 <span class="math">Q</span> 摺向焦點 <span class="math">F</span>：中垂線即拋物線切線！</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            焦距 c = 0.4（正方形邊長 = 2）
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m1-step-badge" class="step-tag m1">步驟 1 / 4：設定底邊準線 L 與焦點 F</span>
+              <label class="toggle-check">
+                <input id="m1-show-notes" type="checkbox" checked onchange="renderM1()" />
+                <span>輔助線與等距標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM1"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m1')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM1Step(m1State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM1Step()">← 上一步</button>
+                <button id="m1-play-btn" class="ctrl-btn amber-primary" onclick="toggleM1Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM1Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m1-slider">摺疊進度</label>
+                <input id="m1-slider" type="range" min="0" max="100" value="100" oninput="onM1Slider(this.value)" />
+                <span id="m1-pct" class="pct-pill" style="background:#fef3c7;color:#b45309;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#ecc8a1;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#faf7f0;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #5b6b7f;display:inline-block;"></span>中垂線摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #e11d48;display:inline-block;"></span>拋物線</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m1-btn-1" class="step-card-btn active-amber" onclick="selectM1Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">標定準線 L 與焦點 F</div>
+                </button>
+                <button id="m1-btn-2" class="step-card-btn" onclick="selectM1Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">將點 Q 摺向焦點 F</div>
+                </button>
+                <button id="m1-btn-3" class="step-card-btn" onclick="selectM1Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">找出等距切點 P</div>
+                </button>
+                <button id="m1-btn-4" class="step-card-btn" onclick="selectM1Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">證明摺痕為切線</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m1-title">步驟 1：對摺找對稱軸，標定準線 L 與焦點 F</h3>
+              <p id="m1-desc">
+                取一張邊長為 2 的正方形色紙（底邊 y = 0 作為「準線 L」）。先左右對摺壓出對稱軸 x = 1，並在對稱軸上標出一個定點 F(1, 0.8) 作為「焦點」。
+              </p>
+              <div id="m1-math" class="math-callout amber">
+                💡 拋物線定義：平面上所有「到定點 F（焦點）的距離 ＝ 到定直線 L（準線）的距離」的點所形成的軌跡！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 2：包絡線成形（連續多摺成拋物線） ==================== -->
+    <section id="panel-2" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m2">
+          <div>
+            <span class="badge-pill">單元二 · 直線族的包絡線（Envelope of Tangents）</span>
+            <h2>連續將底邊各點摺向焦點 <span class="math">F</span>：直線摺痕竟能圍出光滑曲線！</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            微積分「以直代曲」直覺體驗
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m2-step-badge" class="step-tag">步驟 1 / 4：摺出頂點 V 的水平切線</span>
+              <label class="toggle-check">
+                <input id="m2-show-notes" type="checkbox" checked onchange="renderM2()" />
+                <span>顯示拋物線與切點</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM2"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m2')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM2Step(m2State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM2Step()">← 上一步</button>
+                <button id="m2-play-btn" class="ctrl-btn primary" onclick="toggleM2Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM2Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m2-slider">摺疊進度</label>
+                <input id="m2-slider" type="range" min="0" max="100" value="100" oninput="onM2Slider(this.value)" />
+                <span id="m2-pct" class="pct-pill">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#b8cbe8;"></span>色紙正面</span>
+              <span class="legend-item"><span class="swatch" style="background:#f5f8fc;"></span>紙背翻折面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px solid #2563eb;display:inline-block;"></span>累積切線摺痕</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #e11d48;display:inline-block;"></span>包絡拋物線</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m2-btn-1" class="step-card-btn active" onclick="selectM2Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">摺出頂點水平切線</div>
+                </button>
+                <button id="m2-btn-2" class="step-card-btn" onclick="selectM2Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">左右對稱初探輪廓</div>
+                </button>
+                <button id="m2-btn-3" class="step-card-btn" onclick="selectM2Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">沿底邊連續 9 摺</div>
+                </button>
+                <button id="m2-btn-4" class="step-card-btn" onclick="selectM2Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">攤平見證包絡拋物線</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m2-title">步驟 1：底邊中點摺向焦點 F，找出頂點 V</h3>
+              <p id="m2-desc">
+                先將底邊正中央 Q₀(1, 0) 向上摺向焦點 F(1, 0.8) 並展開，壓出水平摺痕 y = 0.4。這條摺痕正是拋物線最低點——頂點 V(1, 0.4) 的水平切線！
+              </p>
+              <div id="m2-math" class="math-callout">
+                💡 焦距幾何意義：頂點 V 恰好落在焦點 F 與準線 L 的正中央，V 到 F 與 V 到 L 的距離皆為焦距 c = 0.4！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 3：延伸課程——光學反射與拋物面天線 ==================== -->
+    <section id="panel-3" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-m3">
+          <div>
+            <span class="badge-pill">延伸應用 · 光學反射性質（Reflective Property）</span>
+            <h2>一摺看穿衛星天線原理：平行光為何一定反射匯聚到焦點 <span class="math">F</span>？</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            對稱翻折 ＝ 入射角等於反射角
+          </span>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-stage">
+            <div class="stage-topbar">
+              <span id="m3-step-badge" class="step-tag m3">步驟 1 / 4：平行對稱軸的光線鉛直射向切點 P</span>
+              <label class="toggle-check">
+                <input id="m3-show-notes" type="checkbox" checked onchange="renderM3()" />
+                <span>光路與等角標示</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="canvasM3"></canvas>
+              <span class="drag-hint-pill">🖱️ 拖曳旋轉 3D 視角</span>
+              <button class="view-reset-fab" onclick="resetCam('m3')" title="重置 3D 視角">⟲ 重置視角</button>
+              <button class="quick-replay-fab" onclick="selectM3Step(m3State.step, true)" title="重播當前步驟">↻ 重播</button>
+            </div>
+
+            <div class="docked-controls">
+              <div class="btn-row">
+                <button class="ctrl-btn" onclick="prevM3Step()">← 上一步</button>
+                <button id="m3-play-btn" class="ctrl-btn emerald-primary" onclick="toggleM3Play()">▶ 重播動畫</button>
+                <button class="ctrl-btn" onclick="nextM3Step()">下一步 →</button>
+              </div>
+              <div class="slider-row">
+                <label for="m3-slider">動畫進度</label>
+                <input id="m3-slider" type="range" min="0" max="100" value="100" oninput="onM3Slider(this.value)" />
+                <span id="m3-pct" class="pct-pill" style="background:#d1fae5;color:#065f46;">100%</span>
+              </div>
+            </div>
+
+            <div class="legend-bar">
+              <span class="legend-item"><span class="swatch" style="background:#aed6b8;"></span>色紙正面</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #d97706;display:inline-block;"></span>平行入射光</span>
+              <span class="legend-item"><span style="width:14px;border-top:2.4px solid #e11d48;display:inline-block;"></span>反射光（匯聚於 F）</span>
+              <span class="legend-item"><span style="width:14px;border-top:2px dashed #059669;display:inline-block;"></span>切線鏡面</span>
+            </div>
+          </div>
+
+          <div class="sim-sidebar">
+            <div>
+              <div style="font-size:0.74rem;font-weight:800;color:#94a3b8;margin-bottom:7px;">快速切換步驟</div>
+              <div class="step-grid-btns">
+                <button id="m3-btn-1" class="step-card-btn active-emerald" onclick="selectM3Step(1, true)">
+                  <div class="s-num">STEP 1</div>
+                  <div class="s-name">平行光鉛直入射</div>
+                </button>
+                <button id="m3-btn-2" class="step-card-btn" onclick="selectM3Step(2, true)">
+                  <div class="s-num">STEP 2</div>
+                  <div class="s-name">翻折證明 ∠1 = ∠2 = ∠3</div>
+                </button>
+                <button id="m3-btn-3" class="step-card-btn" onclick="selectM3Step(3, true)">
+                  <div class="s-num">STEP 3</div>
+                  <div class="s-name">反射光精準直奔焦點 F</div>
+                </button>
+                <button id="m3-btn-4" class="step-card-btn" onclick="selectM3Step(4, true)">
+                  <div class="s-num">STEP 4</div>
+                  <div class="s-name">多束平行光聚光效應</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-box">
+              <h3 id="m3-title">步驟 1：平行於對稱軸的光線射向拋物線切點 P</h3>
+              <p id="m3-desc">
+                想像一束來自遠方（如衛星或太陽）的平行光，沿鉛直方向向下射到拋物線上的點 P。這條入射光線往下延伸，正好通過底邊準線上的對應點 Q！
+              </p>
+              <div id="m3-math" class="math-callout emerald">
+                💡 摺紙超能力：不需要背誦微積分法線向量公式，只要把剛才的「Q 摺向 F」再看一次，就能秒懂光學反射定理！
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 4：拋物線互動實驗室與教學架構 ==================== -->
+    <section id="panel-4" class="tab-panel">
+      <div class="card">
+        <div class="card-header header-cmp">
+          <div>
+            <span class="badge-pill">PART 4 · 焦距開口探索 × 單點等距驗證 × 教師備課總表</span>
+            <h2>拋物線互動實驗室：探索 <span class="math">x² = 4cy</span> 與切線斜率</h2>
+          </div>
+          <span style="font-size:0.78rem;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:999px;font-weight:700;">
+            座標原點設於頂點 V(0, 0)
+          </span>
+        </div>
+
+        <div class="cmp-dual-grid">
+          <!-- 左側：焦距 c 與摺痕數包絡線探索器 -->
+          <div class="cmp-panel">
+            <h3 style="color:#b45309;">探索一：焦距 <span class="math">c</span> 與開口寬窄（包絡線模擬）</h3>
+            <p style="font-size:0.78rem;color:#64748b;">調整焦距 <span class="math">c</span> 與摺痕條數，觀察拋物線開口如何變化</p>
+            <div class="cmp-canvas-wrap">
+              <canvas id="canvasLab1"></canvas>
+            </div>
+
+            <div class="ctrl-card" style="border-color:#fde68a;">
+              <div class="slider-row" style="margin-bottom:6px;">
+                <label for="lab1-c-slider">焦距 <span class="math">c</span></label>
+                <input id="lab1-c-slider" type="range" min="0.15" max="0.65" step="0.01" value="0.35" oninput="renderLab1()" />
+                <span id="lab1-c-val" class="pct-pill" style="background:#fef3c7;color:#b45309;">0.35</span>
+              </div>
+              <div class="slider-row">
+                <label for="lab1-n-slider">摺痕數</label>
+                <input id="lab1-n-slider" type="range" min="5" max="25" step="2" value="15" oninput="renderLab1()" />
+                <span id="lab1-n-val" class="pct-pill" style="background:#fef3c7;color:#b45309;">15</span>
+              </div>
+              <div style="display:flex;justify-content:center;gap:12px;margin-top:6px;font-size:0.75rem;">
+                <label style="cursor:pointer;"><input id="lab1-show-curve" type="checkbox" checked onchange="renderLab1()" /> 顯示拋物線</label>
+                <label style="cursor:pointer;"><input id="lab1-show-pts" type="checkbox" checked onchange="renderLab1()" /> 顯示切點</label>
+              </div>
+            </div>
+
+            <div class="stats-mini-grid">
+              <div class="stat-box">
+                <div class="lbl">焦點座標</div>
+                <div id="lab1-focus" class="val" style="color:#d97706;">(0, 0.35)</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">正焦弦長 <span class="math">4c</span></div>
+                <div id="lab1-lr" class="val" style="color:#2563eb;">1.40</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">標準式</div>
+                <div id="lab1-eq" class="val" style="color:#e11d48;font-size:0.76rem;">x² = 1.40y</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右側：拖曳底邊點 Q 即時等距與切線驗證 -->
+          <div class="cmp-panel" style="border-color:#bfdbfe;background:#f5f9ff;">
+            <h3 style="color:#1e40af;">探索二：移動底邊點 <span class="math">Q</span>，驗證 <span class="math"><span class="overline">PF</span> = <span class="overline">PQ</span></span></h3>
+            <p style="font-size:0.78rem;color:#2563eb;">拖動滑桿改變 <span class="math">Q(q, -c)</span>，觀察中垂線斜率與等距恆成立！</p>
+            <div class="cmp-canvas-wrap">
+              <canvas id="canvasLab2"></canvas>
+            </div>
+
+            <div class="ctrl-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px;flex-wrap:wrap;">
+                <span style="font-size:0.78rem;font-weight:800;">底邊點橫座標 <span class="math">q</span>：</span>
+                <div style="display:flex;gap:5px;">
+                  <button type="button" class="sketch-tool-btn" onclick="setLab2Q(-0.7)">左 (-0.7)</button>
+                  <button type="button" class="sketch-tool-btn" onclick="setLab2Q(0)">頂點 (0)</button>
+                  <button type="button" class="sketch-tool-btn" onclick="setLab2Q(0.7)">右 (+0.7)</button>
+                </div>
+              </div>
+              <input id="lab2-q-slider" type="range" min="-0.95" max="0.95" step="0.01" value="0.55" oninput="renderLab2()" />
+              <div style="display:flex;justify-content:center;margin-top:5px;font-size:0.75rem;">
+                <label style="cursor:pointer;"><input id="lab2-show-ray" type="checkbox" checked onchange="renderLab2()" /> 同步顯示平行光反射至焦點 F</label>
+              </div>
+            </div>
+
+            <div class="stats-mini-grid">
+              <div class="stat-box">
+                <div class="lbl">焦距 <span class="math"><span class="overline">PF</span></span></div>
+                <div id="lab2-pf" class="val" style="color:#e11d48;">0.616</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">準線距 <span class="math"><span class="overline">PQ</span></span></div>
+                <div id="lab2-pq" class="val" style="color:#059669;">0.616</div>
+              </div>
+              <div class="stat-box">
+                <div class="lbl">切線斜率 <span class="math">q/(2c)</span></div>
+                <div id="lab2-slope" class="val" style="color:#2563eb;">0.69</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 教學設計脈絡總表 -->
+        <div class="cmp-table-wrap">
+          <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:10px;color:#0f172a;">📋 拋物線摺紙課堂教學設計脈絡表（建議授課時數：2 節課 / 90 分鐘）</h3>
+          <table class="cmp-table">
+            <thead>
+              <tr>
+                <th>教學階段</th>
+                <th>摺紙操作活動</th>
+                <th>連結之數學概念</th>
+                <th>教師關鍵提問引導</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>一、引起動機<br />（15 分鐘）</td>
+                <td>發下描圖紙（或正方形色紙），標出底邊準線與焦點 F，連續將底邊各點摺向 F。</td>
+                <td>幾何直覺、直線族與包絡線（Envelope）</td>
+                <td>「我們折的每一條都是直線，為什麼展開後卻出現了一條彎彎的光滑曲線？」</td>
+              </tr>
+              <tr>
+                <td>二、定義推導<br />（25 分鐘）</td>
+                <td>任選一摺痕，過底邊點 Q 作鉛垂線交摺痕於 P，實測 PF 與 PQ 長度。</td>
+                <td>中垂線性質、拋物線定義 <span class="math">d(P, F) = d(P, L)</span></td>
+                <td>「為什麼無論 Q 在哪裡，交點 P 到 F 和到底邊的距離永遠一模一樣？」</td>
+              </tr>
+              <tr>
+                <td>三、代數與切線<br />（25 分鐘）</td>
+                <td>建立頂點座標系 V(0,0)，移動焦點高度比較開口寬窄，並證明摺痕僅與拋物線交於 P。</td>
+                <td>標準式 <span class="math">x² = 4cy</span>、正焦弦長 <span class="math">4c</span>、切線斜率 <span class="math">y' = x/(2c)</span></td>
+                <td>「把焦點 F 畫得離底邊更遠，拋物線會變胖還是變瘦？這跟公式中的 c 有什麼關係？」</td>
+              </tr>
+              <tr>
+                <td>四、光學延伸<br />（25 分鐘）</td>
+                <td>利用翻折對稱角驗證入射角等於反射角，完成課堂探究學習單與紙本摺痕繪製。</td>
+                <td>反射對稱、光學聚光性質（衛星天線、車頭燈）</td>
+                <td>「如果把燈泡放在焦點 F，光線打到拋物面反光罩後會往哪裡去？」</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 5：課堂學習單（線上批改 ＋ A4 列印） ==================== -->
+    <section id="panel-5" class="tab-panel">
+      <div class="ws-toolbar">
+        <div>
+          <h2 style="font-size:0.98rem;font-weight:800;color:#1e3a8a;">📝 課堂探究學習單（線上互動批改 / A4 紙本列印）</h2>
+          <p style="font-size:0.78rem;color:#2563eb;">學生可直接在空格填答並按「核對互動答案」；教師點擊「列印學習單 (A4)」即可輸出整齊紙本。</p>
+        </div>
+        <div class="ws-btn-group">
+          <button class="ws-action-btn grade" onclick="gradeWorksheet()">✓ 核對互動答案</button>
+          <button class="ws-action-btn ans" onclick="toggleAnswerKey()">👁 顯示/隱藏解答</button>
+          <button id="ws-quiz-btn" class="ws-action-btn ans" onclick="toggleQuizMode()">📝 測驗模式</button>
+          <button class="ws-action-btn ans" onclick="resetWorksheet()">↺ 清除重填</button>
+          <button class="ws-action-btn print" onclick="window.print()">🖨️ 列印學習單 (A4)</button>
+        </div>
+      </div>
+
+      <article id="worksheet-root" class="worksheet-paper">
+        <div class="ws-helper-bar">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>⌨️ 填答說明：分數請輸入如 <code>1/2</code>、文字可直接輸入關鍵字，按 <code>Enter</code> 自動跳下一格</span>
+          </div>
+          <span id="ws-progress-pill" class="ws-progress-pill">填答進度：0 / 13 格</span>
+        </div>
+
+        <div class="ws-header">
+          <div class="ws-title-row">
+            <h2>【數學探究學習單】拋物線摺紙：焦點、準線、包絡線與光學性質</h2>
+            <span style="font-size:0.76rem;font-weight:700;padding:3px 9px;border:1px solid #94a3b8;border-radius:6px;">
+              歐氏幾何 × 解析幾何 × 微積分切線
+            </span>
+          </div>
+          <div class="ws-meta-grid">
+            <div class="ws-meta-item"><span>班級：</span><input id="ws-meta-class" type="text" placeholder="請填寫" /></div>
+            <div class="ws-meta-item"><span>座號：</span><input id="ws-meta-seat" type="text" placeholder="請填寫" /></div>
+            <div class="ws-meta-item"><span>姓名：</span><input id="ws-meta-name" type="text" placeholder="請填寫" /></div>
+          </div>
+        </div>
+
+        <!-- 探究一：中垂線與拋物線定義 -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge amber">探究一：單次對摺的秘密 —— 中垂線性質與拋物線定義</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-1')">💡 小提示</button>
+          </div>
+          <div class="ws-two-col">
+            <div class="ws-diagram">
+              <svg viewBox="0 0 220 220">
+                <rect x="20" y="20" width="180" height="170" fill="#fff" stroke="#0f172a" stroke-width="1.8" />
+                <line x1="20" y1="190" x2="200" y2="190" stroke="#0f172a" stroke-width="2.5" />
+                <!-- 拋物線 y_svg = 156 - ((x-110)^2)/136 -->
+                <path d="M 28 106 Q 110 206 192 106" fill="none" stroke="#e11d48" stroke-width="2" />
+                <!-- 切線 (Q at 165, F at 110,122) -->
+                <line x1="60" y1="185" x2="200" y2="72" stroke="#2563eb" stroke-width="1.8" stroke-dasharray="5 3" />
+                <!-- PF 與 PQ -->
+                <line x1="110" y1="122" x2="165" y2="100" stroke="#d97706" stroke-width="1.8" />
+                <line x1="165" y1="190" x2="165" y2="100" stroke="#059669" stroke-width="1.8" />
+                <line x1="110" y1="122" x2="165" y2="190" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 3" />
+                <circle cx="110" cy="122" r="4" fill="#d97706" />
+                <circle cx="165" cy="190" r="3.5" fill="#059669" />
+                <circle cx="165" cy="100" r="4" fill="#e11d48" />
+                <text x="96" y="118" font-size="13" font-weight="bold" fill="#d97706">F</text>
+                <text x="160" y="206" font-size="13" font-weight="bold" fill="#059669">Q</text>
+                <text x="172" y="98" font-size="13" font-weight="bold" fill="#e11d48">P</text>
+                <text x="24" y="206" font-size="12" font-weight="bold">準線 L</text>
+                <text class="diagram-hint" x="171" y="150" font-size="11" font-weight="bold" fill="#059669">d(P,L)</text>
+              </svg>
+              <span>圖(一)：單次對摺構造切點 P</span>
+            </div>
+            <div class="ws-q-list">
+              <div class="ws-q-item">
+                (1) 將底邊準線 <span class="math">L</span> 上一點 <span class="math">Q</span> 摺向定點 <span class="math">F</span>（焦點），展開後壓出的摺痕 <span class="math">ℓ</span> 是線段 <span class="math"><span class="overline">QF</span></span> 的
+                <input class="blank" data-ans="中垂線" data-alt="垂直平分線" placeholder="例:中垂線" type="text" /><span class="ans-hint">中垂線（垂直平分線）</span>。
+              </div>
+              <div class="ws-q-item">
+                (2) 過 <span class="math">Q</span> 作垂直於準線 <span class="math">L</span> 的直線交摺痕 <span class="math">ℓ</span> 於點 <span class="math">P</span>，由中垂線性質可知線段長 <span class="math"><span class="overline">PF</span> =</span>
+                <input class="blank" data-ans="PQ" data-alt="QP" placeholder="兩大寫字母" type="text" /><span class="ans-hint">PQ</span>，即點 <span class="math">P</span> 到焦點 <span class="math">F</span> 的距離等於到準線 <span class="math">L</span> 的距離！
+              </div>
+              <div class="ws-q-item">
+                (3) 若在摺痕 <span class="math">ℓ</span> 上任取異於 <span class="math">P</span> 的另一點 <span class="math">P'</span>，因垂線段最短，故 <span class="math"><span class="overline">P'F</span> = <span class="overline">P'Q</span></span>
+                <input class="blank" data-ans=">" data-alt="大於" placeholder="> 或 <" type="text" /><span class="ans-hint">&gt;</span> <span class="math">d(P', L)</span>，因此摺痕與拋物線恰交於一點 <span class="math">P</span>，摺痕必為拋物線的
+                <input class="blank" data-ans="切線" placeholder="兩字" type="text" /><span class="ans-hint">切線</span>。
+              </div>
+            </div>
+          </div>
+          <div id="hint-1" class="ws-hint-box">
+            💡 <strong>提示：</strong>將兩點重疊對摺，摺痕就是兩點連線的垂直平分線（中垂線）；中垂線上任意點到兩端點等距！
+          </div>
+        </div>
+
+        <!-- 探究二：拋物線標準式與焦距 c -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge blue">探究二：解析幾何 —— 標準式 <span class="math">x² = 4cy</span> 與焦距 <span class="math">c</span></span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-2')">💡 小提示</button>
+          </div>
+          <div class="ws-q-list">
+            <div class="ws-q-item">
+              (1) 設頂點 <span class="math">V(0, 0)</span> 為原點、對稱軸為 <span class="math">y</span> 軸，焦點為 <span class="math">F(0, c)</span>（<span class="math">c &gt; 0</span>），則準線 <span class="math">L</span> 的方程式為 <span class="math">y =</span>
+              <input class="blank" data-ans="-c" placeholder="例:-c" type="text" /><span class="ans-hint">-c</span>。
+            </div>
+            <div class="ws-q-item">
+              (2) 若焦點 <span class="math">F</span> 距離準線 <span class="math">L</span> 共 <span class="math">6</span> 公分，則焦距 <span class="math">c =</span>
+              <input class="blank" data-ans="3" type="text" /><span class="ans-hint">3</span> 公分，正焦弦長 <span class="math">4c =</span>
+              <input class="blank" data-ans="12" type="text" /><span class="ans-hint">12</span> 公分，拋物線標準式為 <span class="math">x² =</span>
+              <input class="blank" data-ans="12y" placeholder="例:12y" type="text" /><span class="ans-hint">12y</span>。
+            </div>
+            <div class="ws-q-item">
+              (3) 在互動實驗室中，當我們把焦點 <span class="math">F</span> 移得離準線 <span class="math">L</span> 越遠（<span class="math">c</span> 越大），拋物線的開口會變得越
+              <input class="blank" data-ans="寬" data-alt="大" placeholder="寬或窄" type="text" /><span class="ans-hint">寬（大）</span>。
+            </div>
+            <div class="ws-q-item">
+              (4) 當 <span class="math">x² = 4cy</span>（即 <span class="math">y = x²/(4c)</span>）時，利用微積分求導可得點 <span class="math">(q, q²/(4c))</span> 處的切線斜率為 <span class="math">q / (2c)</span>；若 <span class="math">c = 2</span>、<span class="math">q = 4</span>，則切線斜率為
+              <input class="blank" data-ans="1" type="text" /><span class="ans-hint">1</span>。
+            </div>
+          </div>
+          <div id="hint-2" class="ws-hint-box">
+            💡 <strong>提示：</strong>頂點在焦點與準線正中間，所以焦點到準線的距離是 2c！焦點越遠（c 越大），正焦弦長 4c 越大，開口就越寬。
+          </div>
+        </div>
+
+        <!-- 探究三：手繪練習框 -->
+        <div class="ws-section">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge emerald">探究三：動手繪製單次中垂線切點與多條包絡線</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-3')">💡 小提示</button>
+          </div>
+          <div class="ws-q-list" style="margin-bottom:8px;">
+            請在下方練習框中（藍點為焦點 <span class="math">F</span>、粗底線為準線 <span class="math">L</span>），分別畫出單次對摺的中垂線與等距線段，以及多條切線包絡出的拋物線：
+          </div>
+          <div id="hint-3" class="ws-hint-box" style="margin-bottom:10px;">
+            💡 <strong>提示：</strong>可點擊「參考圖」觀察標準切線如何像弓弦一樣在下方圍出一條光滑的拋物線！
+          </div>
+          <div class="sketch-grid">
+            <div class="sketch-box">
+              <p>【練習框 A】畫出中垂線摺痕與等距 PF = PQ</p>
+              <canvas id="sketchCanvasA" class="sketch-canvas" width="196" height="196"></canvas>
+              <div class="sketch-tools">
+                <button type="button" class="sketch-tool-btn active" data-pad="A" data-mode="dash" onclick="setSketchMode('A','dash',this)">摺痕虛線</button>
+                <button type="button" class="sketch-tool-btn" data-pad="A" data-mode="solid" onclick="setSketchMode('A','solid',this)">等距紅線</button>
+                <button type="button" class="sketch-tool-btn active" data-pad="A" data-tool="line" onclick="toggleSketchTool('A',this)">📏 直線</button>
+                <button type="button" class="sketch-tool-btn" onclick="undoSketch('A')">↩ 復原</button>
+                <button type="button" class="sketch-tool-btn" onclick="clearSketch('A')">清除</button>
+                <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('A')">參考圖</button>
+              </div>
+            </div>
+            <div class="sketch-box">
+              <p>【練習框 B】畫出多條切線形成包絡拋物線</p>
+              <canvas id="sketchCanvasB" class="sketch-canvas" width="196" height="196"></canvas>
+              <div class="sketch-tools">
+                <button type="button" class="sketch-tool-btn active" data-pad="B" data-mode="dash" onclick="setSketchMode('B','dash',this)">切線摺痕</button>
+                <button type="button" class="sketch-tool-btn" data-pad="B" data-mode="solid" onclick="setSketchMode('B','solid',this)">拋物線紅線</button>
+                <button type="button" class="sketch-tool-btn active" data-pad="B" data-tool="line" onclick="toggleSketchTool('B',this)">📏 直線</button>
+                <button type="button" class="sketch-tool-btn" onclick="undoSketch('B')">↩ 復原</button>
+                <button type="button" class="sketch-tool-btn" onclick="clearSketch('B')">清除</button>
+                <button type="button" class="sketch-tool-btn" onclick="drawSketchAnswer('B')">參考圖</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 探究四：光學反射性質 -->
+        <div class="ws-section" style="margin-bottom:0;">
+          <div class="ws-sec-head">
+            <span class="ws-sec-badge emerald">探究四（延伸）：光學反射性質與生活應用</span>
+            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-4')">💡 小提示</button>
+          </div>
+          <div class="ws-q-list">
+            <div class="ws-q-item">
+              (1) 平行於拋物線對稱軸的入射光打在切點 <span class="math">P</span>，沿著切線摺痕翻折時，因 <span class="math">Q</span> 與 <span class="math">F</span> 關於切線對稱，由對頂角相等與翻折對稱可直接證得「入射角
+              <input class="blank" data-ans="=" data-alt="等於" placeholder="=" type="text" /><span class="ans-hint">＝（等於）</span> 反射角」。
+            </div>
+            <div class="ws-q-item">
+              (2) 因此，所有平行於對稱軸入射的訊號或光線，經拋物面反射後必全部精準匯聚於
+              <input class="blank" data-ans="焦點" data-alt="F" placeholder="兩字" type="text" /><span class="ans-hint">焦點（F）</span>；反之，若將手電筒燈泡置於該點，光線反射後就會變成
+              <input class="blank" data-ans="平行" data-alt="平行光" placeholder="兩字" type="text" /><span class="ans-hint">平行（平行光）</span>射向遠方！
+            </div>
+          </div>
+          <div id="hint-4" class="ws-hint-box">
+            💡 <strong>提示：</strong>光路具有可逆性！衛星天線是「平行訊號 → 匯聚焦點接收器」，車頭燈與手電筒則是「焦點光源 → 反射成平行光束」。
+          </div>
+        </div>
+
+        <div id="grade-banner" class="grade-banner"></div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" style="text-align:center;padding:18px;font-size:0.76rem;color:#94a3b8;">
+    拋物線摺紙教學設計：焦點、準線與包絡線｜歐氏幾何・解析幾何・微積分・空間變換
+  </footer>
+
+  <!-- ==================== JavaScript 3D 拋物線摺紙與互動引擎 ==================== -->
+  <script>
+    /* ==================== 1. 分頁切換邏輯 ==================== */
+    function switchTab(idx) {
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`tab-btn-${i}`);
+        const panel = document.getElementById(`panel-${i}`);
+        if (!btn || !panel) continue;
+        if (i === idx) {
+          btn.classList.add('active');
+          panel.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+          panel.classList.remove('active');
+        }
+      }
+      stopM1Play();
+      stopM2Play();
+      stopM3Play();
+      if (idx === 1) {
+        selectM1Step(1, true, true);
+      } else if (idx === 2) {
+        selectM2Step(1, true, true);
+      } else if (idx === 3) {
+        requestAnimationFrame(() => selectM3Step(1, true, true));
+      } else if (idx === 4) {
+        renderLab1();
+        renderLab2();
+      }
+    }
+
+    /* ==================== 2. 3D 幾何摺紙引擎、多邊形裁切與透視相機 ==================== */
+    const m1Cam = { yaw: 0, pitch: 0.56 };
+    const m2Cam = { yaw: 0, pitch: 0.56 };
+    const m3Cam = { yaw: 0, pitch: 0.56 };
+
+    function resetCam(which) {
+      const cam = which === 'm1' ? m1Cam : which === 'm2' ? m2Cam : m3Cam;
+      cam.yaw = 0;
+      cam.pitch = 0.56;
+      if (which === 'm1') renderM1();
+      else if (which === 'm2') renderM2();
+      else renderM3();
+    }
+
+    function p3(x, y, z = 0) { return { x, y, z }; }
+
+    function easeCos(t) {
+      const x = Math.max(0, Math.min(1, t));
+      return 0.5 - 0.5 * Math.cos(Math.PI * x);
+    }
+
+    function fold3D(P, L1, L2, progress, side = 'front') {
+      const p = p3(P.x, P.y, P.z || 0);
+      const a = p3(L1.x, L1.y, L1.z || 0);
+      const b = p3(L2.x, L2.y, L2.z || 0);
+      const ux0 = b.x - a.x, uy0 = b.y - a.y, uz0 = b.z - a.z;
+      const uLen = Math.hypot(ux0, uy0, uz0) || 1;
+      const ux = ux0 / uLen, uy = uy0 / uLen, uz = uz0 / uLen;
+
+      const vx = p.x - a.x, vy = p.y - a.y, vz = p.z - a.z;
+      const cx = uy * vz - uz * vy;
+      const cy = uz * vx - ux * vz;
+      const cz = ux * vy - uy * vx;
+
+      const dir = side === 'front' ? (cz < 0 ? -1 : 1) : (cz > 0 ? -1 : 1);
+      const theta = dir * Math.PI * progress;
+      const cosT = Math.cos(theta), sinT = Math.sin(theta);
+      const dotUV = ux * vx + uy * vy + uz * vz;
+      const oneMinusCos = 1 - cosT;
+
+      return {
+        x: a.x + vx * cosT + cx * sinT + ux * dotUV * oneMinusCos,
+        y: a.y + vy * cosT + cy * sinT + uy * dotUV * oneMinusCos,
+        z: a.z + vz * cosT + cz * sinT + uz * dotUV * oneMinusCos
+      };
+    }
+
+    /* 通用半平面裁切器：將 [0,2]×[0,2] 正方形沿「Q(q,0) 摺向 F(1, 2c)」的中垂線切為上半部與下半部 */
+    function clipPolyHalfPlane(poly, a, b, d, keepGe) {
+      const out = [];
+      const n = poly.length;
+      if (n === 0) return out;
+      const evalFn = (pt) => a * pt.x + b * pt.y - d;
+      const inside = (val) => (keepGe ? val >= -1e-7 : val <= 1e-7);
+
+      for (let i = 0; i < n; i++) {
+        const cur = poly[i];
+        const nxt = poly[(i + 1) % n];
+        const vc = evalFn(cur);
+        const vn = evalFn(nxt);
+        const inC = inside(vc);
+        const inN = inside(vn);
+        if (inC) out.push(cur);
+        if (inC !== inN) {
+          const t = vc / (vc - vn);
+          out.push(p3(cur.x + t * (nxt.x - cur.x), cur.y + t * (nxt.y - cur.y), 0));
+        }
+      }
+      return out;
+    }
+
+    function splitSquareByParabolaCrease(q, c = 0.4) {
+      const sq = [p3(0, 0), p3(2, 0), p3(2, 2), p3(0, 2)];
+      // 焦點 F(1, 2c), 底邊點 Q(q, 0)
+      // 中垂線: (1 - q)*x + (2c)*y = (1 - q^2 + 4c^2) / 2
+      // F 代入左式為 1 - q + 4c^2，Q 代入左式為 q - q^2，差值為 (1-q)^2 + 4c^2 > 0
+      // 故 F 永遠在 >= d 側（上半部固定），Q 永遠在 <= d 側（下半部翻折）
+      const a = 1 - q;
+      const b = 2 * c;
+      const d = (1 - q * q + 4 * c * c) / 2;
+      const upper = clipPolyHalfPlane(sq, a, b, d, true);
+      const lower = clipPolyHalfPlane(sq, a, b, d, false);
+
+      // 找出摺痕線段與正方形邊界的兩端點
+      const pts = [];
+      for (let i = 0; i < 4; i++) {
+        const p1 = sq[i], p2 = sq[(i + 1) % 4];
+        const v1 = a * p1.x + b * p1.y - d;
+        const v2 = a * p2.x + b * p2.y - d;
+        if (Math.abs(v1) < 1e-7) pts.push(p1);
+        else if (v1 * v2 < 0) {
+          const t = v1 / (v1 - v2);
+          pts.push(p3(p1.x + t * (p2.x - p1.x), p1.y + t * (p2.y - p1.y), 0));
+        }
+      }
+      // 去重
+      const unique = [];
+      pts.forEach((pt) => {
+        if (!unique.some((u) => Math.hypot(u.x - pt.x, u.y - pt.y) < 1e-4)) unique.push(pt);
+      });
+      const L1 = unique[0] || p3(0, c);
+      const L2 = unique[1] || p3(2, c);
+      const yP = c + ((q - 1) * (q - 1)) / (4 * c);
+      return { upper, lower, L1, L2, P: p3(q, yP), Q: p3(q, 0), F: p3(1, 2 * c) };
+    }
+
+    function shadeHex(hex, factor) {
+      if (!hex || hex[0] !== '#') return hex;
+      const num = parseInt(hex.slice(1), 16);
+      const r = Math.min(255, Math.max(0, Math.round(((num >> 16) & 255) * factor)));
+      const g = Math.min(255, Math.max(0, Math.round(((num >> 8) & 255) * factor)));
+      const b = Math.min(255, Math.max(0, Math.round((num & 255) * factor)));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function createCamera3D(cam, size) {
+      const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
+      const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+      const dist = 5.6;
+      const fov = size * 1.56;
+
+      const toCam = (pt) => {
+        const px = pt.x - 1, py = pt.y - 1, pz = pt.z || 0;
+        const x1 = px * cy - py * sy;
+        const y1 = px * sy + py * cy;
+        return { x: x1, y: y1 * cp + pz * sp, z: -y1 * sp + pz * cp };
+      };
+
+      const project = (pt) => {
+        const c = toCam(pt);
+        const s = fov / Math.max(0.8, dist - c.z);
+        return { x: size * 0.5 + c.x * s, y: size * 0.53 - c.y * s, z: c.z };
+      };
+
+      return { toCam, project, dist };
+    }
+
+    function drawTableGrid3D(ctx, camera) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(116, 134, 122, 0.22)';
+      ctx.lineWidth = 1;
+      const zPlane = -0.04;
+      for (let t = -0.4; t <= 2.41; t += 0.4) {
+        const h1 = camera.project(p3(-0.4, t, zPlane));
+        const h2 = camera.project(p3(2.4, t, zPlane));
+        ctx.beginPath(); ctx.moveTo(h1.x, h1.y); ctx.lineTo(h2.x, h2.y); ctx.stroke();
+        const v1 = camera.project(p3(t, -0.4, zPlane));
+        const v2 = camera.project(p3(t, 2.4, zPlane));
+        ctx.beginPath(); ctx.moveTo(v1.x, v1.y); ctx.lineTo(v2.x, v2.y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function createScene3D(camera) {
+      const faces = [];
+      const light = { x: 0.36, y: 0.52, z: 0.77 };
+
+      function addPoly(pts, frontColor, backColor, stroke, lineWidth = 1.6, zBias = 0, castShadow = false, lineDash = null) {
+        if (!pts || pts.length < 3) return;
+        const camPts = pts.map((pt) => camera.toCam(pt));
+        const screenPts = pts.map((pt) => camera.project(pt));
+
+        let avgZ = 0, cx = 0, cy = 0, cz = 0, maxWorldZ = -Infinity;
+        pts.forEach((pt, idx) => {
+          avgZ += camPts[idx].z; cx += camPts[idx].x; cy += camPts[idx].y; cz += camPts[idx].z;
+          if ((pt.z || 0) > maxWorldZ) maxWorldZ = pt.z || 0;
+        });
+        avgZ /= pts.length; cx /= pts.length; cy /= pts.length; cz /= pts.length;
+
+        const e1x = camPts[1].x - camPts[0].x, e1y = camPts[1].y - camPts[0].y, e1z = camPts[1].z - camPts[0].z;
+        const e2x = camPts[2].x - camPts[0].x, e2y = camPts[2].y - camPts[0].y, e2z = camPts[2].z - camPts[0].z;
+        let nx = e1y * e2z - e1z * e2y;
+        let ny = e1z * e2x - e1x * e2z;
+        let nz = e1x * e2y - e1y * e2x;
+        const nLen = Math.hypot(nx, ny, nz) || 1;
+        nx /= nLen; ny /= nLen; nz /= nLen;
+
+        const vx = -cx, vy = -cy, vz = camera.dist - cz;
+        const isFront = (nx * vx + ny * vy + nz * vz) >= 0;
+        const rawColor = isFront ? frontColor : (backColor || frontColor);
+
+        let fill = rawColor;
+        if (rawColor && rawColor[0] === '#') {
+          const ndotl = Math.abs(nx * light.x + ny * light.y + nz * light.z);
+          fill = shadeHex(rawColor, 0.78 + 0.25 * ndotl);
+        }
+
+        if (castShadow && maxWorldZ > 0.04) {
+          const shPts = pts.map((pt) => {
+            const lift = Math.max(0, pt.z || 0);
+            return camera.project(p3(pt.x + lift * 0.08, pt.y - lift * 0.06, -0.025));
+          });
+          faces.push({ screenPts: shPts, avgZ: -10, zBias: -100, fill: 'rgba(15, 23, 42, 0.13)', stroke: null, lineWidth: 0, lineDash: null });
+        }
+        faces.push({ screenPts, avgZ, zBias, fill, stroke, lineWidth, lineDash });
+      }
+
+      function flush(ctx) {
+        faces.sort((a, b) => (a.avgZ + a.zBias * 0.002) - (b.avgZ + b.zBias * 0.002));
+        faces.forEach((f) => {
+          ctx.save();
+          ctx.beginPath();
+          f.screenPts.forEach((p, idx) => { if (idx === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+          ctx.closePath();
+          if (f.fill) { ctx.fillStyle = f.fill; ctx.fill(); }
+          if (f.stroke) {
+            if (f.lineDash) ctx.setLineDash(f.lineDash);
+            ctx.strokeStyle = f.stroke;
+            ctx.lineWidth = f.lineWidth;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+      return { addPoly, flush };
+    }
+
+    function drawLine3D(ctx, camera, p1, p2, color = '#475569', dash = [5, 4], width = 1.5, zOffset = 0.008) {
+      const a = camera.project(p3(p1.x, p1.y, (p1.z || 0) + zOffset));
+      const b = camera.project(p3(p2.x, p2.y, (p2.z || 0) + zOffset));
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash(dash);
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawParabola3D(ctx, camera, c = 0.4, color = '#e11d48', width = 2.6, zOffset = 0.012) {
+      ctx.save();
+      ctx.beginPath();
+      let started = false;
+      for (let x = 0; x <= 2.001; x += 0.03) {
+        const y = c + ((x - 1) * (x - 1)) / (4 * c);
+        if (y > 2.02) continue;
+        const sp = camera.project(p3(x, y, zOffset));
+        if (!started) { ctx.moveTo(sp.x, sp.y); started = true; }
+        else ctx.lineTo(sp.x, sp.y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPoint3D(ctx, camera, pt, color = '#e11d48', r = 4.2, zOffset = 0.014) {
+      const p = camera.project(p3(pt.x, pt.y, (pt.z || 0) + zOffset));
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLabel3D(ctx, camera, pt, text, color = '#0f172a', ox = 0, oy = 0) {
+      const p = camera.project(p3(pt.x, pt.y, (pt.z || 0) + 0.016));
+      ctx.save();
+      ctx.font = 'bold 13px -apple-system, "Noto Sans TC", sans-serif';
+      ctx.lineWidth = 3.2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.strokeText(text, p.x + ox, p.y + oy);
+      ctx.fillStyle = color;
+      ctx.fillText(text, p.x + ox, p.y + oy);
+      ctx.restore();
+    }
+
+    function drawStageHint3D(ctx, size, text, accent = '#0f172a') {
+      if (!text) return;
+      ctx.save();
+      ctx.font = 'bold 12px -apple-system, "Noto Sans TC", sans-serif';
+      const padX = 12;
+      const w = Math.min(size - 24, ctx.measureText(text).width + padX * 2);
+      const h = 24;
+      const x = (size - w) / 2;
+      const y = size - 32;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 12);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, size / 2, y + h / 2 + 0.5, w - 12);
+      ctx.restore();
+    }
+
+    function liftPts(pts, dz) {
+      return dz > 0 ? pts.map((q) => p3(q.x, q.y, (q.z || 0) + dz)) : pts;
+    }
+
+    /* ==================== 2B. Web Audio 摺紙音效引擎 ==================== */
+    let sfxEnabled = true;
+    let sharedAudioCtx = null;
+
+    function getAudioCtx() {
+      if (!sharedAudioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) sharedAudioCtx = new AC();
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(() => {});
+      return sharedAudioCtx;
+    }
+
+    function toggleSfx() {
+      sfxEnabled = !sfxEnabled;
+      const btn = document.getElementById('sfx-toggle-btn');
+      if (btn) {
+        btn.textContent = sfxEnabled ? '🔊 音效：開' : '🔇 音效：關';
+        btn.style.opacity = sfxEnabled ? '1' : '0.72';
+      }
+      if (sfxEnabled) playOrigamiSfx('crease');
+    }
+
+    function playOrigamiSfx(kind) {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        if (kind === 'fold') {
+          const len = Math.floor(ctx.sampleRate * 0.13);
+          const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.sin((i / len) * Math.PI);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(900, now);
+          filter.frequency.exponentialRampToValueAtTime(1700, now + 0.12);
+          filter.Q.value = 1.6;
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+          src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+          src.start(now);
+        } else if (kind === 'crease') {
+          const osc = ctx.createOscillator(), gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(620, now);
+          osc.frequency.exponentialRampToValueAtTime(280, now + 0.07);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.08);
+        } else if (kind === 'step') {
+          [523.25, 659.25].forEach((freq, idx) => {
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.09, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.18);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08); osc.stop(now + idx * 0.08 + 0.18);
+          });
+        } else if (kind === 'done') {
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.11, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.36);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07); osc.stop(now + idx * 0.07 + 0.36);
+          });
+        }
+      } catch (e) {}
+    }
+
+    /* ==================== 3. 分頁 1：單次對摺原理模擬器 ==================== */
+    const m1Theme = { front: '#ecc8a1', back: '#faf7f0', border: '#a6632c' };
+    const m1StepsData = {
+      1: {
+        badge: '步驟 1 / 4：設定底邊準線 L 與焦點 F',
+        title: '步驟 1：對摺找對稱軸，標定準線 L 與焦點 F',
+        desc: '取一張邊長為 2 的正方形色紙（底邊 y = 0 作為「準線 L」）。先左右對摺壓出對稱軸 x = 1，並在對稱軸上標出定點 F(1, 0.8) 作為「焦點」。',
+        math: '💡 拋物線定義：平面上所有「到定點 F（焦點）的距離 ＝ 到定直線 L（準線）的距離」的點所形成的軌跡！'
+      },
+      2: {
+        badge: '步驟 2 / 4：將準線上任一點 Q 向上摺向焦點 F',
+        title: '步驟 2：將底邊點 Q 精準疊合至焦點 F，壓出中垂線摺痕 ℓ',
+        desc: '在底邊準線 L 上任選一點 Q(1.65, 0)，將下方紙片向上翻摺，使 Q 點精準重合於焦點 F(1, 0.8)！這條摺痕 ℓ 恰好是線段 QF 的垂直平分線（中垂線）。',
+        math: '📐 歐氏幾何關鍵：摺疊讓 Q 與 F 對稱重合，因此摺痕 ℓ 上任何一點到 F 與到 Q 的距離都完全相等！'
+      },
+      3: {
+        badge: '步驟 3 / 4：過 Q 作鉛垂線交摺痕於 P，驗證 PF = PQ',
+        title: '步驟 3：攤平紙片，找出拋物線上的切點 P',
+        desc: '將紙片展開，保留摺痕 ℓ。過點 Q 作垂直於準線 L 的鉛直線，與摺痕 ℓ 交於點 P。因 P 位於 QF 的中垂線上，必有 PF = PQ = d(P, L)，故 P 點必在拋物線上！',
+        math: '✨ 等距驗證：PF（到焦點距離）＝ PQ（到準線垂直距離），精準符合拋物線的幾何定義！'
+      },
+      4: {
+        badge: '步驟 4 / 4：證明摺痕 ℓ 必為拋物線在 P 點的切線',
+        title: '步驟 4：為何摺痕不只是過 P，更是拋物線的切線？',
+        desc: '在摺痕 ℓ 上任取異於 P 的點 P\'，由中垂線性質得 P\'F = P\'Q；但斜線段 P\'Q 必大於點 P\' 到準線的垂線段 d(P\', L)，故 P\' 位於拋物線外部，整條摺痕恰與拋物線相切於 P！',
+        math: '★ 結論：每將底邊一點摺向 F，就會誕生一條拋物線的切線！這就是下一單元「包絡線」成形的秘密！'
+      }
+    };
+
+    const m1State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM1UI() {
+      const info = m1StepsData[m1State.step];
+      document.getElementById('m1-step-badge').textContent = info.badge;
+      document.getElementById('m1-title').textContent = info.title;
+      document.getElementById('m1-desc').textContent = info.desc;
+      document.getElementById('m1-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) document.getElementById(`m1-btn-${i}`).className = i === m1State.step ? 'step-card-btn active-amber' : 'step-card-btn';
+    }
+
+    function selectM1Step(step, autoPlay = true, autoChain = false) {
+      stopM1Play();
+      m1State.step = step; m1State.autoChain = autoChain;
+      updateM1UI();
+      if (autoPlay) {
+        m1State.progress = 0; m1State.sfxFlags = {};
+        document.getElementById('m1-slider').value = 0; document.getElementById('m1-pct').textContent = '0%';
+        startM1Play();
+      } else {
+        m1State.progress = 1;
+        document.getElementById('m1-slider').value = 100; document.getElementById('m1-pct').textContent = '100%';
+        renderM1();
+      }
+    }
+
+    function prevM1Step() { selectM1Step(m1State.step > 1 ? m1State.step - 1 : 4, true); }
+    function nextM1Step() { selectM1Step(m1State.step < 4 ? m1State.step + 1 : 1, true); }
+    function onM1Slider(val) { stopM1Play(); m1State.progress = Number(val) / 100; document.getElementById('m1-pct').textContent = `${val}%`; renderM1(); }
+
+    function startM1Play() {
+      m1State.playing = true;
+      document.getElementById('m1-play-btn').textContent = '⏸ 暫停動畫';
+      if (m1State.progress >= 0.99) { m1State.progress = 0; m1State.sfxFlags = {}; }
+      if (m1State.progress < 0.05 && !m1State.sfxFlags.start) { m1State.sfxFlags.start = true; playOrigamiSfx('fold'); }
+      const tick = () => {
+        if (!m1State.playing) return;
+        const prev = m1State.progress;
+        m1State.progress += 0.0042;
+        if (prev < 0.5 && m1State.progress >= 0.5 && !m1State.sfxFlags.mid) { m1State.sfxFlags.mid = true; playOrigamiSfx('crease'); }
+        if (m1State.progress >= 1) {
+          m1State.progress = 1;
+          document.getElementById('m1-slider').value = 100; document.getElementById('m1-pct').textContent = '100%';
+          renderM1();
+          playOrigamiSfx(m1State.step === 4 ? 'done' : 'step');
+          const shouldChain = m1State.autoChain && m1State.step < 4;
+          const nextStep = m1State.step + 1;
+          stopM1Play();
+          if (shouldChain) m1State.chainTimer = setTimeout(() => selectM1Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m1State.progress * 100);
+        document.getElementById('m1-slider').value = pct; document.getElementById('m1-pct').textContent = `${pct}%`;
+        renderM1();
+        m1State.raf = requestAnimationFrame(tick);
+      };
+      m1State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM1Play() {
+      m1State.playing = false; m1State.autoChain = false;
+      if (m1State.chainTimer) { clearTimeout(m1State.chainTimer); m1State.chainTimer = null; }
+      if (m1State.raf) cancelAnimationFrame(m1State.raf);
+      const btn = document.getElementById('m1-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM1Play() {
+      if (m1State.playing) stopM1Play();
+      else if (m1State.progress >= 0.99) selectM1Step(1, true, true);
+      else startM1Play();
+    }
+
+    function renderM1() {
+      const canvas = document.getElementById('canvasM1');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) { canvas.width = size * dpr; canvas.height = size * dpr; }
+      const ctx = canvas.getContext('2d');
+      ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m1Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m1-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const MB = p3(1, 0), MT = p3(1, 2);
+      const c = 0.4;
+      const q = 1.68;
+      const split = splitSquareByParabolaCrease(q, c);
+      const prog = m1State.progress;
+
+      if (m1State.step === 1) {
+        const foldAmt = Math.sin(easeCos(prog) * Math.PI) * 0.88;
+        scene.addPoly([A, MB, MT, D], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        if (foldAmt > 0.002) {
+          const Bf = fold3D(B, MB, MT, foldAmt, 'front');
+          const Cf = fold3D(C, MB, MT, foldAmt, 'front');
+          scene.addPoly([MB, Bf, Cf, MT], m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, true);
+        } else {
+          scene.addPoly([MB, B, C, MT], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        }
+        scene.flush(ctx);
+        if (showNotes) {
+          drawLine3D(ctx, camera, A, B, '#0f172a', [], 2.6, 0.012);
+          drawLine3D(ctx, camera, MB, MT, '#94a3b8', [4, 4], 1.4);
+          drawPoint3D(ctx, camera, split.F, '#d97706', 5);
+          drawLabel3D(ctx, camera, split.F, '焦點 F', '#b45309', 8, -4);
+          drawLabel3D(ctx, camera, p3(0.4, 0), '準線 L', '#0f172a', -10, 16);
+        }
+      } else if (m1State.step === 2) {
+        const eProg = easeCos(prog);
+        scene.addPoly(split.upper, m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        const folded = split.lower.map((pt) => fold3D(pt, split.L1, split.L2, eProg, 'front'));
+        scene.addPoly(liftPts(folded, eProg > 0.96 ? 0.006 : 0), m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, eProg > 0.02 && eProg < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawLine3D(ctx, camera, split.L1, split.L2, '#2563eb', [5, 3], 2.2, 0.015);
+          drawPoint3D(ctx, camera, split.F, '#d97706', 5, 0.018);
+          const Qf = fold3D(split.Q, split.L1, split.L2, eProg, 'front');
+          drawPoint3D(ctx, camera, Qf, '#059669', 4.4, 0.02);
+          drawLabel3D(ctx, camera, split.F, 'F', '#b45309', -14, -6);
+          if (eProg < 0.85) drawLabel3D(ctx, camera, Qf, 'Q', '#059669', 8, 6);
+          else drawLabel3D(ctx, camera, split.F, 'Q 重合於 F！', '#059669', 8, -8);
+        }
+      } else if (m1State.step === 3) {
+        const u = Math.max(0, 1 - easeCos(Math.min(1, prog / 0.45)));
+        scene.addPoly(split.upper, m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        const folded = split.lower.map((pt) => fold3D(pt, split.L1, split.L2, u, 'front'));
+        scene.addPoly(liftPts(folded, u > 0.02 ? 0.005 : 0), m1Theme.front, m1Theme.back, m1Theme.border, 1.6, 4, u > 0.02 && u < 0.98);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawLine3D(ctx, camera, A, B, '#0f172a', [], 2.4, 0.01);
+          drawLine3D(ctx, camera, split.L1, split.L2, '#2563eb', [5, 3], 2.1, 0.014);
+          if (prog > 0.45) {
+            drawLine3D(ctx, camera, split.Q, split.P, '#059669', [], 2.4, 0.015);
+            drawLine3D(ctx, camera, split.F, split.P, '#d97706', [], 2.4, 0.015);
+            drawLine3D(ctx, camera, split.F, split.Q, '#94a3b8', [3, 3], 1.2, 0.012);
+            drawPoint3D(ctx, camera, split.P, '#e11d48', 5, 0.018);
+            drawLabel3D(ctx, camera, split.P, 'P (PF = PQ)', '#e11d48', -24, -12);
+          }
+          drawPoint3D(ctx, camera, split.F, '#d97706', 4.6, 0.016);
+          drawPoint3D(ctx, camera, split.Q, '#059669', 4.4, 0.016);
+          drawLabel3D(ctx, camera, split.F, 'F', '#b45309', -14, -4);
+          drawLabel3D(ctx, camera, split.Q, 'Q', '#059669', 6, 14);
+        }
+      } else {
+        scene.addPoly([A, B, C, D], m1Theme.front, m1Theme.back, m1Theme.border, 1.8, 0, false);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawLine3D(ctx, camera, A, B, '#0f172a', [], 2.4, 0.01);
+          drawParabola3D(ctx, camera, c, '#e11d48', 2.6, 0.014);
+          drawLine3D(ctx, camera, split.L1, split.L2, '#2563eb', [], 2.2, 0.015);
+          drawLine3D(ctx, camera, split.Q, split.P, '#059669', [4, 3], 1.6, 0.014);
+          drawLine3D(ctx, camera, split.F, split.P, '#d97706', [4, 3], 1.6, 0.014);
+          // 動態在摺痕上取點 P' 顯示 P'F = P'Q > d(P', L)
+          const tP = 0.25 + 0.22 * Math.sin(prog * Math.PI);
+          const Pp = p3(split.L1.x + tP * (split.L2.x - split.L1.x), split.L1.y + tP * (split.L2.y - split.L1.y));
+          const foot = p3(Pp.x, 0);
+          if (prog > 0.15) {
+            drawLine3D(ctx, camera, Pp, split.F, '#7c3aed', [3, 3], 1.5, 0.016);
+            drawLine3D(ctx, camera, Pp, split.Q, '#7c3aed', [3, 3], 1.5, 0.016);
+            drawLine3D(ctx, camera, Pp, foot, '#64748b', [], 1.5, 0.016);
+            drawPoint3D(ctx, camera, Pp, '#7c3aed', 4.2, 0.018);
+            drawLabel3D(ctx, camera, Pp, "P' (外部)", '#7c3aed', -36, -10);
+          }
+          drawPoint3D(ctx, camera, split.F, '#d97706', 4.6, 0.018);
+          drawPoint3D(ctx, camera, split.P, '#e11d48', 5, 0.018);
+          drawLabel3D(ctx, camera, split.F, 'F', '#b45309', -14, -4);
+          drawLabel3D(ctx, camera, split.P, '切點 P', '#e11d48', 8, -6);
+        }
+      }
+      if (showNotes) {
+        const hint = m1State.step === 1 ? '左右對摺找對稱軸，標出準線 L 與焦點 F…'
+          : m1State.step === 2 ? '將底邊點 Q 向上翻摺至焦點 F，壓出中垂線摺痕！'
+          : m1State.step === 3 ? (prog <= 0.45 ? '展開紙片保留摺痕…' : '過 Q 作鉛垂線交摺痕於 P，得 PF = PQ！')
+          : "摺痕上其他點 P' 皆在拋物線外部 ⇒ 摺痕必為切線！";
+        drawStageHint3D(ctx, size, hint, '#b45309');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 4. 分頁 2：包絡線成形模擬器 ==================== */
+    const m2Theme = { front: '#b8cbe8', back: '#f5f8fc', border: '#3b5b92' };
+    const m2StepsData = {
+      1: {
+        badge: '步驟 1 / 4：摺出頂點 V 的水平切線',
+        title: '步驟 1：底邊中點摺向焦點 F，找出頂點 V',
+        desc: '將底邊正中央 Q₀(1, 0) 向上摺向焦點 F(1, 0.8) 並展開，壓出水平摺痕 y = 0.4。這條摺痕正是拋物線最低點——頂點 V(1, 0.4) 的水平切線！',
+        math: '💡 焦距幾何意義：頂點 V 恰好落在焦點 F 與準線 L 的正中央，V 到 F 與 V 到 L 的距離皆為焦距 c = 0.4！'
+      },
+      2: {
+        badge: '步驟 2 / 4：左右對稱各摺 2 條切線，輪廓初現',
+        title: '步驟 2：左右對稱翻摺，直線切線開始圍出碗狀輪廓',
+        desc: '在底邊對稱取 q = 0.65, 1.35 與 q = 0.25, 1.75 依序摺向焦點 F 並展開，觀察左右對稱的直線摺痕如何自然托出拋物線的彎曲底部！',
+        math: '📐 對稱性觀察：對稱於 x = 1 的兩點所摺出的切線，斜率正好互為相反數，完美展現拋物線的軸對稱美！'
+      },
+      3: {
+        badge: '步驟 3 / 4：沿底邊連續 9 次翻摺，累積密集切線族',
+        title: '步驟 3：沿著準線密集連續翻摺，見證包絡線成形！',
+        desc: '由左到右依序將底邊 9 個等距點逐一摺向焦點 F 並展開。雖然每一次壓出的都是筆直的線段，但所有切線的下方邊界卻自動浮現一條光滑曲線！',
+        math: '💡 微積分直覺：這條與每一條直線摺痕都相切的曲線，在數學上稱為「直線族的包絡線（Envelope）」！'
+      },
+      4: {
+        badge: '步驟 4 / 4：攤平點亮拋物線與所有切點，完美驗證！',
+        title: '步驟 4：攤平色紙，見證所有摺痕精準包絡拋物線！',
+        desc: '將 13 條直線摺痕全部攤平並疊合上解析幾何的拋物線方程式 y - 0.4 = (x - 1)² / 1.6，每一條摺痕都與紅色曲線精準相切於唯一的切點 Pᵢ！',
+        math: '★ 課堂震撼時刻：不靠圓規、不靠描點，只用雙手反覆做「點對點對摺」，就能把二次函數的圖形完整摺出來！'
+      }
+    };
+
+    const m2State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM2UI() {
+      const info = m2StepsData[m2State.step];
+      document.getElementById('m2-step-badge').textContent = info.badge;
+      document.getElementById('m2-title').textContent = info.title;
+      document.getElementById('m2-desc').textContent = info.desc;
+      document.getElementById('m2-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) document.getElementById(`m2-btn-${i}`).className = i === m2State.step ? 'step-card-btn active' : 'step-card-btn';
+    }
+
+    function selectM2Step(step, autoPlay = true, autoChain = false) {
+      stopM2Play();
+      m2State.step = step; m2State.autoChain = autoChain;
+      updateM2UI();
+      if (autoPlay) {
+        m2State.progress = 0; m2State.sfxFlags = {};
+        document.getElementById('m2-slider').value = 0; document.getElementById('m2-pct').textContent = '0%';
+        startM2Play();
+      } else {
+        m2State.progress = 1;
+        document.getElementById('m2-slider').value = 100; document.getElementById('m2-pct').textContent = '100%';
+        renderM2();
+      }
+    }
+
+    function prevM2Step() { selectM2Step(m2State.step > 1 ? m2State.step - 1 : 4, true); }
+    function nextM2Step() { selectM2Step(m2State.step < 4 ? m2State.step + 1 : 1, true); }
+    function onM2Slider(val) { stopM2Play(); m2State.progress = Number(val) / 100; document.getElementById('m2-pct').textContent = `${val}%`; renderM2(); }
+
+    function startM2Play() {
+      m2State.playing = true;
+      document.getElementById('m2-play-btn').textContent = '⏸ 暫停動畫';
+      if (m2State.progress >= 0.99) { m2State.progress = 0; m2State.sfxFlags = {}; }
+      if (m2State.progress < 0.05 && !m2State.sfxFlags.start) { m2State.sfxFlags.start = true; playOrigamiSfx('fold'); }
+      const tick = () => {
+        if (!m2State.playing) return;
+        const prev = m2State.progress;
+        m2State.progress += m2State.step === 3 ? 0.0028 : 0.0038;
+        if (prev < 0.5 && m2State.progress >= 0.5 && !m2State.sfxFlags.mid) { m2State.sfxFlags.mid = true; playOrigamiSfx('crease'); }
+        if (m2State.progress >= 1) {
+          m2State.progress = 1;
+          document.getElementById('m2-slider').value = 100; document.getElementById('m2-pct').textContent = '100%';
+          renderM2();
+          playOrigamiSfx(m2State.step === 4 ? 'done' : 'step');
+          const shouldChain = m2State.autoChain && m2State.step < 4;
+          const nextStep = m2State.step + 1;
+          stopM2Play();
+          if (shouldChain) m2State.chainTimer = setTimeout(() => selectM2Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m2State.progress * 100);
+        document.getElementById('m2-slider').value = pct; document.getElementById('m2-pct').textContent = `${pct}%`;
+        renderM2();
+        m2State.raf = requestAnimationFrame(tick);
+      };
+      m2State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM2Play() {
+      m2State.playing = false; m2State.autoChain = false;
+      if (m2State.chainTimer) { clearTimeout(m2State.chainTimer); m2State.chainTimer = null; }
+      if (m2State.raf) cancelAnimationFrame(m2State.raf);
+      const btn = document.getElementById('m2-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM2Play() {
+      if (m2State.playing) stopM2Play();
+      else if (m2State.progress >= 0.99) selectM2Step(1, true, true);
+      else startM2Play();
+    }
+
+    function renderM2() {
+      const canvas = document.getElementById('canvasM2');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) { canvas.width = size * dpr; canvas.height = size * dpr; }
+      const ctx = canvas.getContext('2d');
+      ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m2Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m2-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const c = 0.4;
+      const F = p3(1, 2 * c);
+      const prog = m2State.progress;
+
+      if (m2State.step === 1) {
+        const sp = splitSquareByParabolaCrease(1.0, c);
+        const foldAmt = Math.sin(easeCos(prog) * Math.PI) * 0.92;
+        scene.addPoly(sp.upper, m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+        const folded = sp.lower.map((pt) => fold3D(pt, sp.L1, sp.L2, foldAmt, 'front'));
+        scene.addPoly(folded, m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, foldAmt > 0.02);
+        scene.flush(ctx);
+        if (showNotes) {
+          drawLine3D(ctx, camera, sp.L1, sp.L2, '#2563eb', [5, 3], 2.2, 0.015);
+          drawPoint3D(ctx, camera, F, '#d97706', 4.8, 0.018);
+          drawPoint3D(ctx, camera, sp.P, '#e11d48', 4.6, 0.018);
+          drawLabel3D(ctx, camera, F, 'F', '#b45309', 8, -4);
+          drawLabel3D(ctx, camera, sp.P, '頂點 V', '#e11d48', 8, 6);
+        }
+      } else if (m2State.step === 2) {
+        const qs = [0.65, 1.35, 0.25, 1.75];
+        const qNames = ['Q₁', 'Q₂', 'Q₃', 'Q₄'];
+        const seg = Math.min(qs.length - 1, Math.floor(prog * qs.length));
+        const localT = (prog * qs.length) - seg;
+        const curQ = qs[seg];
+        const curName = qNames[seg];
+        const sp = splitSquareByParabolaCrease(curQ, c);
+        const foldAmt = Math.sin(easeCos(localT) * Math.PI) * 0.92;
+        scene.addPoly(sp.upper, m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+        const folded = sp.lower.map((pt) => fold3D(pt, sp.L1, sp.L2, foldAmt, 'front'));
+        scene.addPoly(folded, m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, foldAmt > 0.02);
+        scene.flush(ctx);
+        const doneQs = [1.0, ...qs.slice(0, seg + (localT > 0.48 ? 1 : 0))];
+        doneQs.forEach((qv) => {
+          const s = splitSquareByParabolaCrease(qv, c);
+          drawLine3D(ctx, camera, s.L1, s.L2, '#2563eb', [], 1.6, 0.014);
+          if (showNotes) drawPoint3D(ctx, camera, s.P, '#e11d48', 3.4, 0.016);
+        });
+        // 標出底邊四個對稱點與目前正在摺向焦點 F 的點
+        drawLine3D(ctx, camera, sp.L1, sp.L2, '#1d4ed8', [5, 3], 2.0, 0.015);
+        if (showNotes) {
+          drawLine3D(ctx, camera, sp.Q, F, 'rgba(5, 150, 105, 0.55)', [4, 3], 1.6, 0.015);
+          qs.forEach((qv, idx) => {
+            const ptQ = p3(qv, 0);
+            const isCur = idx === seg;
+            drawPoint3D(ctx, camera, ptQ, isCur ? '#059669' : '#64748b', isCur ? 4.6 : 3.2, 0.016);
+            drawLabel3D(ctx, camera, ptQ, qNames[idx], isCur ? '#047857' : '#64748b', -8, 16);
+          });
+          const Qf = fold3D(sp.Q, sp.L1, sp.L2, foldAmt, 'front');
+          if (foldAmt > 0.04) {
+            drawPoint3D(ctx, camera, Qf, '#10b981', 4.8, 0.022);
+            if (foldAmt > 0.78) {
+              drawLabel3D(ctx, camera, F, `${curName} → F！`, '#047857', 10, -10);
+            } else {
+              drawLabel3D(ctx, camera, Qf, curName, '#047857', 8, -6);
+            }
+          }
+        }
+        drawPoint3D(ctx, camera, F, '#d97706', 5.0, 0.019);
+        if (showNotes) drawLabel3D(ctx, camera, F, '焦點 F', '#b45309', -48, -6);
+      } else if (m2State.step === 3) {
+        const qs = [0.15, 0.36, 0.57, 0.78, 1.0, 1.22, 1.43, 1.64, 1.85];
+        const qNames = ['Q₁', 'Q₂', 'Q₃', 'Q₄', 'Q₅', 'Q₆', 'Q₇', 'Q₈', 'Q₉'];
+        const seg = Math.min(qs.length - 1, Math.floor(prog * qs.length));
+        const localT = (prog * qs.length) - seg;
+        const curName = qNames[seg];
+        const sp = splitSquareByParabolaCrease(qs[seg], c);
+        const foldAmt = Math.sin(easeCos(localT) * Math.PI) * 0.90;
+        scene.addPoly(sp.upper, m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+        const folded = sp.lower.map((pt) => fold3D(pt, sp.L1, sp.L2, foldAmt, 'front'));
+        scene.addPoly(folded, m2Theme.front, m2Theme.back, m2Theme.border, 1.6, 4, foldAmt > 0.02);
+        scene.flush(ctx);
+        qs.slice(0, seg + (localT > 0.45 ? 1 : 0)).forEach((qv) => {
+          const s = splitSquareByParabolaCrease(qv, c);
+          drawLine3D(ctx, camera, s.L1, s.L2, 'rgba(37, 99, 235, 0.78)', [], 1.4, 0.013);
+        });
+        drawLine3D(ctx, camera, sp.L1, sp.L2, '#1d4ed8', [5, 3], 2.0, 0.015);
+        if (showNotes) {
+          drawLine3D(ctx, camera, sp.Q, F, 'rgba(5, 150, 105, 0.55)', [4, 3], 1.6, 0.015);
+          qs.forEach((qv, idx) => {
+            const ptQ = p3(qv, 0);
+            const isCur = idx === seg;
+            const color = isCur ? '#059669' : (idx < seg ? '#2563eb' : '#94a3b8');
+            drawPoint3D(ctx, camera, ptQ, color, isCur ? 4.8 : 2.8, 0.016);
+            if (isCur) drawLabel3D(ctx, camera, ptQ, curName, '#047857', -8, 16);
+          });
+          const Qf = fold3D(sp.Q, sp.L1, sp.L2, foldAmt, 'front');
+          if (foldAmt > 0.04) {
+            drawPoint3D(ctx, camera, Qf, '#10b981', 4.8, 0.022);
+            if (foldAmt > 0.76) {
+              drawLabel3D(ctx, camera, F, `${curName} → F！`, '#047857', 10, -10);
+            } else {
+              drawLabel3D(ctx, camera, Qf, curName, '#047857', 8, -6);
+            }
+          }
+        }
+        drawPoint3D(ctx, camera, F, '#d97706', 5.0, 0.019);
+        if (showNotes) drawLabel3D(ctx, camera, F, '焦點 F', '#b45309', -48, -6);
+      } else {
+        scene.addPoly([A, B, C, D], m2Theme.front, m2Theme.back, m2Theme.border, 1.8, 0, false);
+        scene.flush(ctx);
+        const allQs = [];
+        for (let i = 0; i < 13; i++) allQs.push(0.1 + (1.8 * i) / 12);
+        allQs.forEach((qv) => {
+          const s = splitSquareByParabolaCrease(qv, c);
+          drawLine3D(ctx, camera, s.L1, s.L2, 'rgba(37, 99, 235, 0.58)', [], 1.35, 0.012);
+          if (showNotes && prog > 0.35 && s.P.y <= 1.98) drawPoint3D(ctx, camera, s.P, '#e11d48', 3.0, 0.016);
+        });
+        if (showNotes && prog > 0.2) drawParabola3D(ctx, camera, c, '#e11d48', 2.8, 0.015);
+        drawPoint3D(ctx, camera, F, '#d97706', 5, 0.018);
+        drawLabel3D(ctx, camera, F, '焦點 F', '#b45309', 8, -4);
+      }
+      if (showNotes) {
+        const s2Names = ['Q₁(0.65, 0)', 'Q₂(1.35, 0)', 'Q₃(0.25, 0)', 'Q₄(1.75, 0)'];
+        const s2Idx = Math.min(3, Math.floor(prog * 4));
+        const s3Qs = [0.15, 0.36, 0.57, 0.78, 1.0, 1.22, 1.43, 1.64, 1.85];
+        const s3Names = ['Q₁', 'Q₂', 'Q₃', 'Q₄', 'Q₅', 'Q₆', 'Q₇', 'Q₈', 'Q₉'];
+        const s3Idx = Math.min(8, Math.floor(prog * 9));
+        const hint = m2State.step === 1 ? '底邊中點摺向 F，壓出頂點 V 水平切線…'
+          : m2State.step === 2 ? `對稱翻摺：將底邊點 ${s2Names[s2Idx]} 摺向焦點 F！`
+          : m2State.step === 3 ? `連續 9 摺 (${s3Idx + 1}/9)：將底邊點 ${s3Names[s3Idx]}(${s3Qs[s3Idx].toFixed(2)}, 0) 摺向焦點 F！`
+          : '攤平見證 13 條直線切線完美包絡拋物線！';
+        drawStageHint3D(ctx, size, hint, '#2563eb');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 5. 分頁 3：延伸——光學反射模擬器 ==================== */
+    const m3Theme = { front: '#aed6b8', back: '#f4f9f5', border: '#2d7a5b' };
+    const m3StepsData = {
+      1: {
+        badge: '步驟 1 / 4：平行對稱軸的光線鉛直射向切點 P',
+        title: '步驟 1：平行於對稱軸的光線射向拋物線切點 P',
+        desc: '想像一束來自遠方的平行光，沿鉛直方向向下射到拋物線上的切點 P。將光線往下延伸，正好垂直打在底邊準線上的對應點 Q！',
+        math: '💡 觀察方向：入射光線與剛才摺紙構造中的垂線 PQ 完全共線！'
+      },
+      2: {
+        badge: '步驟 2 / 4：沿切線摺痕翻折，對稱證明 ∠1 = ∠2 = ∠3',
+        title: '步驟 2：沿切線摺痕翻折，一秒證出「入射角 ＝ 反射角」',
+        desc: '因為點 Q 沿切線摺痕 ℓ 翻折後精準疊合至焦點 F，所以線段 PQ 與線段 PF 關於切線對稱（∠2 = ∠3）；又入射光與 PQ 成對頂角（∠1 = ∠2），故 ∠1 = ∠3！',
+        math: '📐 零微積分證明：∠1（入射光與切線夾角）＝ ∠2（對頂角）＝ ∠3（翻折對稱角）⇒ 反射光必通過焦點 F！'
+      },
+      3: {
+        badge: '步驟 3 / 4：平行入射光經切點 P 反射後精準射向焦點 F',
+        title: '步驟 3：光線打到拋物線後，精準反射直奔焦點 F！',
+        desc: '由於切線就是該點的局部鏡面，滿足入射角等於反射角的反射光線，必然沿著線段 PF 的方向直奔焦點 F！',
+        math: '✨ 光路可逆性：把燈泡放在焦點 F，光線打到拋物面反光罩後，也會全部變成平行光束射向遠方（手電筒、車頭燈原理）！'
+      },
+      4: {
+        badge: '步驟 4 / 4：多束平行光同時入射，全部精準匯聚於焦點 F',
+        title: '步驟 4：拋物面衛星天線與太陽能聚熱爐的聚光奇蹟！',
+        desc: '無論平行光射到拋物線上的哪一個位置，每一束光都會依相同原理反射並同時匯聚在焦點 F，將微弱的遠方訊號或陽光能量集中放大！',
+        math: '★ 生活應用：小耳朵衛星天線（集波器就裝在焦點 F）、太陽能聚光爐、大型天文望遠鏡主鏡都運用了這個性質！'
+      }
+    };
+
+    const m3State = { step: 1, progress: 1, playing: false, raf: null, autoChain: false, chainTimer: null, sfxFlags: {} };
+
+    function updateM3UI() {
+      const info = m3StepsData[m3State.step];
+      document.getElementById('m3-step-badge').textContent = info.badge;
+      document.getElementById('m3-title').textContent = info.title;
+      document.getElementById('m3-desc').textContent = info.desc;
+      document.getElementById('m3-math').textContent = info.math;
+      for (let i = 1; i <= 4; i++) document.getElementById(`m3-btn-${i}`).className = i === m3State.step ? 'step-card-btn active-emerald' : 'step-card-btn';
+    }
+
+    function selectM3Step(step, autoPlay = true, autoChain = false) {
+      stopM3Play();
+      m3State.step = step; m3State.autoChain = autoChain;
+      updateM3UI();
+      if (autoPlay) {
+        m3State.progress = 0; m3State.sfxFlags = {};
+        document.getElementById('m3-slider').value = 0; document.getElementById('m3-pct').textContent = '0%';
+        startM3Play();
+      } else {
+        m3State.progress = 1;
+        document.getElementById('m3-slider').value = 100; document.getElementById('m3-pct').textContent = '100%';
+        renderM3();
+      }
+    }
+
+    function prevM3Step() { selectM3Step(m3State.step > 1 ? m3State.step - 1 : 4, true); }
+    function nextM3Step() { selectM3Step(m3State.step < 4 ? m3State.step + 1 : 1, true); }
+    function onM3Slider(val) { stopM3Play(); m3State.progress = Number(val) / 100; document.getElementById('m3-pct').textContent = `${val}%`; renderM3(); }
+
+    function startM3Play() {
+      m3State.playing = true;
+      document.getElementById('m3-play-btn').textContent = '⏸ 暫停動畫';
+      if (m3State.progress >= 0.99) { m3State.progress = 0; m3State.sfxFlags = {}; }
+      if (m3State.progress < 0.05 && !m3State.sfxFlags.start) { m3State.sfxFlags.start = true; playOrigamiSfx('fold'); }
+      const tick = () => {
+        if (!m3State.playing) return;
+        const prev = m3State.progress;
+        m3State.progress += 0.0040;
+        if (prev < 0.5 && m3State.progress >= 0.5 && !m3State.sfxFlags.mid) { m3State.sfxFlags.mid = true; playOrigamiSfx('crease'); }
+        if (m3State.progress >= 1) {
+          m3State.progress = 1;
+          document.getElementById('m3-slider').value = 100; document.getElementById('m3-pct').textContent = '100%';
+          renderM3();
+          playOrigamiSfx(m3State.step === 4 ? 'done' : 'step');
+          const shouldChain = m3State.autoChain && m3State.step < 4;
+          const nextStep = m3State.step + 1;
+          stopM3Play();
+          if (shouldChain) m3State.chainTimer = setTimeout(() => selectM3Step(nextStep, true, true), 1100);
+          return;
+        }
+        const pct = Math.round(m3State.progress * 100);
+        document.getElementById('m3-slider').value = pct; document.getElementById('m3-pct').textContent = `${pct}%`;
+        renderM3();
+        m3State.raf = requestAnimationFrame(tick);
+      };
+      m3State.raf = requestAnimationFrame(tick);
+    }
+
+    function stopM3Play() {
+      m3State.playing = false; m3State.autoChain = false;
+      if (m3State.chainTimer) { clearTimeout(m3State.chainTimer); m3State.chainTimer = null; }
+      if (m3State.raf) cancelAnimationFrame(m3State.raf);
+      const btn = document.getElementById('m3-play-btn');
+      if (btn) btn.textContent = '▶ 重播動畫';
+    }
+
+    function toggleM3Play() {
+      if (m3State.playing) stopM3Play();
+      else if (m3State.progress >= 0.99) selectM3Step(1, true, true);
+      else startM3Play();
+    }
+
+    function renderM3() {
+      const canvas = document.getElementById('canvasM3');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(240, Math.floor(rect.width - 14));
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) { canvas.width = size * dpr; canvas.height = size * dpr; }
+      const ctx = canvas.getContext('2d');
+      ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, size, size);
+
+      const camera = createCamera3D(m3Cam, size);
+      drawTableGrid3D(ctx, camera);
+      const scene = createScene3D(camera);
+      const showNotes = document.getElementById('m3-show-notes').checked;
+
+      const A = p3(0, 0), B = p3(2, 0), C = p3(2, 2), D = p3(0, 2);
+      const c = 0.4;
+      const q = 1.66;
+      const sp = splitSquareByParabolaCrease(q, c);
+      const prog = m3State.progress;
+
+      if (m3State.step === 2) {
+        const foldAmt = Math.sin(easeCos(prog) * Math.PI) * 0.92;
+        scene.addPoly(sp.upper, m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+        const folded = sp.lower.map((pt) => fold3D(pt, sp.L1, sp.L2, foldAmt, 'front'));
+        scene.addPoly(folded, m3Theme.front, m3Theme.back, m3Theme.border, 1.6, 4, foldAmt > 0.02);
+        scene.flush(ctx);
+        drawParabola3D(ctx, camera, c, '#059669', 2.2, 0.013);
+        drawLine3D(ctx, camera, sp.L1, sp.L2, '#059669', [5, 3], 2.2, 0.015);
+        drawLine3D(ctx, camera, p3(q, 2), sp.P, '#d97706', [], 2.4, 0.016);
+        drawLine3D(ctx, camera, sp.P, sp.Q, '#94a3b8', [3, 3], 1.5, 0.015);
+        drawLine3D(ctx, camera, sp.P, sp.F, '#e11d48', [], 2.2, 0.016);
+        drawPoint3D(ctx, camera, sp.F, '#e11d48', 5, 0.018);
+        drawPoint3D(ctx, camera, sp.P, '#0f172a', 4.4, 0.018);
+        if (showNotes) {
+          drawLabel3D(ctx, camera, p3(q + 0.08, sp.P.y + 0.24), '∠1', '#d97706', 0, 0);
+          drawLabel3D(ctx, camera, p3(q - 0.16, sp.P.y - 0.20), '∠2', '#475569', 0, 0);
+          drawLabel3D(ctx, camera, p3(q - 0.26, sp.P.y + 0.02), '∠3', '#e11d48', 0, 0);
+        }
+      } else {
+        scene.addPoly([A, B, C, D], m3Theme.front, m3Theme.back, m3Theme.border, 1.8, 0, false);
+        scene.flush(ctx);
+        drawParabola3D(ctx, camera, c, '#059669', 2.8, 0.014);
+
+        if (m3State.step === 1) {
+          const curY = 2.0 - easeCos(prog) * (2.0 - sp.P.y);
+          drawLine3D(ctx, camera, sp.L1, sp.L2, '#059669', [5, 3], 1.8, 0.014);
+          drawLine3D(ctx, camera, p3(q, 2.0), p3(q, curY), '#d97706', [], 2.8, 0.017);
+          drawLine3D(ctx, camera, sp.P, sp.Q, '#94a3b8', [3, 3], 1.4, 0.014);
+          drawPoint3D(ctx, camera, p3(q, curY), '#f59e0b', 4.5, 0.02);
+          drawPoint3D(ctx, camera, sp.F, '#e11d48', 4.8, 0.018);
+          drawPoint3D(ctx, camera, sp.Q, '#059669', 4, 0.016);
+          if (showNotes) {
+            drawLabel3D(ctx, camera, sp.F, 'F', '#e11d48', -14, -4);
+            drawLabel3D(ctx, camera, sp.P, 'P', '#0f172a', 8, -4);
+            drawLabel3D(ctx, camera, sp.Q, 'Q', '#059669', 6, 14);
+          }
+        } else if (m3State.step === 3) {
+          const tIn = Math.min(1, prog / 0.45);
+          const tOut = Math.max(0, (prog - 0.45) / 0.55);
+          const curY = 2.0 - easeCos(tIn) * (2.0 - sp.P.y);
+          drawLine3D(ctx, camera, sp.L1, sp.L2, '#059669', [5, 3], 1.8, 0.014);
+          drawLine3D(ctx, camera, p3(q, 2.0), p3(q, curY), '#d97706', [], 2.6, 0.017);
+          if (tOut > 0) {
+            const eOut = easeCos(tOut);
+            const rx = sp.P.x + eOut * (sp.F.x - sp.P.x);
+            const ry = sp.P.y + eOut * (sp.F.y - sp.P.y);
+            drawLine3D(ctx, camera, sp.P, p3(rx, ry), '#e11d48', [], 2.8, 0.018);
+            drawPoint3D(ctx, camera, p3(rx, ry), '#e11d48', 4.6, 0.02);
+          }
+          drawPoint3D(ctx, camera, sp.F, '#e11d48', 5.2, 0.019);
+          if (showNotes) {
+            drawLabel3D(ctx, camera, sp.F, '焦點 F', '#e11d48', -48, -6);
+            drawLabel3D(ctx, camera, sp.P, 'P', '#0f172a', 8, -4);
+          }
+        } else {
+          // 步驟 4：多束平行光同時匯聚於 F
+          const rays = [0.22, 0.48, 0.74, 1.0, 1.26, 1.52, 1.78];
+          const tIn = Math.min(1, prog / 0.48);
+          const tOut = Math.max(0, (prog - 0.48) / 0.52);
+          const eIn = easeCos(tIn), eOut = easeCos(tOut);
+          rays.forEach((rq) => {
+            const py = c + ((rq - 1) * (rq - 1)) / (4 * c);
+            const ptP = p3(rq, py);
+            const curY = 2.0 - eIn * (2.0 - py);
+            drawLine3D(ctx, camera, p3(rq, 2.0), p3(rq, curY), '#d97706', [], 2.1, 0.016);
+            if (eOut > 0) {
+              const rx = ptP.x + eOut * (sp.F.x - ptP.x);
+              const ry = ptP.y + eOut * (sp.F.y - ptP.y);
+              drawLine3D(ctx, camera, ptP, p3(rx, ry), '#e11d48', [], 2.2, 0.017);
+            }
+          });
+          drawPoint3D(ctx, camera, sp.F, '#e11d48', 5.5 + (eOut > 0.85 ? 2.5 : 0), 0.022);
+          if (showNotes) drawLabel3D(ctx, camera, sp.F, eOut > 0.85 ? '★ 能量匯聚於焦點 F！' : '焦點 F', '#e11d48', -60, -12);
+        }
+      }
+      if (showNotes) {
+        const hint = m3State.step === 1 ? '平行光鉛直向下射向拋物線切點 P…'
+          : m3State.step === 2 ? '沿切線翻折驗證對稱角：∠1 = ∠2 = ∠3！'
+          : m3State.step === 3 ? '滿足入射角＝反射角，光線直奔焦點 F！'
+          : '多束平行光同時反射，全部精準匯聚於焦點 F！';
+        drawStageHint3D(ctx, size, hint, '#059669');
+      }
+      ctx.restore();
+    }
+
+    /* ==================== 6. 分頁 4：拋物線互動實驗室 ==================== */
+    function renderLab1() {
+      const canvas = document.getElementById('canvasLab1');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(220, Math.floor(canvas.parentElement.getBoundingClientRect().width - 12));
+      canvas.width = size * dpr; canvas.height = size * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, size, size);
+
+      const c = Number(document.getElementById('lab1-c-slider').value);
+      const count = Number(document.getElementById('lab1-n-slider').value);
+      const showCurve = document.getElementById('lab1-show-curve').checked;
+      const showPts = document.getElementById('lab1-show-pts').checked;
+
+      const pad = 26, W = size - pad * 2;
+      // 世界座標 u in [-1, 1], v in [0, 2]（準線在 v = 0，頂點在 (0, c)，焦點在 (0, 2c)）
+      const toXY = (u, v) => ({ x: pad + ((u + 1) / 2) * W, y: pad + (1 - v / 2) * W });
+
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.8;
+      ctx.fillRect(pad, pad, W, W); ctx.strokeRect(pad, pad, W, W);
+
+      // 準線與對稱軸
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(pad, pad + W); ctx.lineTo(pad + W, pad + W); ctx.stroke();
+      ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(pad + W / 2, pad); ctx.lineTo(pad + W / 2, pad + W); ctx.stroke();
+      ctx.restore();
+
+      // 切線族摺痕
+      ctx.save();
+      ctx.beginPath(); ctx.rect(pad, pad, W, W); ctx.clip();
+      for (let i = 0; i < count; i++) {
+        const q = -0.96 + (1.92 * i) / (count - 1);
+        // 切線: v = (q / (2c)) * u + c - q^2 / (4c)
+        const vL = (q / (2 * c)) * (-1) + c - (q * q) / (4 * c);
+        const vR = (q / (2 * c)) * (1) + c - (q * q) / (4 * c);
+        const p1 = toXY(-1, vL), p2 = toXY(1, vR);
+        ctx.strokeStyle = 'rgba(37, 99, 235, 0.45)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+
+        if (showPts) {
+          const vp = c + (q * q) / (4 * c);
+          if (vp <= 2) {
+            const pp = toXY(q, vp);
+            ctx.beginPath(); ctx.arc(pp.x, pp.y, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#e11d48'; ctx.fill();
+          }
+        }
+      }
+
+      if (showCurve) {
+        ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        let started = false;
+        for (let u = -1; u <= 1.001; u += 0.02) {
+          const v = c + (u * u) / (4 * c);
+          if (v > 2.05) continue;
+          const pt = toXY(u, v);
+          if (!started) { ctx.moveTo(pt.x, pt.y); started = true; } else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      const pF = toXY(0, 2 * c), pV = toXY(0, c);
+      ctx.beginPath(); ctx.arc(pF.x, pF.y, 4.5, 0, Math.PI * 2); ctx.fillStyle = '#d97706'; ctx.fill();
+      ctx.beginPath(); ctx.arc(pV.x, pV.y, 3.5, 0, Math.PI * 2); ctx.fillStyle = '#059669'; ctx.fill();
+      ctx.font = 'bold 11.5px sans-serif';
+      ctx.fillStyle = '#b45309'; ctx.fillText('F', pF.x + 7, pF.y + 4);
+      ctx.fillStyle = '#065f46'; ctx.fillText('V', pV.x + 7, pV.y + 4);
+      ctx.fillStyle = '#0f172a'; ctx.fillText('準線 L', pad + 4, pad + W + 16);
+
+      document.getElementById('lab1-c-val').textContent = c.toFixed(2);
+      document.getElementById('lab1-n-val').textContent = `${count}`;
+      document.getElementById('lab1-focus').textContent = `(0, ${c.toFixed(2)})`;
+      document.getElementById('lab1-lr').textContent = (4 * c).toFixed(2);
+      document.getElementById('lab1-eq').textContent = `x² = ${(4 * c).toFixed(2)}y`;
+      ctx.restore();
+    }
+
+    function setLab2Q(val) {
+      document.getElementById('lab2-q-slider').value = val;
+      renderLab2();
+    }
+
+    function renderLab2() {
+      const canvas = document.getElementById('canvasLab2');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const size = Math.max(220, Math.floor(canvas.parentElement.getBoundingClientRect().width - 12));
+      canvas.width = size * dpr; canvas.height = size * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.save(); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, size, size);
+
+      const c = 0.4;
+      const q = Number(document.getElementById('lab2-q-slider').value);
+      const showRay = document.getElementById('lab2-show-ray').checked;
+
+      const pad = 26, W = size - pad * 2;
+      const toXY = (u, v) => ({ x: pad + ((u + 1) / 2) * W, y: pad + (1 - v / 2) * W });
+
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.8;
+      ctx.fillRect(pad, pad, W, W); ctx.strokeRect(pad, pad, W, W);
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(pad, pad + W); ctx.lineTo(pad + W, pad + W); ctx.stroke();
+
+      ctx.save();
+      ctx.beginPath(); ctx.rect(pad, pad, W, W); ctx.clip();
+
+      // 拋物線
+      ctx.strokeStyle = 'rgba(225, 29, 72, 0.35)'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let u = -1; u <= 1.001; u += 0.02) {
+        const pt = toXY(u, c + (u * u) / (4 * c));
+        if (u === -1) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.stroke();
+
+      // 切線摺痕
+      const vL = (q / (2 * c)) * (-1) + c - (q * q) / (4 * c);
+      const vR = (q / (2 * c)) * (1) + c - (q * q) / (4 * c);
+      const pL = toXY(-1, vL), pR = toXY(1, vR);
+      ctx.setLineDash([5, 3]); ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(pL.x, pL.y); ctx.lineTo(pR.x, pR.y); ctx.stroke();
+      ctx.setLineDash([]);
+
+      const vp = c + (q * q) / (4 * c);
+      const pF = toXY(0, 2 * c), pQ = toXY(q, 0), pP = toXY(q, vp);
+
+      // 入射光
+      if (showRay) {
+        const pTop = toXY(q, 2);
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.moveTo(pTop.x, pTop.y); ctx.lineTo(pP.x, pP.y); ctx.stroke();
+      }
+
+      // PF 與 PQ
+      ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(pP.x, pP.y); ctx.lineTo(pF.x, pF.y); ctx.stroke();
+      ctx.strokeStyle = '#059669'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(pP.x, pP.y); ctx.lineTo(pQ.x, pQ.y); ctx.stroke();
+
+      ctx.restore();
+
+      [pF, pQ, pP].forEach((pt, idx) => {
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 4.3, 0, Math.PI * 2);
+        ctx.fillStyle = idx === 0 ? '#d97706' : idx === 1 ? '#059669' : '#e11d48';
+        ctx.fill();
+      });
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#b45309'; ctx.fillText('F', pF.x - 14, pF.y - 4);
+      ctx.fillStyle = '#059669'; ctx.fillText('Q', pQ.x - 5, pad + W + 16);
+      ctx.fillStyle = '#e11d48'; ctx.fillText('P', pP.x + 6, pP.y - 6);
+
+      const distPQ = c + (q * q) / (4 * c);
+      const distPF = Math.hypot(q, distPQ - 2 * c);
+      document.getElementById('lab2-pf').textContent = distPF.toFixed(3);
+      document.getElementById('lab2-pq').textContent = distPQ.toFixed(3);
+      document.getElementById('lab2-slope').textContent = (q / (2 * c)).toFixed(2);
+      ctx.restore();
+    }
+
+    /* ==================== 7. 分頁 5：課堂學習單互動批改與手繪板 ==================== */
+    const WS_STORAGE_KEY = 'origami_third_parabola_ws_v1';
+
+    function updateWorksheetProgress() {
+      const blanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
+      const filled = blanks.filter((b) => b.value.trim() !== '').length;
+      const pill = document.getElementById('ws-progress-pill');
+      if (!pill) return;
+      pill.textContent = `填答進度：${filled} / ${blanks.length} 格`;
+      pill.classList.toggle('complete', filled === blanks.length && blanks.length > 0);
+    }
+
+    function saveWorksheetProgress() {
+      try {
+        const data = {
+          meta: {
+            cls: document.getElementById('ws-meta-class')?.value || '',
+            seat: document.getElementById('ws-meta-seat')?.value || '',
+            name: document.getElementById('ws-meta-name')?.value || ''
+          },
+          blanks: Array.from(document.querySelectorAll('#worksheet-root input.blank')).map((b) => b.value)
+        };
+        localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {}
+      updateWorksheetProgress();
+    }
+
+    function loadWorksheetProgress() {
+      try {
+        const raw = localStorage.getItem(WS_STORAGE_KEY);
+        if (!raw) { updateWorksheetProgress(); return; }
+        const data = JSON.parse(raw);
+        if (data.meta) {
+          if (document.getElementById('ws-meta-class')) document.getElementById('ws-meta-class').value = data.meta.cls || '';
+          if (document.getElementById('ws-meta-seat')) document.getElementById('ws-meta-seat').value = data.meta.seat || '';
+          if (document.getElementById('ws-meta-name')) document.getElementById('ws-meta-name').value = data.meta.name || '';
+        }
+        if (Array.isArray(data.blanks)) {
+          document.querySelectorAll('#worksheet-root input.blank').forEach((b, i) => {
+            if (typeof data.blanks[i] === 'string') b.value = data.blanks[i];
+          });
+        }
+      } catch (e) {}
+      updateWorksheetProgress();
+    }
+
+    function toggleHint(id) { const box = document.getElementById(id); if (box) box.classList.toggle('open'); }
+
+    function toggleQuizMode() {
+      const root = document.getElementById('worksheet-root');
+      const btn = document.getElementById('ws-quiz-btn');
+      const active = root.classList.toggle('quiz-mode');
+      if (btn) {
+        btn.classList.toggle('active-toggle', active);
+        btn.textContent = active ? '📝 測驗模式（已開啟）' : '📝 測驗模式';
+      }
+      if (active) {
+        root.classList.remove('show-ans');
+        document.querySelectorAll('.ws-hint-box.open').forEach((b) => b.classList.remove('open'));
+      }
+    }
+
+    function normalizeAns(str) {
+      return (str || '').trim().toUpperCase().replace(/\s+/g, '').replace(/＝/g, '=').replace(/＞/g, '>').replace(/－/g, '-');
+    }
+
+    function gradeWorksheet() {
+      const blanks = document.querySelectorAll('#worksheet-root input.blank');
+      let correctCount = 0;
+      blanks.forEach((inp) => {
+        const userVal = normalizeAns(inp.value);
+        const ans = normalizeAns(inp.dataset.ans || '');
+        const alt = normalizeAns(inp.dataset.alt || '');
+        inp.classList.remove('correct', 'wrong');
+        if (userVal && (userVal === ans || (alt && userVal === alt))) {
+          inp.classList.add('correct'); correctCount++;
+        } else {
+          inp.classList.add('wrong');
+        }
+      });
+      const banner = document.getElementById('grade-banner');
+      banner.style.display = 'block';
+      if (correctCount === blanks.length) {
+        banner.style.background = '#d1fae5'; banner.style.color = '#065f46';
+        banner.textContent = `🎉 太棒了！全部 ${blanks.length} 格完全正確！你已經徹底掌握拋物線摺紙、包絡線與光學反射！`;
+        playOrigamiSfx('done'); launchConfetti();
+      } else {
+        banner.style.background = '#fef3c7'; banner.style.color = '#92400e';
+        banner.textContent = `目前答對 ${correctCount} / ${blanks.length} 格，紅色空格可點擊「💡 小提示」或對照 3D 模擬器再試一次！`;
+        playOrigamiSfx('step');
+      }
+    }
+
+    function toggleAnswerKey() { document.getElementById('worksheet-root').classList.toggle('show-ans'); }
+
+    function resetWorksheet() {
+      document.querySelectorAll('#worksheet-root input.blank').forEach((inp) => {
+        inp.value = ''; inp.classList.remove('correct', 'wrong');
+      });
+      document.getElementById('grade-banner').style.display = 'none';
+      saveWorksheetProgress();
+    }
+
+    /* 手繪摺痕練習框 */
+    const sketchPads = {};
+    function initSketchPads() {
+      ['A', 'B'].forEach((id) => {
+        const canvas = document.getElementById(`sketchCanvas${id}`);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        sketchPads[id] = { canvas, ctx, mode: 'dash', tool: 'line', strokes: [], drawing: false, start: null, current: null };
+        redrawSketch(id);
+
+        const getPos = (e) => {
+          const r = canvas.getBoundingClientRect();
+          return { x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) };
+        };
+        canvas.addEventListener('pointerdown', (e) => {
+          const pad = sketchPads[id];
+          pad.drawing = true; pad.start = getPos(e); pad.current = [pad.start];
+          canvas.setPointerCapture(e.pointerId);
+        });
+        canvas.addEventListener('pointermove', (e) => {
+          const pad = sketchPads[id];
+          if (!pad.drawing) return;
+          const pos = getPos(e);
+          if (pad.tool === 'line') pad.current = [pad.start, pos]; else pad.current.push(pos);
+          redrawSketch(id);
+          drawStroke(pad.ctx, { mode: pad.mode, pts: pad.current });
+        });
+        const finish = () => {
+          const pad = sketchPads[id];
+          if (!pad.drawing) return;
+          pad.drawing = false;
+          if (pad.current && pad.current.length >= 2) pad.strokes.push({ mode: pad.mode, pts: pad.current });
+          pad.current = null;
+          redrawSketch(id);
+        };
+        canvas.addEventListener('pointerup', finish);
+        canvas.addEventListener('pointercancel', finish);
+      });
+    }
+
+    function drawStroke(ctx, st) {
+      if (!st.pts || st.pts.length < 2) return;
+      ctx.save(); ctx.beginPath();
+      ctx.moveTo(st.pts[0].x, st.pts[0].y);
+      for (let i = 1; i < st.pts.length; i++) ctx.lineTo(st.pts[i].x, st.pts[i].y);
+      if (st.mode === 'dash') { ctx.setLineDash([5, 4]); ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1.6; }
+      else { ctx.setLineDash([]); ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.2; }
+      ctx.stroke(); ctx.restore();
+    }
+
+    function redrawSketch(id) {
+      const pad = sketchPads[id];
+      if (!pad) return;
+      const { ctx, canvas } = pad;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const p = 18, w = canvas.width - p * 2;
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4;
+      ctx.strokeRect(p, p, w, w);
+      // 粗底線（準線 L）與焦點 F
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(p, p + w); ctx.lineTo(p + w, p + w); ctx.stroke();
+      ctx.beginPath(); ctx.arc(p + w * 0.5, p + w * 0.6, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#2563eb'; ctx.fill();
+      ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#1d4ed8';
+      ctx.fillText('F', p + w * 0.5 + 6, p + w * 0.6 + 4);
+      pad.strokes.forEach((st) => drawStroke(ctx, st));
+    }
+
+    function setSketchMode(id, mode, btn) {
+      if (!sketchPads[id]) return;
+      sketchPads[id].mode = mode;
+      document.querySelectorAll(`.sketch-tool-btn[data-pad="${id}"][data-mode]`).forEach((b) => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function toggleSketchTool(id, btn) {
+      const pad = sketchPads[id]; if (!pad) return;
+      pad.tool = pad.tool === 'line' ? 'free' : 'line';
+      if (btn) { btn.classList.toggle('active', pad.tool === 'line'); btn.textContent = pad.tool === 'line' ? '📏 直線' : '✏️ 自由筆'; }
+    }
+
+    function undoSketch(id) { if (!sketchPads[id]) return; sketchPads[id].strokes.pop(); redrawSketch(id); }
+    function clearSketch(id) { if (!sketchPads[id]) return; sketchPads[id].strokes = []; redrawSketch(id); }
+
+    function drawSketchAnswer(id) {
+      const pad = sketchPads[id]; if (!pad) return;
+      const p = 18, w = pad.canvas.width - p * 2;
+      const toXY = (u, v) => ({ x: p + ((u + 1) / 2) * w, y: p + (1 - v / 2) * w });
+      const c = 0.4;
+      if (id === 'A') {
+        const q = 0.65;
+        const vL = (q / (2 * c)) * (-1) + c - (q * q) / (4 * c);
+        const vR = (q / (2 * c)) * (1) + c - (q * q) / (4 * c);
+        const vp = c + (q * q) / (4 * c);
+        pad.strokes = [
+          { mode: 'dash', pts: [toXY(-0.3, (q / (2 * c)) * (-0.3) + c - (q * q) / (4 * c)), toXY(1, vR)] },
+          { mode: 'solid', pts: [toXY(0, 2 * c), toXY(q, vp)] },
+          { mode: 'solid', pts: [toXY(q, 0), toXY(q, vp)] }
+        ];
+      } else {
+        pad.strokes = [];
+        for (let i = 0; i < 9; i++) {
+          const q = -0.85 + (1.7 * i) / 8;
+          const vL = Math.max(0, Math.min(2, (q / (2 * c)) * (-1) + c - (q * q) / (4 * c)));
+          const vR = Math.max(0, Math.min(2, (q / (2 * c)) * (1) + c - (q * q) / (4 * c)));
+          pad.strokes.push({ mode: 'dash', pts: [toXY(-1, vL), toXY(1, vR)] });
+        }
+        const curvePts = [];
+        for (let u = -0.95; u <= 0.96; u += 0.08) curvePts.push(toXY(u, c + (u * u) / (4 * c)));
+        pad.strokes.push({ mode: 'solid', pts: curvePts });
+      }
+      redrawSketch(id);
+    }
+
+    /* 慶祝彩帶 */
+    function launchConfetti() {
+      const canvas = document.getElementById('confettiCanvas'); if (!canvas) return;
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+      const colors = ['#f59e0b', '#2563eb', '#059669', '#e11d48', '#7c3aed'];
+      const parts = Array.from({ length: 80 }, () => ({
+        x: Math.random() * canvas.width, y: -20 - Math.random() * 140,
+        vx: (Math.random() - 0.5) * 4, vy: 3 + Math.random() * 4,
+        s: 6 + Math.random() * 6, c: colors[Math.floor(Math.random() * colors.length)], r: Math.random() * 6.28
+      }));
+      let frame = 0;
+      const anim = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        parts.forEach((p) => {
+          p.x += p.vx; p.y += p.vy; p.r += 0.1;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+          ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+          ctx.restore();
+        });
+        frame++;
+        if (frame < 110) requestAnimationFrame(anim); else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      };
+      requestAnimationFrame(anim);
+    }
+
+    /* ==================== 8. 3D 拖曳旋轉與初始化 ==================== */
+    function bindOrbit3D(canvasId, cam, renderFn) {
+      const canvas = document.getElementById(canvasId); if (!canvas) return;
+      let dragging = false, lastX = 0, lastY = 0;
+      canvas.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX, dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        cam.yaw += dx * 0.01;
+        cam.pitch = Math.max(-1.1, Math.min(1.4, cam.pitch + dy * 0.01));
+        renderFn();
+      });
+      const stopDrag = () => { dragging = false; };
+      canvas.addEventListener('pointerup', stopDrag);
+      canvas.addEventListener('pointercancel', stopDrag);
+    }
+
+    window.addEventListener('resize', () => { renderM1(); renderM2(); renderM3(); renderLab1(); renderLab2(); });
+
+    window.onload = function () {
+      selectM1Step(1, true, true);
+      updateM2UI(); renderM2();
+      updateM3UI(); renderM3();
+      bindOrbit3D('canvasM1', m1Cam, renderM1);
+      bindOrbit3D('canvasM2', m2Cam, renderM2);
+      bindOrbit3D('canvasM3', m3Cam, renderM3);
+      renderLab1();
+      renderLab2();
+      initSketchPads();
+      loadWorksheetProgress();
+
+      const allBlanks = Array.from(document.querySelectorAll('#worksheet-root input.blank'));
+      document.querySelectorAll('#worksheet-root input').forEach((inp) => {
+        if (inp.classList.contains('blank')) {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const idx = allBlanks.indexOf(inp);
+              if (idx >= 0 && idx < allBlanks.length - 1) allBlanks[idx + 1].focus();
+              else gradeWorksheet();
+            }
+          });
+        }
+        inp.addEventListener('input', () => { inp.classList.remove('correct', 'wrong'); saveWorksheetProgress(); });
+      });
+    };
+  </script>
+</body>
+</html>
