@@ -556,6 +556,7 @@
 
     .ws-sec-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
     .ws-sec-head .ws-sec-badge { margin-bottom: 0; }
+    .ws-sec-tools { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 
     .ws-hint-btn {
       border: 1px solid #cbd5e1;
@@ -566,8 +567,10 @@
       padding: 3px 9px;
       border-radius: 999px;
       cursor: pointer;
+      transition: all 0.15s ease;
     }
     .ws-hint-btn:hover { background: #f1f5f9; color: #0f172a; }
+    .ws-hint-btn.active-ans { background: #ecfdf5; border-color: #10b981; color: #065f46; }
 
     .ws-hint-box {
       display: none;
@@ -653,7 +656,7 @@
       border-radius: 5px;
       margin-left: 3px;
     }
-    .show-ans .ans-hint { display: inline-block; }
+    .show-ans .ans-hint, .ws-section.show-sec-ans .ans-hint { display: inline-block; }
 
     .sketch-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 10px; }
     @media (min-width: 640px) { .sketch-grid { grid-template-columns: 1fr 1fr; } }
@@ -1161,7 +1164,7 @@
         </div>
         <div class="ws-btn-group">
           <button class="ws-action-btn grade" onclick="gradeWorksheet()">✓ 核對互動答案</button>
-          <button class="ws-action-btn ans" onclick="toggleAnswerKey()">👁 顯示/隱藏解答</button>
+          <button id="ws-all-ans-btn" class="ws-action-btn ans" onclick="toggleAnswerKey()">👁 顯示全部解答</button>
           <button id="ws-quiz-btn" class="ws-action-btn ans" onclick="toggleQuizMode()">📝 測驗模式</button>
           <button class="ws-action-btn ans" onclick="resetWorksheet()">↺ 清除重填</button>
           <button class="ws-action-btn print" onclick="window.print()">🖨️ 列印學習單 (A4)</button>
@@ -1191,10 +1194,13 @@
         </div>
 
         <!-- 探究一：中垂線與拋物線定義 -->
-        <div class="ws-section">
+        <div id="ws-sec-1" class="ws-section">
           <div class="ws-sec-head">
             <span class="ws-sec-badge amber">探究一：單次對摺的秘密 —— 中垂線性質與拋物線定義</span>
-            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-1')">💡 小提示</button>
+            <div class="ws-sec-tools">
+              <button type="button" class="ws-hint-btn ws-sec-ans-btn" data-sec="ws-sec-1" onclick="toggleSectionAns('ws-sec-1')">👁 顯示解答</button>
+              <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-1')">💡 小提示</button>
+            </div>
           </div>
           <div class="ws-two-col">
             <div class="ws-diagram">
@@ -1242,10 +1248,13 @@
         </div>
 
         <!-- 探究二：拋物線標準式與焦距 c -->
-        <div class="ws-section">
+        <div id="ws-sec-2" class="ws-section">
           <div class="ws-sec-head">
             <span class="ws-sec-badge blue">探究二：解析幾何 —— 標準式 <span class="math">x² = 4cy</span> 與焦距 <span class="math">c</span></span>
-            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-2')">💡 小提示</button>
+            <div class="ws-sec-tools">
+              <button type="button" class="ws-hint-btn ws-sec-ans-btn" data-sec="ws-sec-2" onclick="toggleSectionAns('ws-sec-2')">👁 顯示解答</button>
+              <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-2')">💡 小提示</button>
+            </div>
           </div>
           <div class="ws-q-list">
             <div class="ws-q-item">
@@ -1313,10 +1322,13 @@
         </div>
 
         <!-- 探究四：光學反射性質 -->
-        <div class="ws-section" style="margin-bottom:0;">
+        <div id="ws-sec-4" class="ws-section" style="margin-bottom:0;">
           <div class="ws-sec-head">
             <span class="ws-sec-badge emerald">探究四（延伸）：光學反射性質與生活應用</span>
-            <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-4')">💡 小提示</button>
+            <div class="ws-sec-tools">
+              <button type="button" class="ws-hint-btn ws-sec-ans-btn" data-sec="ws-sec-4" onclick="toggleSectionAns('ws-sec-4')">👁 顯示解答</button>
+              <button type="button" class="ws-hint-btn" onclick="toggleHint('hint-4')">💡 小提示</button>
+            </div>
           </div>
           <div class="ws-q-list">
             <div class="ws-q-item">
@@ -2643,6 +2655,8 @@
       }
       if (active) {
         root.classList.remove('show-ans');
+        ['ws-sec-1', 'ws-sec-2', 'ws-sec-4'].forEach((sid) => document.getElementById(sid)?.classList.remove('show-sec-ans'));
+        syncSectionAnsUI();
         document.querySelectorAll('.ws-hint-box.open').forEach((b) => b.classList.remove('open'));
       }
     }
@@ -2678,7 +2692,41 @@
       }
     }
 
-    function toggleAnswerKey() { document.getElementById('worksheet-root').classList.toggle('show-ans'); }
+    function syncSectionAnsUI() {
+      const secIds = ['ws-sec-1', 'ws-sec-2', 'ws-sec-4'];
+      let shownCount = 0;
+      secIds.forEach((sid) => {
+        const sec = document.getElementById(sid);
+        const btn = document.querySelector(`.ws-sec-ans-btn[data-sec="${sid}"]`);
+        const isShown = !!sec && sec.classList.contains('show-sec-ans');
+        if (isShown) shownCount++;
+        if (btn) {
+          btn.classList.toggle('active-ans', isShown);
+          btn.textContent = isShown ? '🙈 隱藏解答' : '👁 顯示解答';
+        }
+      });
+      const allBtn = document.getElementById('ws-all-ans-btn');
+      if (allBtn) {
+        const allShown = shownCount === secIds.length;
+        allBtn.classList.toggle('active-toggle', allShown);
+        allBtn.textContent = allShown ? '🙈 隱藏全部解答' : '👁 顯示全部解答';
+      }
+    }
+
+    function toggleSectionAns(secId) {
+      const sec = document.getElementById(secId);
+      if (!sec) return;
+      sec.classList.toggle('show-sec-ans');
+      syncSectionAnsUI();
+    }
+
+    function toggleAnswerKey() {
+      const secIds = ['ws-sec-1', 'ws-sec-2', 'ws-sec-4'];
+      const allShown = secIds.every((sid) => document.getElementById(sid)?.classList.contains('show-sec-ans'));
+      secIds.forEach((sid) => document.getElementById(sid)?.classList.toggle('show-sec-ans', !allShown));
+      document.getElementById('worksheet-root')?.classList.remove('show-ans');
+      syncSectionAnsUI();
+    }
 
     function resetWorksheet() {
       document.querySelectorAll('#worksheet-root input.blank').forEach((inp) => {
