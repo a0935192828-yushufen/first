@@ -2736,11 +2736,15 @@
       if (st.mode === 'tangent') {
         ctx.setLineDash([]); ctx.strokeStyle = 'rgba(37, 99, 235, 0.52)'; ctx.lineWidth = 1.25;
       } else if (st.mode === 'dash') {
-        ctx.setLineDash([5, 4]); ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1.6;
+        ctx.setLineDash([5, 4]); ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 1.9;
+      } else if (st.mode === 'green') {
+        ctx.setLineDash([]); ctx.strokeStyle = '#059669'; ctx.lineWidth = 2.4;
+      } else if (st.mode === 'faintCurve') {
+        ctx.setLineDash([]); ctx.strokeStyle = 'rgba(225, 29, 72, 0.24)'; ctx.lineWidth = 1.8; ctx.lineJoin = 'round';
       } else if (st.mode === 'curve') {
         ctx.setLineDash([]); ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.8; ctx.lineJoin = 'round';
       } else {
-        ctx.setLineDash([]); ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.2;
+        ctx.setLineDash([]); ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.4;
       }
       ctx.stroke(); ctx.restore();
     }
@@ -2772,7 +2776,8 @@
       const { ctx, canvas } = pad;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const p = 18, w = canvas.width - p * 2;
-      ctx.fillStyle = id === 'B' ? '#f8fbff' : '#ffffff';
+      const toXY = (u, v) => ({ x: p + ((u + 1) / 2) * w, y: p + (1 - v / 2) * w });
+      ctx.fillStyle = id === 'B' ? '#f8fbff' : '#fffdf7';
       ctx.fillRect(p, p, w, w);
       ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4;
       ctx.strokeRect(p, p, w, w);
@@ -2789,7 +2794,25 @@
       ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.4;
       ctx.beginPath(); ctx.moveTo(p, p + w); ctx.lineTo(p + w, p + w); ctx.stroke();
 
-      // 練習框 B 加上底邊等距提示點，方便觀察多點包絡線
+      // 練習框 A：標出底邊示範點 Q 與 QF 淡色參考虛線，方便作中垂線
+      if (id === 'A') {
+        const ptF = toXY(0, 0.8);
+        const ptQ = toXY(0.65, 0);
+        ctx.save();
+        ctx.setLineDash([2, 3]);
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(ptF.x, ptF.y); ctx.lineTo(ptQ.x, ptQ.y); ctx.stroke();
+        ctx.restore();
+
+        ctx.beginPath(); ctx.arc(ptQ.x, ptQ.y, 4.0, 0, Math.PI * 2);
+        ctx.fillStyle = '#059669'; ctx.fill();
+        ctx.lineWidth = 1.2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+        ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#047857';
+        ctx.fillText('Q', ptQ.x - 4, p + w + 12);
+      }
+
+      // 練習框 B：加上底邊等距提示點，方便觀察多點包絡線
       if (id === 'B') {
         for (let i = 0; i < 7; i++) {
           const tx = p + w * (0.1 + (0.8 * i) / 6);
@@ -2803,15 +2826,33 @@
       ctx.fillStyle = '#d97706'; ctx.fill();
       ctx.lineWidth = 1.2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
       ctx.font = 'bold 11px sans-serif';
-      ctx.fillStyle = '#b45309'; ctx.fillText('F', p + w * 0.5 + 6, p + w * 0.6 + 4);
+      ctx.fillStyle = '#b45309'; ctx.fillText('F', p + w * 0.5 - 13, p + w * 0.6 + 4);
       ctx.fillStyle = '#475569'; ctx.font = 'bold 10px sans-serif';
       ctx.fillText('準線 L', p + 2, p + w + 12);
 
       pad.strokes.forEach((st) => drawStroke(ctx, st));
+      if (pad.rightAngleAt) {
+        const ra = pad.rightAngleAt;
+        ctx.save();
+        ctx.strokeStyle = '#059669'; ctx.lineWidth = 1.4;
+        ctx.strokeRect(ra.x - 7, ra.y - 7, 7, 7);
+        ctx.restore();
+      }
       if (pad.dots && pad.dots.length) {
         pad.dots.forEach((d) => {
-          ctx.beginPath(); ctx.arc(d.x, d.y, 2.5, 0, Math.PI * 2);
+          ctx.beginPath(); ctx.arc(d.x, d.y, id === 'A' ? 3.8 : 2.5, 0, Math.PI * 2);
           ctx.fillStyle = '#e11d48'; ctx.fill();
+          if (id === 'A') { ctx.lineWidth = 1.2; ctx.strokeStyle = '#ffffff'; ctx.stroke(); }
+        });
+      }
+      if (pad.labels && pad.labels.length) {
+        pad.labels.forEach((lb) => {
+          ctx.save();
+          ctx.font = 'bold 10.5px -apple-system, "Noto Sans TC", sans-serif';
+          ctx.lineWidth = 2.6; ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+          ctx.strokeText(lb.text, lb.x, lb.y);
+          ctx.fillStyle = lb.color; ctx.fillText(lb.text, lb.x, lb.y);
+          ctx.restore();
         });
       }
     }
@@ -2829,25 +2870,47 @@
       if (btn) { btn.classList.toggle('active', pad.tool === 'line'); btn.textContent = pad.tool === 'line' ? '📏 直線' : '✏️ 自由筆'; }
     }
 
-    function undoSketch(id) { if (!sketchPads[id]) return; sketchPads[id].strokes.pop(); sketchPads[id].dots = []; redrawSketch(id); }
-    function clearSketch(id) { if (!sketchPads[id]) return; sketchPads[id].strokes = []; sketchPads[id].dots = []; redrawSketch(id); }
+    function undoSketch(id) {
+      if (!sketchPads[id]) return;
+      sketchPads[id].strokes.pop();
+      sketchPads[id].dots = []; sketchPads[id].labels = []; sketchPads[id].rightAngleAt = null;
+      redrawSketch(id);
+    }
+    function clearSketch(id) {
+      if (!sketchPads[id]) return;
+      sketchPads[id].strokes = [];
+      sketchPads[id].dots = []; sketchPads[id].labels = []; sketchPads[id].rightAngleAt = null;
+      redrawSketch(id);
+    }
 
     function drawSketchAnswer(id) {
       const pad = sketchPads[id]; if (!pad) return;
       const p = 18, w = pad.canvas.width - p * 2;
       const toXY = (u, v) => ({ x: p + ((u + 1) / 2) * w, y: p + (1 - v / 2) * w });
       const c = 0.4;
-      pad.dots = [];
+      pad.dots = []; pad.labels = []; pad.rightAngleAt = null;
       if (id === 'A') {
         const q = 0.65;
         const seg = clipTangentToUnitBox(q, c);
         const vp = c + (q * q) / (4 * c);
+        const ptF = toXY(0, 2 * c), ptQ = toXY(q, 0), ptP = toXY(q, vp);
+        const curvePts = [];
+        for (let u = -0.98; u <= 0.99; u += 0.05) {
+          const v = c + (u * u) / (4 * c);
+          if (v <= 2.0) curvePts.push(toXY(u, v));
+        }
         pad.strokes = [
+          { mode: 'faintCurve', pts: curvePts },
           { mode: 'dash', pts: seg ? [toXY(seg[0].u, seg[0].v), toXY(seg[1].u, seg[1].v)] : [] },
-          { mode: 'solid', pts: [toXY(0, 2 * c), toXY(q, vp)] },
-          { mode: 'solid', pts: [toXY(q, 0), toXY(q, vp)] }
+          { mode: 'solid', pts: [ptF, ptP] },
+          { mode: 'green', pts: [ptQ, ptP] }
         ];
-        pad.dots = [toXY(q, vp)];
+        pad.dots = [ptP];
+        pad.rightAngleAt = ptQ;
+        pad.labels = [
+          { text: 'P (PF=PQ)', x: ptP.x - 44, y: ptP.y - 9, color: '#e11d48' },
+          { text: '摺痕 ℓ', x: p + 12, y: p + w - 26, color: '#1d4ed8' }
+        ];
       } else {
         pad.strokes = [];
         for (let i = 0; i < 13; i++) {
