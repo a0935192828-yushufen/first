@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>正方形中摺出正△與最大正△｜互動幾何摺紙教學與學習單</title>
+  <title>正方形中摺出正△與最大正△｜歐氏幾何・三角函數・代數極值・空間變換</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpolygon points='16,6 26,24 6,24' fill='rgba(255,255,255,0.25)' stroke='%23fff' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cline x1='16' y1='6' x2='16' y2='24' stroke='%23fff' stroke-width='1.5' stroke-dasharray='2.5 2'/%3E%3C/svg%3E" />
   <style>
     /* ==================== 1. 設計系統與全域變數 ==================== */
@@ -162,6 +162,29 @@
       font-size: 0.72rem;
       color: var(--text-muted);
     }
+
+    .domain-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .domain-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+
+    .domain-tag.geo { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+    .domain-tag.trig { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+    .domain-tag.alg { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .domain-tag.space { background: #fff1f2; color: #9f1239; border-color: #fecdd3; }
 
     .tab-bar {
       display: grid;
@@ -1316,6 +1339,12 @@
         <div class="brand-title">
           <h1>正方形中摺出正△與最大正△</h1>
           <p>雙摺法動態模擬 × 幾何極值探索 × 課堂互動學習單</p>
+          <div class="domain-tags" aria-label="涵蓋數學領域">
+            <span class="domain-tag geo">歐氏幾何</span>
+            <span class="domain-tag trig">三角函數</span>
+            <span class="domain-tag alg">代數與極值</span>
+            <span class="domain-tag space">空間變換</span>
+          </div>
         </div>
       </div>
 
